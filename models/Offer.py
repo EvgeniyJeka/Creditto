@@ -14,13 +14,15 @@ class Offer(object):
         self.id = Offer.id
         Offer.id += 1
 
+        self.type = 'offer'
+
         self.owner_id = owner_id
         self.sum = sum
         self.duration = duration
         self.offered_interest = offered_interest
 
     def __repr__(self) -> str:
-        if self.status is None and  self.matching_bid is None:
+        if self.status is None and self.matching_bid is None:
             return f"Offer ID: {self.id}, Owner ID: {self.owner_id}, Sum: {self.sum}, Duration: {self.duration}," \
                 f" Interest: {self.offered_interest}"
         else:
