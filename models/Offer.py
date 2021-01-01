@@ -8,7 +8,7 @@ class Offer(object):
     status = None
     matching_bid = None
 
-    def __init__(self, owner_id, sum, duration, offered_interest):
+    def __init__(self, owner_id, sum, duration, offered_interest, allow_partiall_fill):
 
         # In future we will check the last offer ID assigned and take the next one
         self.id = Offer.id
@@ -21,13 +21,16 @@ class Offer(object):
         self.duration = duration
         self.offered_interest = offered_interest
 
+        self.allow_partiall_fill = allow_partiall_fill
+
     def __repr__(self) -> str:
         if self.status is None and self.matching_bid is None:
             return f"Offer ID: {self.id}, Owner ID: {self.owner_id}, Sum: {self.sum}, Duration: {self.duration}," \
-                f" Interest: {self.offered_interest}"
+                f" Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partiall_fill}"
         else:
             return f"Offer ID: {self.id}, Owner ID: {self.owner_id}, Sum: {self.sum}, Duration: {self.duration}, " \
-                f"Interest: {self.offered_interest}, Status: {self.status}, Matching Bid: {self.matching_bid}"
+                f"Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partiall_fill}, " \
+                f"Status: {self.status}, Matching Bid: {self.matching_bid}"
 
 
 
