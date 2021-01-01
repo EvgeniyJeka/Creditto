@@ -1,8 +1,9 @@
-
 from kafka import KafkaConsumer
 import json
 import logging
 from kafka.admin import KafkaAdminClient, NewTopic
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 
@@ -28,14 +29,19 @@ class ConsumerToSql(object):
         self.consumer = KafkaConsumer('offers', 'bids', 'matches', bootstrap_servers = ['localhost:9092'],
                                       auto_offset_reset = 'earliest', enable_auto_commit=True, group_id="sql_consumer")
 
+        self.consume_write()
+
 
 
     def consume_write(self):
         for msg in self.consumer:
-            #print(msg)
             message_content = msg.value.decode('utf-8')
             object_content = json.loads(message_content)
             print(object_content)
+            logging.info(f"ConsumerToSql: Received message {object_content}")
 
 
 
+if __name__ == "__main__":
+    # Initiating component responsible for saving data to SQL DB
+    sql_consumer = ConsumerToSql()

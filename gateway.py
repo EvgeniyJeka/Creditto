@@ -4,21 +4,23 @@ import logging
 import json
 from consumer_to_sql import ConsumerToSql
 from models.Offer import Offer
+from producer_from_api import ProducerFromApi
 
 logging.basicConfig(level=logging.INFO)
 
-# Start Kafka, Zoo Keeper, MySQL Server !
+# System start will be performed by Python script
+# Start Kafka, Zoo Keeper, MySQL Server => will be performed by docker-compose (SQL will be added on later stages)
+# Start all consumers: ConsumerToSql, ConsumerToMatcher = > Script (phase 4)
+# Start Gateway => Script (phase 4)
 
 # Initiating API Server
 app = Flask(__name__)
 
-# Initiating component responsible for saving data to SQL DB
-sql_consumer = ConsumerToSql()
-#
-#
 # Initiating producer
-#producer = KafkaProducer()
-#
+producer = ProducerFromApi()
+
+
+
 
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
@@ -48,6 +50,7 @@ def place_offer():
 
     logging.info(offer_to_producer)
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
+    print(producer.produce_message(offer_to_producer, 'offers'))
 
     return {"result": ".."}
 #
@@ -83,4 +86,9 @@ def place_offer():
 
 
 if __name__ == "__main__":
+
     app.run()
+
+
+
+
