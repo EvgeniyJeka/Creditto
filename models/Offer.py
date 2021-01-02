@@ -1,3 +1,6 @@
+from statuses import OfferStatuses, Types
+from datetime import datetime
+
 
 class Offer(object):
     id = 1
@@ -8,28 +11,34 @@ class Offer(object):
     status = None
     matching_bid = None
 
-    def __init__(self, owner_id, sum, duration, offered_interest, allow_partiall_fill):
+    def __init__(self, owner_id, sum, duration, offered_interest, allow_partial_fill):
 
         # In future we will check the last offer ID assigned and take the next one
         self.id = Offer.id
         Offer.id += 1
 
-        self.type = 'offer'
+        self.type = Types.OFFER.value
 
         self.owner_id = owner_id
         self.sum = sum
         self.duration = duration
         self.offered_interest = offered_interest
 
-        self.allow_partiall_fill = allow_partiall_fill
+        self.allow_partial_fill = allow_partial_fill
+        self.date_added = str(datetime.now())
+        self.status = OfferStatuses.OPEN.value
+
 
     def __repr__(self) -> str:
-        if self.status is None and self.matching_bid is None:
+        if self.matching_bid is None:
             return f"Offer ID: {self.id}, Owner ID: {self.owner_id}, Sum: {self.sum}, Duration: {self.duration}," \
-                f" Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partiall_fill}"
+                f" Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partial_fill}," \
+                f" Date Added: {self.date_added} " \
+                f"Status: {self.status}"
         else:
             return f"Offer ID: {self.id}, Owner ID: {self.owner_id}, Sum: {self.sum}, Duration: {self.duration}, " \
-                f"Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partiall_fill}, " \
+                f"Interest: {self.offered_interest}, Partial Fill Allowed: {self.allow_partial_fill}, " \
+                f"Date Added: {self.date_added} " \
                 f"Status: {self.status}, Matching Bid: {self.matching_bid}"
 
 
