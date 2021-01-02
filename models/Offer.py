@@ -11,11 +11,10 @@ class Offer(object):
     status = None
     matching_bid = None
 
-    def __init__(self, owner_id, sum, duration, offered_interest, allow_partial_fill):
+    def __init__(self, id, owner_id, sum, duration, offered_interest, allow_partial_fill, date_added=None, status=None):
 
         # In future we will check the last offer ID assigned and take the next one
-        self.id = Offer.id
-        Offer.id += 1
+        self.id = id
 
         self.type = Types.OFFER.value
 
@@ -25,8 +24,18 @@ class Offer(object):
         self.offered_interest = offered_interest
 
         self.allow_partial_fill = allow_partial_fill
-        self.date_added = str(datetime.now())
-        self.status = OfferStatuses.OPEN.value
+
+        # Current time is added on object creation. Should not be added on object deserialization
+        if date_added is None:
+            self.date_added = str(datetime.now())
+        else:
+            self.date_added = datetime.strptime(date_added, '%Y-%m-%d %H:%M:%S.%f')
+
+        # Default status NEW is added on object creation. Should not be added on object deserialization
+        if status is None:
+            self.status = OfferStatuses.OPEN.value
+        else:
+            self.status = status
 
 
     def __repr__(self) -> str:

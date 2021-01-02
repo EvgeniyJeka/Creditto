@@ -1,55 +1,34 @@
 import pymysql
 from datetime import datetime
+import logging
 
-class SqlWriter(object):
+from models.Offer import Offer
+from models.SqlBasic import SqlBasic
 
-    hst = '127.0.0.1'
-    usr = 'root'
-    pwd = '123456'
-    db_name = 'creditto'
-    cursor = None
+
+class SqlWriter(SqlBasic):
 
     def __init__(self):
-        SqlWriter.cursor = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-        self.create_validate_tables(SqlWriter.cursor)
+        super().__init__()
+        self.create_validate_tables(self.cursor)
+
+    def insert_offer(self, offer: Offer):
+
+        query = f'insert into offers values({offer.id}, {offer.owner_id}, {offer.sum}, {offer.duration}, ' \
+            f'{offer.offered_interest}, {offer.allow_partial_fill}, "{offer.date_added}", {offer.status})'
+
+        return self.cursor.execute(query)
 
 
 
-    # Connect to DB
-    def connect_me(self, hst, usr, pwd, db_name):
-        try:
-            conn = pymysql.connect(host=hst, user=usr, password=pwd, db=db_name, autocommit='True')
-            cursor = conn.cursor()
-            return cursor
-
-        # Wrong Credentials error
-        except pymysql.err.OperationalError:
-            print("Wrong Credentials or Host")
-
-        # Wrong DB name error
-        except pymysql.err.InternalError:
-            print("Unknown Database")
-
-    # Validates that all the required tables exist, if they arent - the method creates them.
-    def create_validate_tables(self, cursor):
-
-        cursor.execute('show tables')
-        tups = cursor.fetchall()
-
-        tables = [tup[0] for tup in tups]
-
-        # Creating the 'offers' table if not exists - column for each "Offer" object property.
-        if 'offers' not in tables:
-            print("Logs: 'offers' table is missing! Creating the 'offers' table")
-            query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
-                    "duration int, offered_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
-                    "status int);"
-
-            cursor.execute(query)
 
 
-if __name__=='__main__':
-    swriter = SqlWriter()
+# if __name__=='__main__':
+#     swriter = SqlWriter()
+#
+#     print(swriter.get_next_id('offers', swriter.cursor))
+#
+#     #query = 'insert into offers values(3, 11, 260, 12, 0.05, 0, "2020-1-15", 1)'
+#     #swriter.cursor.execute(query)
 
-    query = f"insert into offers values (2, 22, 100.0, 13, 0.05, 0, '{datetime.now()}', 1);"
-    swriter.cursor.execute(query)
+

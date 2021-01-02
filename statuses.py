@@ -20,3 +20,4 @@ class Types(Enum):
     OFFER = 'offer'
     BID = 'bid'
     MATCH = 'match'
+    EXPIRED = 'expired'

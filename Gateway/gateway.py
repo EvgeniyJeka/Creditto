@@ -3,6 +3,7 @@ from flask import request
 import logging
 import json
 
+from Gateway.reporter import Reporter
 from models.Bid import Bid
 from models.Offer import Offer
 from Gateway.producer_from_api import ProducerFromApi
@@ -37,7 +38,8 @@ app = Flask(__name__)
 # Initiating producer
 producer = ProducerFromApi()
 
-
+# Initiating Reporter - needed for contact with SQL DB
+reporter = Reporter()
 
 
 @app.route("/place_offer", methods=['POST'])
@@ -55,6 +57,8 @@ def place_offer():
         # Once passed - create new Offer object and fill it with data received in the request
         # Use producer method to produce new kafka message - send Offer as JSON
 
+    next_id = reporter.get_next_id('offers')
+
     if offer['type'] != Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
@@ -63,7 +67,7 @@ def place_offer():
             return {"error": "Required parameter is missing in provided offer"}
 
     # In future versions it is possible that the offer will be converted to Google Proto message
-    placed_offer = Offer(offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
+    placed_offer = Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
     offer_to_producer = json.dumps(placed_offer.__dict__)
@@ -72,7 +76,8 @@ def place_offer():
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
-    return {"result": ".."}
+
+    return {"result": f"Added new offer, ID {next_id} assigned"}
 
 @app.route("/place_bid", methods=['POST'])
 def place_bid():
