@@ -89,6 +89,8 @@ def place_bid():
     bid = request.get_json()
     logging.info(f"Bid received: {bid}")
 
+    next_id = reporter.get_next_id('bids')
+
     if bid['type'] != Types.BID.value:
         return {"error": "Invalid object type for this API method"}
 
@@ -104,10 +106,10 @@ def place_bid():
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
-        placed_bid = Bid(bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
+        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
 
     else:
-        placed_bid = Bid(bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
+        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
     bid_to_producer = json.dumps(placed_bid.__dict__)
 
@@ -115,7 +117,7 @@ def place_bid():
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")
     print(producer.produce_message(bid_to_producer, 'bids'))
 
-    return {"result": ".."}
+    return {"result": f"Added new bid, ID {next_id} assigned"}
 
 
 

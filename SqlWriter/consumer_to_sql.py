@@ -1,11 +1,11 @@
 from kafka import KafkaConsumer
 import json
-import logging
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
 from SqlWriter.sql_writer import SqlWriter
 from models.Offer import Offer
+from models.Bid import Bid
 from statuses import Types
 
 logging.basicConfig(level=logging.INFO)
@@ -15,27 +15,30 @@ logging.basicConfig(level=logging.INFO)
 class ConsumerToSql(object):
 
     def __init__(self):
-        print("ConsumerToSql: Initiate ConsumerToSql instance")
+        logging.info("ConsumerToSql: Initiate ConsumerToSql instance")
         self.sql_writer = SqlWriter()
 
+        logging.info("ConsumerToSql: Verifying essential topics, starting main consumer")
+        self.start_consumer()
 
+        self.consume_write()
+
+    def start_consumer(self):
         # Creating Kafka topics or adding if the topic is missing
         admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id='test')
         existing_topics = admin_client.list_topics()
 
         required_topics = ("offers", "bids", "matches")
-        topic_list = [ NewTopic(name=x, num_partitions=1, replication_factor=1) for x in required_topics
+        topic_list = [NewTopic(name=x, num_partitions=1, replication_factor=1) for x in required_topics
                       if x not in existing_topics]
 
         admin_client.create_topics(new_topics=topic_list, validate_only=False)
         print(f"Existing topics: {admin_client.list_topics()}")
 
-
         # Initiating consumer
-        self.consumer = KafkaConsumer('offers', 'bids', 'matches', bootstrap_servers = ['localhost:9092'],
-                                      auto_offset_reset = 'earliest', enable_auto_commit=True, group_id="sql_consumer")
+        self.consumer = KafkaConsumer('offers', 'bids', 'matches', bootstrap_servers=['localhost:9092'],
+                                      auto_offset_reset='earliest', enable_auto_commit=True, group_id="sql_consumer")
 
-        self.consume_write()
 
 
 
@@ -45,9 +48,6 @@ class ConsumerToSql(object):
             object_content = json.loads(json.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
-
-            # def __init__(self, owner_id, sum, duration, offered_interest, allow_partial_fill, date_added=None,
-            #              status=None):
 
             if object_content['type'] == Types.OFFER.value:
                 logging.info("ConsumerToSql: Processing OFFER")
@@ -65,6 +65,16 @@ class ConsumerToSql(object):
 
             elif object_content['type'] == Types.BID.value:
                 logging.info("ConsumerToSql: Processing BID")
+
+                added_bid = Bid(object_content['id'],
+                                object_content['owner_id'],
+                                object_content['bid_interest'],
+                                object_content['target_offer_id'],
+                                object_content['partial_only'],
+                                date_added=object_content['date_added'],
+                                status=object_content['status'])
+
+                self.sql_writer.insert_bid(added_bid)
 
 
 

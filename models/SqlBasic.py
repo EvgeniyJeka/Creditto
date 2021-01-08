@@ -51,10 +51,18 @@ class SqlBasic(object):
 
         # Creating the 'offers' table if not exists - column for each "Offer" object property.
         if 'offers' not in tables:
-            print("Logs: 'offers' table is missing! Creating the 'offers' table")
+            logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
             query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
                     "duration int, offered_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
                     "status int);"
+
+            cursor.execute(query)
+
+        # Creating the 'bids' table if not exists - column for each "Bid" object property.
+        if 'bids' not in tables:
+            logging.warning("Logs: 'bids' table is missing! Creating the 'bids' table")
+            query = "CREATE TABLE bids (id int, owner_id int, bid_interest varchar(255), target_offer_id int, " \
+                    "partial_only int, date_added varchar(255), status int);"
 
             cursor.execute(query)
 
