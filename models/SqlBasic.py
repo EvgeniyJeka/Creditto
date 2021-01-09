@@ -3,6 +3,7 @@ from datetime import datetime
 import logging
 
 
+
 class SqlBasic(object):
     hst = '127.0.0.1'
     usr = 'root'
@@ -36,6 +37,20 @@ class SqlBasic(object):
         # Wrong DB name error
         except pymysql.err.InternalError:
             print("Unknown Database")
+
+
+    def run_sql_query(self, query: str):
+        try:
+            self.cursor.execute(query)
+            return self.cursor.fetchall()
+
+        except pymysql.err.ProgrammingError as e:
+            logging.error(f"Incorrect SQL syntax in query: {query} Error: {e}")
+            raise e
+
+        except Exception as e:
+            logging.error(f"Failed to executed query: {query} Error: {e}")
+            raise e
 
     # Validates that all the required tables exist, if they aren't - the method creates them.
     def create_validate_tables(self, cursor):

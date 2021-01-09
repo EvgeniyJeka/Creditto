@@ -77,6 +77,7 @@ def place_offer():
     print(producer.produce_message(offer_to_producer, 'offers'))
 
 
+    #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
     return {"result": f"Added new offer, ID {next_id} assigned"}
 
 @app.route("/place_bid", methods=['POST'])
@@ -121,21 +122,6 @@ def place_bid():
 
 
 
-
-
-
-# @app.route('/table_to_json/<table_name>', methods=['GET'])
-# def table_to_json(table_name):
-#     """
-#     This method is used to get the content of SQL table as JSON.
-#     :param table_name: String
-#     :return: Table content as JSON
-#     """
-#     if table_name:
-#         return core.table_as_json(table_name)
-#
-#     else:
-#         return {"error": "Must enter valid table name."}
 
 
 if __name__ == "__main__":

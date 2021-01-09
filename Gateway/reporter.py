@@ -23,7 +23,8 @@ class Reporter(SqlBasic):
         """
         try:
             query = f"select id from {table_name} order by id desc;"
-            result = self.cursor.execute(query)
+
+            result = self.run_sql_query(query)[0][0]
             return result + 1
 
         except pymysql.err.ProgrammingError as e:

@@ -44,10 +44,9 @@ class Bid(object):
     def __repr__(self):
 
         if self.partial_only and self.partial_sum:
-            return f"Owner ID: {self.owner_id}, Bid Interest: {self.bid_interest}, Target Offer ID: {self.target_offer_id}, " \
+            return f"Bid ID: {self.id}, Owner ID: {self.owner_id}, Bid Interest: {self.bid_interest}, Target Offer ID: {self.target_offer_id}, " \
                 f"Bid Status: {self.status}, Partial Bid: {self.partial_only}, Sum suggested: {self.partial_sum},  " \
-                f"Date Added: {self.date_added}, Status: {self.status}"
+                f"Date Added: {self.date_added}"
         else:
-            return f"Owner ID: {self.owner_id}, Bid Interest: {self.bid_interest}, Target Offer ID: {self.target_offer_id}, " \
-                f"Bid Status: {self.status}, Partial Bid: {self.partial_only}, Date Added: {self.date_added}, " \
-                f"Status: {self.status} "
+            return f"Bid ID: {self.id}, Owner ID: {self.owner_id}, Bid Interest: {self.bid_interest}, Target Offer ID: {self.target_offer_id}, " \
+                f"Bid Status: {self.status}, Partial Bid: {self.partial_only}, Date Added: {self.date_added}, "
