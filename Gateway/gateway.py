@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 import logging
-import json
+import simplejson
 
 from Gateway.reporter import Reporter
 from models.Bid import Bid
@@ -70,7 +70,7 @@ def place_offer():
     placed_offer = Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
-    offer_to_producer = json.dumps(placed_offer.__dict__)
+    offer_to_producer = simplejson.dumps(placed_offer.__dict__)
 
     logging.info(offer_to_producer)
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
@@ -112,7 +112,7 @@ def place_bid():
     else:
         placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
-    bid_to_producer = json.dumps(placed_bid.__dict__)
+    bid_to_producer = simplejson.dumps(placed_bid.__dict__)
 
     logging.info(bid_to_producer)
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")

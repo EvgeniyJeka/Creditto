@@ -1,6 +1,6 @@
 
 from kafka import KafkaConsumer
-import json
+import simplejson
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
@@ -58,7 +58,7 @@ class ConsumerToMatcher(object):
     def consume_process(self):
         for msg in self.consumer:
             message_content = msg.value.decode('utf-8')
-            object_content = json.loads(json.loads(message_content))
+            object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
