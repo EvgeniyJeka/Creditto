@@ -31,12 +31,9 @@ class SqlWriter(SqlBasic):
 
 
 
-# if __name__=='__main__':
-#     swriter = SqlWriter()
-#
-#     print(swriter.get_next_id('offers', swriter.cursor))
-#
-#     #query = 'insert into offers values(3, 11, 260, 12, 0.05, 0, "2020-1-15", 1)'
-#     #swriter.cursor.execute(query)
+if __name__=='__main__':
+    a = [(1,2), (5,7), (9,4)]
+    a.sort(key=lambda x: x[1], reverse=True)
+    print(a)
 
 

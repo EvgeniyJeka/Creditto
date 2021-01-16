@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from statuses import OfferStatuses, Types
 from datetime import datetime
 
@@ -11,7 +13,7 @@ class Offer(object):
     status = None
     matching_bid = None
 
-    def __init__(self, id, owner_id, sum, duration, offered_interest, allow_partial_fill, date_added=None, status=None):
+    def __init__(self, id, owner_id, sum, duration, offered_interest: Decimal, allow_partial_fill, date_added=None, status=None):
 
         # In future we will check the last offer ID assigned and take the next one
         self.id = id

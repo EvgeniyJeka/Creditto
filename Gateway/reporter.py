@@ -28,4 +28,8 @@ class Reporter(SqlBasic):
             return result + 1
 
         except pymysql.err.ProgrammingError as e:
-            logging.error(f"SqlWriter: Table {table_name} doesn't exsits: {e}")
+            logging.error(f"Reporter: Table {table_name} doesn't exsits: {e}")
+
+        except IndexError as e:
+            logging.warning(f"Reporter: The table {table_name} is currently empty. Receiving first record")
+            return 1

@@ -89,6 +89,8 @@ class ConsumerToMatcher(object):
                                 date_added=object_content['date_added'],
                                 status=object_content['status'])
 
+                self.matcher.add_bid(received_bid)
+
 if __name__ == "__main__":
     # Initiating component responsible for saving data to SQL DB
     matcher_consumer = ConsumerToMatcher()

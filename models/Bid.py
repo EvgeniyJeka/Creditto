@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from statuses import BidStatuses, Types
 from datetime import datetime
 
@@ -12,7 +14,7 @@ class Bid(object):
     partial_only = None
     partial_sum = 0
 
-    def __init__(self, id, owner_id, bid_interest, target_offer_id, partial_only, partial_sum=None,
+    def __init__(self, id, owner_id, bid_interest: Decimal, target_offer_id, partial_only, partial_sum=None,
                  date_added=None, status=None):
 
         self.id = id
