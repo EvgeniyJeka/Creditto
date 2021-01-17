@@ -1,4 +1,4 @@
-from decimal import Decimal
+from utils import Calculator
 
 from statuses import OfferStatuses, Types
 from datetime import datetime
@@ -23,7 +23,7 @@ class Offer(object):
         self.owner_id = owner_id
         self.sum = sum
         self.duration = duration
-        self.offered_interest = offered_interest
+        self.offered_interest = Calculator.precise(offered_interest)
 
         self.allow_partial_fill = allow_partial_fill
 

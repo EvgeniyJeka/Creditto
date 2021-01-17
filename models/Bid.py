@@ -1,11 +1,9 @@
-from decimal import Decimal
-
 from statuses import BidStatuses, Types
 from datetime import datetime
+from utils import Calculator
 
 
 class Bid(object):
-    id = 1
     owner_id = None
     bid_interest = None
     status = None
@@ -23,7 +21,7 @@ class Bid(object):
         self.type = Types.BID.value
 
         self.owner_id = owner_id
-        self.bid_interest = bid_interest
+        self.bid_interest = Calculator.precise(bid_interest)
         self.target_offer_id = target_offer_id
 
         if partial_only:

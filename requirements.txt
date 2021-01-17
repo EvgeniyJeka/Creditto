@@ -3,3 +3,4 @@ Flask
 kafka-python
 pymysql
 cryptography
+simplejson
