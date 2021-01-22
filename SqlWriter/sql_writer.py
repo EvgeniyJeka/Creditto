@@ -32,8 +32,9 @@ class SqlWriter(SqlBasic):
 
 
 if __name__=='__main__':
-    a = [(1,2), (5,7), (9,4)]
-    a.sort(key=lambda x: x[1], reverse=True)
-    print(a)
+    # a = [(1,2), (5,7), (9,4)]
+    # a.sort(key=lambda x: x[1], reverse=True)
+    # print(a)
+    print(datetime.now())
 
 
