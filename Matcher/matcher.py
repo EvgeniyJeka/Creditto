@@ -26,7 +26,6 @@ class Matcher(object):
         self.pool = read_sql_recovery.recover_offers_bids_sql()
 
 
-
     def add_offer(self, offer: Offer):
 
         if offer.id not in self.get_all_existing_offers_ids():
@@ -65,9 +64,14 @@ class Matcher(object):
                     logging.info("Using Producer instance to send the match to Kafka topic 'matches' ")
                     print(producer.produce_message(match_to_producer, 'matches'))
 
-    # This method checks if match cretirea for provided offer is matched
-    def check_match(self, offer: Offer, match_algorithm: int):
 
+    def check_match(self, offer: Offer, match_algorithm: int):
+        """
+        # This method checks if match cretirea for provided offer is matched
+        :param offer: Offer object
+        :param match_algorithm: selected match algorithm ID, int
+        :return: Match object on success
+        """
         # Default match algorithm - Bid with the lowest interest is selected among 5 available bids.
         if match_algorithm == MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST.value:
             bids_for_offer = self.pool[offer]
@@ -92,11 +96,11 @@ class Matcher(object):
 
 
 
-
-
-
-
     def get_all_existing_offers_ids(self):
+        """
+        This method returns all available Offer ID's from Matcher object pool
+        :return: list of ints
+        """
         return [x.id for x in self.pool.keys()]
 
 

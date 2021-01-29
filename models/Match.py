@@ -8,18 +8,23 @@
 # Match exact time
 from decimal import Decimal
 
+from statuses import Types
+
 
 class Match(object):
 
     def __init__(self, offer_id: int, bid_id: int, offer_owner_id: int,
                  bid_owner_id: int, match_time: str, partial: int, monthly_payment: Decimal = None):
+
+        self.type = Types.MATCH.value
+
         self.offer_id = offer_id
         self.bid_id = bid_id
         self.offer_owner_id = offer_owner_id
         self.bid_owner_id = bid_owner_id
         self.match_time = match_time
-        self.patial = partial
-        self.monthly_paymenr = monthly_payment
+        self.partial = partial
+        self.monthly_payment = monthly_payment
 
 
     def __repr__(self):

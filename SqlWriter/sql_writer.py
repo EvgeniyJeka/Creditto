@@ -2,6 +2,7 @@ import pymysql
 from datetime import datetime
 import logging
 
+from models import Match
 from models.Offer import Offer
 from models.Bid import Bid
 from models.SqlBasic import SqlBasic
@@ -24,6 +25,19 @@ class SqlWriter(SqlBasic):
 
         query = f'insert into bids values({bid.id}, {bid.owner_id}, {bid.bid_interest}, {bid.target_offer_id}, ' \
             f'{bid.partial_only}, "{bid.date_added}", {bid.status})'
+
+        return self.cursor.execute(query)
+
+    def insert_match(self, match: Match):
+        """
+        Inserting received Match object fields to SQL table 'matches'
+        :param match: Match object
+        :return:
+        """
+        new_match_id = self.get_next_id('matches')
+
+        query = f'insert into matches values({new_match_id}, {match.offer_id}, ' \
+            f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}", {match.partial}, -1)'
 
         return self.cursor.execute(query)
 

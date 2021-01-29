@@ -4,6 +4,7 @@ from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
 from SqlWriter.sql_writer import SqlWriter
+from models.Match import Match
 from models.Offer import Offer
 from models.Bid import Bid
 from statuses import Types
@@ -49,34 +50,53 @@ class ConsumerToSql(object):
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
-            if object_content['type'] == Types.OFFER.value:
-                logging.info("ConsumerToSql: Processing OFFER")
+            try:
+                if object_content['type'] == Types.OFFER.value:
+                    logging.info("ConsumerToSql: Processing OFFER")
 
-                added_offer = Offer(object_content['id'],
+                    added_offer = Offer(object_content['id'],
+                                        object_content['owner_id'],
+                                        object_content['sum'],
+                                        object_content['duration'],
+                                        object_content['offered_interest'],
+                                        object_content['allow_partial_fill'],
+                                        object_content['date_added'],
+                                        object_content['status'])
+
+                    self.sql_writer.insert_offer(added_offer)
+
+                elif object_content['type'] == Types.BID.value:
+                    logging.info("ConsumerToSql: Processing BID")
+
+                    added_bid = Bid(object_content['id'],
                                     object_content['owner_id'],
-                                    object_content['sum'],
-                                    object_content['duration'],
-                                    object_content['offered_interest'],
-                                    object_content['allow_partial_fill'],
-                                    object_content['date_added'],
-                                    object_content['status'])
+                                    object_content['bid_interest'],
+                                    object_content['target_offer_id'],
+                                    object_content['partial_only'],
+                                    date_added=object_content['date_added'],
+                                    status=object_content['status'])
 
-                self.sql_writer.insert_offer(added_offer)
+                    self.sql_writer.insert_bid(added_bid)
 
-            elif object_content['type'] == Types.BID.value:
-                logging.info("ConsumerToSql: Processing BID")
+                elif object_content['type'] == Types.MATCH.value:
+                    logging.info("ConsumerToSql: Processing MATCH")
 
-                added_bid = Bid(object_content['id'],
-                                object_content['owner_id'],
-                                object_content['bid_interest'],
-                                object_content['target_offer_id'],
-                                object_content['partial_only'],
-                                date_added=object_content['date_added'],
-                                status=object_content['status'])
+                    added_match = Match(object_content['offer_id'],
+                                        object_content['bid_id'],
+                                        object_content['offer_owner_id'],
+                                        object_content['bid_owner_id'],
+                                        object_content['match_time'],
+                                        object_content['partial'])
 
-                self.sql_writer.insert_bid(added_bid)
+                    self.sql_writer.insert_match(added_match)
+
+            except KeyError as e:
+                logging.critical(f"Consumer To SQL: INVALID kafka message received: {object_content}")
+                logging.critical(f"Consumer To SQL: {e}")
 
 
+  # def __init__(self, offer_id: int, bid_id: int, offer_owner_id: int,
+  #                bid_owner_id: int, match_time: str, partial: int, monthly_payment: Decimal = None):
 
 
 
