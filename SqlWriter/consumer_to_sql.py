@@ -7,7 +7,7 @@ from SqlWriter.sql_writer import SqlWriter
 from models.Match import Match
 from models.Offer import Offer
 from models.Bid import Bid
-from statuses import Types
+from statuses import Types, OfferStatuses
 
 logging.basicConfig(level=logging.INFO)
 
@@ -89,15 +89,13 @@ class ConsumerToSql(object):
                                         object_content['partial'])
 
                     self.sql_writer.insert_match(added_match)
+                    self.sql_writer.update_offer_status_sql(object_content['offer_id'], OfferStatuses.MATCHED.value)
+                    # Update status - matched bid
+                    # Update status - all other bids on matched offer
 
             except KeyError as e:
                 logging.critical(f"Consumer To SQL: INVALID kafka message received: {object_content}")
                 logging.critical(f"Consumer To SQL: {e}")
-
-
-  # def __init__(self, offer_id: int, bid_id: int, offer_owner_id: int,
-  #                bid_owner_id: int, match_time: str, partial: int, monthly_payment: Decimal = None):
-
 
 
 

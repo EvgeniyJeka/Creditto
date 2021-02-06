@@ -24,6 +24,7 @@ class Matcher(object):
         # Using the created instance to perform full recovery from SQL on start
         read_sql_recovery = SqlRecoveryReader()
         self.pool = read_sql_recovery.recover_offers_bids_sql()
+        self.matched_offer = None
 
 
     def add_offer(self, offer: Offer):
@@ -58,13 +59,20 @@ class Matcher(object):
                 is_match = self.check_match(offer, Config.SELECTED_MATCHING_ALGORITHM.value)
 
                 if isinstance(is_match, Match):
+                    self.matched_offer = offer
                     match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)
 
                     logging.info(match_to_producer)
                     logging.info("Using Producer instance to send the match to Kafka topic 'matches' ")
                     print(producer.produce_message(match_to_producer, 'matches'))
 
+        # Removing offer that was matched (if there was a match) and all bids on it from the pool
+        if self.matched_offer:
+            self.pool.pop(self.matched_offer)
+            self.matched_offer = None
 
+
+    # Consider making a separate method for each matching algorithm
     def check_match(self, offer: Offer, match_algorithm: int):
         """
         # This method checks if match cretirea for provided offer is matched
