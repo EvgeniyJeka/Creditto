@@ -6,6 +6,7 @@ from models import Match
 from models.Offer import Offer
 from models.Bid import Bid
 from models.SqlBasic import SqlBasic
+from statuses import BidStatuses
 
 
 class SqlWriter(SqlBasic):
@@ -50,7 +51,6 @@ class SqlWriter(SqlBasic):
         self.cursor.execute(query)
         return True
 
-
     def update_offer_status_sql(self, offer_id: int, new_status):
         """
         This method can be used to update offer status in SQL table 'offers'.
@@ -60,23 +60,32 @@ class SqlWriter(SqlBasic):
         self.cursor.execute(query)
         return True
 
-    # TBD
     def update_bid_status_sql(self, bid_id: int, new_status):
-        # Bid status update
-        pass
+        """
+        This method can be used to update bid status in SQL table 'bids'.
+        Bid ID and new offer status is expected
+        """
+        query = f'update bids set status = {new_status} where bids.id = {bid_id};'
+        self.cursor.execute(query)
+        return True
 
-    def update_unmatched_bids_status_sql(self, offer_id: int, matched_bid: int):
-        # Bid status update after match - unmatched bids
-        pass
+    def cancel_remaining_bids_sql(self, offer_id, winning_bid_id):
+        """
+        This method can be used to cancel all bids on given offer except the one that was matched.
+        The status of all bids on provided offer is changed to CANCELLED
+        :param offer_id:
+        :param winning_bid_id:
+        """
+        query = f'select id from bids where target_offer_id = {offer_id};'
+        self.cursor.execute(query)
+        # Fetching data from SQL and putting it to list, excluding the matched bid
+        all_bids_filtered = [x[0] for x in self.cursor.fetchall() if x[0] != winning_bid_id]
+
+        for bid in all_bids_filtered:
+            self.update_bid_status_sql(bid, BidStatuses.CANCELLED.value)
 
 
+if __name__ == '__main__':
+    sqlr = SqlWriter()
 
-
-
-if __name__=='__main__':
-    # a = [(1,2), (5,7), (9,4)]
-    # a.sort(key=lambda x: x[1], reverse=True)
-    # print(a)
-    print(datetime.now())
-
-
+    sqlr.cancel_remaining_bids_sql(1, 3)

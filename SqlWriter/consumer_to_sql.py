@@ -7,7 +7,7 @@ from SqlWriter.sql_writer import SqlWriter
 from models.Match import Match
 from models.Offer import Offer
 from models.Bid import Bid
-from statuses import Types, OfferStatuses
+from statuses import Types, OfferStatuses, BidStatuses
 
 logging.basicConfig(level=logging.INFO)
 
@@ -88,10 +88,11 @@ class ConsumerToSql(object):
                                         object_content['match_time'],
                                         object_content['partial'])
 
+                    # Inserting match record, updating matched offer , matched bid and unmatched bids statuses
                     self.sql_writer.insert_match(added_match)
                     self.sql_writer.update_offer_status_sql(object_content['offer_id'], OfferStatuses.MATCHED.value)
-                    # Update status - matched bid
-                    # Update status - all other bids on matched offer
+                    self.sql_writer.update_bid_status_sql(object_content['bid_id'], BidStatuses.MATCHED.value)
+                    self.sql_writer.cancel_remaining_bids_sql(object_content['offer_id'], object_content['bid_id'])
 
             except KeyError as e:
                 logging.critical(f"Consumer To SQL: INVALID kafka message received: {object_content}")
