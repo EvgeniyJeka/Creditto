@@ -12,11 +12,11 @@ class SqlBasic(object):
     cursor = None
 
     def __init__(self):
-        self.cursor = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+        self.cursor = self.connect_me(self.hst, self.usr, self.pwd)
         self.create_validate_tables(self.cursor)
 
     # Connect to DB
-    def connect_me(self, hst, usr, pwd, db_name):
+    def connect_me(self, hst, usr, pwd):
         """
         This method can be used to connect to MYSQL DB.
         :param hst: SQL Host
@@ -26,8 +26,22 @@ class SqlBasic(object):
         :return: SQL cursor
         """
         try:
-            conn = pymysql.connect(host=hst, user=usr, password=pwd, db=db_name, autocommit='True')
+            conn = pymysql.connect(host=hst, user=usr, password=pwd, autocommit='True')
             cursor = conn.cursor()
+
+            cursor.execute('show databases')
+            databases = [x[0] for x in cursor.fetchall()]
+
+            if self.db_name in databases:
+                query = f"USE {self.db_name}"
+                logging.info(f"Executing query |{query}|")
+                cursor.execute(query)
+
+            else:
+                query = f"CREATE DATABASE {self.db_name}"
+                logging.info(f"Executing query | {query}|")
+                cursor.execute(query)
+
             return cursor
 
         # Wrong Credentials error

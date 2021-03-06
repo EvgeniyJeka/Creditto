@@ -121,12 +121,8 @@ def place_bid():
     return {"result": f"Added new bid, ID {next_id} assigned"}
 
 
-
-
-
 if __name__ == "__main__":
-
-    app.run()
+    app.run(debug=True, host='0.0.0.0')
 
 
 
