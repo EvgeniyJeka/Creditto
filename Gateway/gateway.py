@@ -3,11 +3,11 @@ from flask import request
 import logging
 import json
 
-from Gateway.reporter import Reporter
-from Gateway.models.Bid import Bid
-from Gateway.models.Offer import Offer
-from Gateway.producer_from_api import ProducerFromApi
-from Gateway.statuses import Types
+from reporter import Reporter
+from models.Bid import Bid
+from models.Offer import Offer
+from producer_from_api import ProducerFromApi
+from statuses import Types
 
 logging.basicConfig(level=logging.INFO)
 
