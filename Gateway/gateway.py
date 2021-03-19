@@ -4,10 +4,10 @@ import logging
 import json
 
 from Gateway.reporter import Reporter
-from models.Bid import Bid
-from models.Offer import Offer
+from Gateway.models.Bid import Bid
+from Gateway.models.Offer import Offer
 from Gateway.producer_from_api import ProducerFromApi
-from statuses import Types
+from Gateway.statuses import Types
 
 logging.basicConfig(level=logging.INFO)
 

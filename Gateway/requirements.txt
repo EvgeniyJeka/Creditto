@@ -1,0 +1,5 @@
+requests
+Flask
+kafka-python
+pymysql
+cryptography
