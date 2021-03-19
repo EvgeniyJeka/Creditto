@@ -1,6 +1,6 @@
 
 from kafka import KafkaConsumer
-import json
+import simplejson
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
@@ -58,7 +58,7 @@ class ConsumerToMatcher(object):
     def consume_process(self):
         for msg in self.consumer:
             message_content = msg.value.decode('utf-8')
-            object_content = json.loads(json.loads(message_content))
+            object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
@@ -88,6 +88,8 @@ class ConsumerToMatcher(object):
                                 object_content['partial_only'],
                                 date_added=object_content['date_added'],
                                 status=object_content['status'])
+
+                self.matcher.add_bid(received_bid)
 
 if __name__ == "__main__":
     # Initiating component responsible for saving data to SQL DB
