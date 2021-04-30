@@ -3,10 +3,10 @@ from flask import request
 import logging
 import json
 
-from reporter import Reporter
+from . reporter import Reporter
 from models.Bid import Bid
 from models.Offer import Offer
-from producer_from_api import ProducerFromApi
+from . producer_from_api import ProducerFromApi
 from statuses import Types
 
 logging.basicConfig(level=logging.INFO)
@@ -140,7 +140,8 @@ def place_bid():
 
 if __name__ == "__main__":
 
-    app.run()
+    #app.run()
+    app.run(debug=True, host='0.0.0.0')
 
 
 

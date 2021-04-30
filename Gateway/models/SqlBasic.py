@@ -3,8 +3,10 @@ from datetime import datetime
 import logging
 
 
+
 class SqlBasic(object):
-    hst = '127.0.0.1'
+    #hst = '127.0.0.1'
+    hst = 'creditto_cabin_db_1'
     usr = 'root'
     pwd = '123456'
     db_name = 'creditto'
