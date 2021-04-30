@@ -6,7 +6,7 @@ import logging
 
 class SqlBasic(object):
     #hst = '127.0.0.1'
-    hst = 'creditto_cabin_db_1'
+    hst = 'kafka_2_cabin_db_1'
     usr = 'root'
     pwd = '123456'
     db_name = 'creditto'
@@ -32,8 +32,9 @@ class SqlBasic(object):
             return cursor
 
         # Wrong Credentials error
-        except pymysql.err.OperationalError:
+        except pymysql.err.OperationalError as e:
             print("Wrong Credentials or Host")
+            print(e)
 
         # Wrong DB name error
         except pymysql.err.InternalError:

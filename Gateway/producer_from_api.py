@@ -2,7 +2,7 @@ import json
 from kafka import KafkaProducer
 import time
 import logging
-from .local_config import Config
+from local_config import Config
 logging.basicConfig(level=logging.INFO)
 
 
