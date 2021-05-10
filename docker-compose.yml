@@ -53,3 +53,9 @@ services:
     depends_on:
       - cabin_db
       - kafka
+      
+  sql_writer:
+    image: sql_writer:latest
+    depends_on:
+      - cabin_db
+      - kafka
