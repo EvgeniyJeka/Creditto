@@ -1,12 +1,13 @@
 import pymysql
 from datetime import datetime
 import logging
+from local_config import Config
 
 
 
 class SqlBasic(object):
     #hst = '127.0.0.1'
-    hst = 'kafka_2_cabin_db_1'
+    hst =  Config.sql_port.value
     usr = 'root'
     pwd = '123456'
     db_name = 'creditto'
