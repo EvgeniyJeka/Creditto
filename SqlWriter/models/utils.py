@@ -4,8 +4,6 @@ from decimal import *
 
 class Calculator:
 
-
-
     @staticmethod
     def precise(input):
         """
