@@ -4,11 +4,12 @@ import json
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
-from Matcher.matcher import Matcher
-from SqlWriter.sql_writer import SqlWriter
+from matcher import Matcher
 from models.Offer import Offer
 from models.Bid import Bid
 from statuses import Types
+from local_config import Config
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -51,7 +52,7 @@ class ConsumerToMatcher(object):
         print(f"Existing topics: {admin_client.list_topics()}")
 
         # Initiating consumer
-        self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=['localhost:9092'],
+        self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=[Config.kafka_bootstrap_servers.value],
                                     auto_offset_reset='earliest', enable_auto_commit=True, group_id="matcher_consumer")
 
 
