@@ -1,6 +1,6 @@
 from statuses import BidStatuses, Types
 from datetime import datetime
-from utils import Calculator
+from models.utils import Calculator
 
 
 class Bid(object):
