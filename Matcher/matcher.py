@@ -4,7 +4,7 @@ from decimal import Decimal
 import simplejson
 
 from statuses import OfferStatuses
-from .sql_recovery_reader import SqlRecoveryReader
+from sql_recovery_reader import SqlRecoveryReader
 from local_config import Config, MatchingAlgorithm
 from models.Match import Match
 from models.Offer import Offer

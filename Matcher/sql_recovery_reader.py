@@ -4,7 +4,7 @@ from models.SqlBasic import SqlBasic
 from models.Offer import Offer
 from models.Bid import Bid
 import logging
-from local_config import SqlConfig
+
 
 logging.basicConfig(level=logging.INFO)
 
