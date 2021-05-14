@@ -2,8 +2,8 @@ import json
 from kafka import KafkaProducer
 import time
 import logging
-from local_config import Config
 logging.basicConfig(level=logging.INFO)
+from local_config import KafkaConfig
 
 
 # producer = KafkaProducer(value_serializer = lambda m: json.dumps(m).encode('utf-8'), bootstrap_servers = ['localhost:9092'])
@@ -15,10 +15,8 @@ logging.basicConfig(level=logging.INFO)
 class ProducerFromApi(object):
 
     def __init__(self):
-        # self.producer = KafkaProducer(value_serializer = lambda m: json.dumps(m).encode('utf-8'),
-        #                               bootstrap_servers = ['localhost:9092'])
-        self.producer = KafkaProducer(value_serializer=lambda m: json.dumps(m).encode('utf-8'),
-                                      bootstrap_servers=[Config.kafka_bootstrap_servers.value])
+        self.producer = KafkaProducer(value_serializer = lambda m: json.dumps(m).encode('utf-8'),
+                                      bootstrap_servers = [KafkaConfig.BOOTSTRAP_SERVERS.value])
 
 
     def produce_message(self, message, topic):

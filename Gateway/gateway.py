@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import request
 import logging
-import json
+import simplejson
 
 from reporter import Reporter
 from models.Bid import Bid
@@ -45,7 +45,6 @@ reporter = Reporter()
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
     """
-
     """
     verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
 
@@ -70,19 +69,19 @@ def place_offer():
     placed_offer = Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
-    offer_to_producer = json.dumps(placed_offer.__dict__)
+    offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
 
     logging.info(offer_to_producer)
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
 
+    #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
     return {"result": f"Added new offer, ID {next_id} assigned"}
 
 @app.route("/place_bid", methods=['POST'])
 def place_bid():
     """
-
     """
     verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
 
@@ -111,7 +110,7 @@ def place_bid():
     else:
         placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
-    bid_to_producer = json.dumps(placed_bid.__dict__)
+    bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
 
     logging.info(bid_to_producer)
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")
@@ -120,27 +119,7 @@ def place_bid():
     return {"result": f"Added new bid, ID {next_id} assigned"}
 
 
-
-
-
-
-# @app.route('/table_to_json/<table_name>', methods=['GET'])
-# def table_to_json(table_name):
-#     """
-#     This method is used to get the content of SQL table as JSON.
-#     :param table_name: String
-#     :return: Table content as JSON
-#     """
-#     if table_name:
-#         return core.table_as_json(table_name)
-#
-#     else:
-#         return {"error": "Must enter valid table name."}
-
-
 if __name__ == "__main__":
-
-    #app.run()
     app.run(debug=True, host='0.0.0.0')
 
 
