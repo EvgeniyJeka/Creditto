@@ -1,4 +1,4 @@
-from utils import Calculator
+from models.utils import Calculator
 
 from statuses import OfferStatuses, Types
 from datetime import datetime
