@@ -1,6 +1,5 @@
-
 from kafka import KafkaConsumer
-import json
+import simplejson
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
@@ -8,8 +7,7 @@ from matcher import Matcher
 from models.Offer import Offer
 from models.Bid import Bid
 from statuses import Types
-from local_config import Config
-
+from local_config import KafkaConfig
 
 logging.basicConfig(level=logging.INFO)
 
@@ -41,7 +39,7 @@ class ConsumerToMatcher(object):
 
     def start_consumer(self):
         # Creating Kafka topics or adding if the topic is missing
-        admin_client = KafkaAdminClient(bootstrap_servers="localhost:9092", client_id='test')
+        admin_client = KafkaAdminClient(bootstrap_servers=KafkaConfig.BOOTSTRAP_SERVERS.value, client_id='test')
         existing_topics = admin_client.list_topics()
 
         required_topics = ("offers", "bids", "matches")
@@ -52,14 +50,14 @@ class ConsumerToMatcher(object):
         print(f"Existing topics: {admin_client.list_topics()}")
 
         # Initiating consumer
-        self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=[Config.kafka_bootstrap_servers.value],
+        self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
                                     auto_offset_reset='earliest', enable_auto_commit=True, group_id="matcher_consumer")
 
 
     def consume_process(self):
         for msg in self.consumer:
             message_content = msg.value.decode('utf-8')
-            object_content = json.loads(json.loads(message_content))
+            object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
@@ -89,6 +87,8 @@ class ConsumerToMatcher(object):
                                 object_content['partial_only'],
                                 date_added=object_content['date_added'],
                                 status=object_content['status'])
+
+                self.matcher.add_bid(received_bid)
 
 if __name__ == "__main__":
     # Initiating component responsible for saving data to SQL DB

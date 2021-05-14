@@ -2,8 +2,9 @@ import simplejson
 from kafka import KafkaProducer
 import time
 import logging
+from local_config import KafkaConfig
+
 logging.basicConfig(level=logging.INFO)
-from local_config import Config
 
 
 
@@ -11,7 +12,7 @@ class ProducerFromMatcher(object):
 
     def __init__(self):
         self.producer = KafkaProducer(value_serializer = lambda m: simplejson.dumps(m).encode('utf-8'),
-                                      bootstrap_servers = [Config.kafka_bootstrap_servers.value])
+                                      bootstrap_servers = [KafkaConfig.BOOTSTRAP_SERVERS.value])
 
 
     def produce_message(self, message, topic):
