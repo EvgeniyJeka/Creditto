@@ -61,3 +61,10 @@ services:
     depends_on:
       - cabin_db
       - kafka
+      
+  creditto_matcher:
+    image: creditto_matcher:latest
+    build: ./Matcher
+    depends_on:
+      - cabin_db
+      - kafka
