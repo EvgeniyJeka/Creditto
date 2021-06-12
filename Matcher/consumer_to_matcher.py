@@ -21,7 +21,7 @@ logging.basicConfig(level=logging.INFO)
     #Call matcher.add_bid method
     # If response = True - see it as confirmation
     # Else if response = Match object:
-        #call producer_from_matcher.send and send the received Match object to 'matches' Kafka topic
+        #call producer_from_matcher.send and send the received Match object to 'matches' Kafka topi c
 
 
 class ConsumerToMatcher(object):
