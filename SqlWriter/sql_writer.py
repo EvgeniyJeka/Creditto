@@ -87,5 +87,3 @@ class SqlWriter(SqlBasic):
 
 if __name__ == '__main__':
     sqlr = SqlWriter()
-
-    sqlr.cancel_remaining_bids_sql(1, 3)

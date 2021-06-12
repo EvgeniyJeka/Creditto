@@ -3,10 +3,10 @@ from flask import request
 import logging
 import simplejson
 
-from Gateway.reporter import Reporter
+from reporter import Reporter
 from models.Bid import Bid
 from models.Offer import Offer
-from Gateway.producer_from_api import ProducerFromApi
+from producer_from_api import ProducerFromApi
 from statuses import Types
 
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +45,6 @@ reporter = Reporter()
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
     """
-
     """
     verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
 
@@ -83,7 +82,6 @@ def place_offer():
 @app.route("/place_bid", methods=['POST'])
 def place_bid():
     """
-
     """
     verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
 

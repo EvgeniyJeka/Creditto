@@ -5,6 +5,7 @@ from models.Offer import Offer
 from models.Bid import Bid
 import logging
 
+
 logging.basicConfig(level=logging.INFO)
 
 class SqlRecoveryReader(SqlBasic):
