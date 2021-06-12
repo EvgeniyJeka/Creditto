@@ -1,9 +1,11 @@
+from utils import Calculator
+
 from statuses import OfferStatuses, Types
 from datetime import datetime
 
 
 class Offer(object):
-    id = 1
+
     owner_id = None
     sum = None
     duration = None
@@ -11,7 +13,7 @@ class Offer(object):
     status = None
     matching_bid = None
 
-    def __init__(self, id, owner_id, sum, duration, offered_interest, allow_partial_fill, date_added=None, status=None):
+    def __init__(self, id: int, owner_id, sum, duration, offered_interest, allow_partial_fill, date_added=None, status=None):
 
         # In future we will check the last offer ID assigned and take the next one
         self.id = id
@@ -21,7 +23,7 @@ class Offer(object):
         self.owner_id = owner_id
         self.sum = sum
         self.duration = duration
-        self.offered_interest = offered_interest
+        self.offered_interest = Calculator.precise(offered_interest)
 
         self.allow_partial_fill = allow_partial_fill
 
