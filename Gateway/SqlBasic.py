@@ -1,6 +1,6 @@
 import pymysql
 import logging
-from credittomodels.local_config import SqlConfig
+from local_config import SqlConfig
 
 
 

@@ -10,9 +10,9 @@ classifiers = [
 
 setup(
   name='credittomodels',
-  version='0.0.2',
+  version='0.0.4',
   description='Classes needed for Creditto project',
-  long_description=open('README.txt').read() + '\n\n' + open('CHANGELOG.txt').read(),
+  long_description='Classes needed for Creditto project',
   url='',
   author='Eugene Silverman',
   author_email='',

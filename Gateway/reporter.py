@@ -3,8 +3,8 @@ import pymysql
 from datetime import datetime
 import logging
 
-from .Offer import Offer
-from.SqlBasic import SqlBasic
+from credittomodels import Offer
+from SqlBasic import SqlBasic
 
 
 class Reporter(SqlBasic):
