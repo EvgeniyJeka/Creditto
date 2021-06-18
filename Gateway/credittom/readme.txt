@@ -1,1 +1,0 @@
-Models and basic methods used in Creditto project

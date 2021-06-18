@@ -68,7 +68,7 @@ def place_offer():
             return {"error": "Required parameter is missing in provided offer"}
 
     # In future versions it is possible that the offer will be converted to Google Proto message
-    placed_offer = Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
+    placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
     offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
@@ -107,10 +107,10 @@ def place_bid():
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
-        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
+        placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
 
     else:
-        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
+        placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
     bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
 
