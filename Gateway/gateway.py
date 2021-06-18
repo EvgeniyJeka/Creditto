@@ -4,10 +4,12 @@ import logging
 import simplejson
 
 from reporter import Reporter
-from models.Bid import Bid
-from models.Offer import Offer
+from credittomodels import Bid
+from credittomodels import Offer
 from producer_from_api import ProducerFromApi
-from statuses import Types
+from credittomodels import statuses
+
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,7 +60,7 @@ def place_offer():
 
     next_id = reporter.get_next_id('offers')
 
-    if offer['type'] != Types.OFFER.value:
+    if offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_offer_params:
@@ -90,7 +92,7 @@ def place_bid():
 
     next_id = reporter.get_next_id('bids')
 
-    if bid['type'] != Types.BID.value:
+    if bid['type'] != statuses.Types.BID.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_bid_params:

@@ -1,7 +1,6 @@
 import pymysql
-from datetime import datetime
 import logging
-from local_config import SqlConfig
+from credittomodels.local_config import SqlConfig
 
 
 

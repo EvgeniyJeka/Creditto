@@ -1,6 +1,6 @@
-from models.utils import Calculator
+from .utils import Calculator
 
-from statuses import OfferStatuses, Types
+from .statuses import OfferStatuses, Types
 from datetime import datetime
 
 

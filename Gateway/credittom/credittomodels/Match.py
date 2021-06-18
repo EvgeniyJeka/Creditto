@@ -7,7 +7,7 @@
 # Match exact time
 from decimal import Decimal
 
-from statuses import Types
+from .statuses import Types
 
 
 class Match(object):
