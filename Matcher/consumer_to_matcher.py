@@ -4,9 +4,9 @@ from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
 from matcher import Matcher
-from models.Offer import Offer
-from models.Bid import Bid
-from statuses import Types
+from credittomodels import Offer
+from credittomodels import Bid
+from credittomodels import statuses
 from local_config import KafkaConfig
 
 logging.basicConfig(level=logging.INFO)
@@ -60,10 +60,10 @@ class ConsumerToMatcher(object):
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
-            if object_content['type'] == Types.OFFER.value:
+            if object_content['type'] == statuses.Types.OFFER.value:
                 logging.info("ConsumerToMatcher: Processing OFFER")
 
-                received_offer = Offer(object_content['id'],
+                received_offer = Offer.Offer(object_content['id'],
                                     object_content['owner_id'],
                                     object_content['sum'],
                                     object_content['duration'],
@@ -74,10 +74,10 @@ class ConsumerToMatcher(object):
 
                 self.matcher.add_offer(received_offer)
 
-            elif object_content['type'] == Types.BID.value:
+            elif object_content['type'] == statuses.Types.BID.value:
                 logging.info("ConsumerToMatcher: Processing BID")
 
-                received_bid = Bid(object_content['id'],
+                received_bid = Bid.Bid(object_content['id'],
                                 object_content['owner_id'],
                                 object_content['bid_interest'],
                                 object_content['target_offer_id'],

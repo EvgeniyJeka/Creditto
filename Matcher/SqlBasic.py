@@ -1,7 +1,7 @@
 import pymysql
-from datetime import datetime
 import logging
 from local_config import SqlConfig
+
 
 
 class SqlBasic(object):
@@ -18,7 +18,7 @@ class SqlBasic(object):
     # Connect to DB
     def connect_me(self, hst, usr, pwd):
         """
-        This method can be used to connect to MYSQL DB.
+        This method can be used to connect  to MYSQL DB.
         :param hst: SQL Host
         :param usr: Username
         :param pwd: Password
