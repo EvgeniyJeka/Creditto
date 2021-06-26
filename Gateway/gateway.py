@@ -9,6 +9,9 @@ from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 from credittomodels import statuses
 
+# 1. Add automated tests: match flow, API + SQL. Make tests to run in a separate container (e2e test)
+# 2. Add validation on Offer/Bid placement - respond only after confirmation
+# 3. Start writing read.me file (will be also considered as a spec)
 
 
 logging.basicConfig(level=logging.INFO)
