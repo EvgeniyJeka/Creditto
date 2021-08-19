@@ -30,8 +30,17 @@ the bid with the lowest interest rate is selected when the fifth bid is received
     sum: loan sum in USD
     duration: loan duration
     offered_interest: the max interest rate the borrower is willing to offer
-    status: current loan status (see statuses list below)
+    status: current offer status (see statuses list below)
     matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
+    
+3. Bid:
+    owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
+    bid_interest: the interest asked by the lender
+    status: current bid status (see statuses list below)
+    target_offer: the offer that current bid seeks to match
+    sum: bid sum - taken from the offer by default
+    partial_only: an optional flag (T.B.D.)
+    partial_sum: an option (T.B.D.)
 
 
 
