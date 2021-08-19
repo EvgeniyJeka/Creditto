@@ -65,6 +65,7 @@ System components:
  c. matches
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
+ Receives: JSON from parsed POST and GET requests. 
  Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
  Access SQL DB to validate received data. 
  
@@ -83,5 +84,5 @@ System components:
  
  
  
- Receives: JSON from parsed POST and GET requests
+
  
