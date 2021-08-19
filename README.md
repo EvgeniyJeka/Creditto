@@ -75,6 +75,11 @@ System components:
  d. get_bid_status: get bid status by provided ID (T.B.D.)
  e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
  
+ Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
+ Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
+ 
+ 
+ 
  
  
  
