@@ -85,11 +85,15 @@ System components:
    
    a. Once new 'offer' message is received it's decoded.
    If Offer status is OPEN the retrieved offer is inserted to 'offers' SQL table.
-   Else - existing offer status is updated.
+   Else - existing offer status is updated (T.B.D.)
    
    b. Once new 'bid' message is received it's decoded.
    If Bid status is PLACED the retrieved bid is inserted to 'bids' SQL table.
-   Else - existing bid status is updated.
+   Else - existing bid status is updated (T.B.D.)
+   
+   c. Once new 'match' message is received it's decoded.
+   The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
+   are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
  
  
  
