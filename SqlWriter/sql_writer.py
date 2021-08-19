@@ -1,12 +1,8 @@
-import pymysql
-from datetime import datetime
-import logging
-
-from models import Match
-from models.Offer import Offer
-from models.Bid import Bid
-from models.SqlBasic import SqlBasic
-from statuses import BidStatuses
+from credittomodels import Match
+from credittomodels import Offer
+from credittomodels import Bid
+from SqlBasic import SqlBasic
+from credittomodels import statuses
 
 
 class SqlWriter(SqlBasic):
@@ -82,7 +78,7 @@ class SqlWriter(SqlBasic):
         all_bids_filtered = [x[0] for x in self.cursor.fetchall() if x[0] != winning_bid_id]
 
         for bid in all_bids_filtered:
-            self.update_bid_status_sql(bid, BidStatuses.CANCELLED.value)
+            self.update_bid_status_sql(bid, statuses.BidStatuses.CANCELLED.value)
 
 
 if __name__ == '__main__':

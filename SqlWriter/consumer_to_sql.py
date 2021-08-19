@@ -4,11 +4,12 @@ from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
 from sql_writer import SqlWriter
-from models.Match import Match
-from models.Offer import Offer
-from models.Bid import Bid
-from statuses import Types, OfferStatuses, BidStatuses
+from credittomodels import Match
+from credittomodels import Offer
+from credittomodels import Bid
+from credittomodels import statuses
 from local_config import KafkaConfig
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -41,8 +42,6 @@ class ConsumerToSql(object):
                                       auto_offset_reset='earliest', enable_auto_commit=True, group_id="sql_consumer")
 
 
-
-
     def consume_write(self):
         for msg in self.consumer:
             message_content = msg.value.decode('utf-8')
@@ -51,10 +50,10 @@ class ConsumerToSql(object):
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
             try:
-                if object_content['type'] == Types.OFFER.value:
+                if object_content['type'] == statuses.Types.OFFER.value:
                     logging.info("ConsumerToSql: Processing OFFER")
 
-                    added_offer = Offer(object_content['id'],
+                    added_offer = Offer.Offer(object_content['id'],
                                         object_content['owner_id'],
                                         object_content['sum'],
                                         object_content['duration'],
@@ -65,10 +64,10 @@ class ConsumerToSql(object):
 
                     self.sql_writer.insert_offer(added_offer)
 
-                elif object_content['type'] == Types.BID.value:
+                elif object_content['type'] == statuses.Types.BID.value:
                     logging.info("ConsumerToSql: Processing BID")
 
-                    added_bid = Bid(object_content['id'],
+                    added_bid = Bid.Bid(object_content['id'],
                                     object_content['owner_id'],
                                     object_content['bid_interest'],
                                     object_content['target_offer_id'],
@@ -78,10 +77,10 @@ class ConsumerToSql(object):
 
                     self.sql_writer.insert_bid(added_bid)
 
-                elif object_content['type'] == Types.MATCH.value:
+                elif object_content['type'] == statuses.Types.MATCH.value:
                     logging.info("ConsumerToSql: Processing MATCH")
 
-                    added_match = Match(object_content['offer_id'],
+                    added_match = Match.Match(object_content['offer_id'],
                                         object_content['bid_id'],
                                         object_content['offer_owner_id'],
                                         object_content['bid_owner_id'],
@@ -90,8 +89,8 @@ class ConsumerToSql(object):
 
                     # Inserting match record, updating matched offer , matched bid and unmatched bids statuses
                     self.sql_writer.insert_match(added_match)
-                    self.sql_writer.update_offer_status_sql(object_content['offer_id'], OfferStatuses.MATCHED.value)
-                    self.sql_writer.update_bid_status_sql(object_content['bid_id'], BidStatuses.MATCHED.value)
+                    self.sql_writer.update_offer_status_sql(object_content['offer_id'], statuses.OfferStatuses.MATCHED.value)
+                    self.sql_writer.update_bid_status_sql(object_content['bid_id'], statuses.BidStatuses.MATCHED.value)
                     self.sql_writer.cancel_remaining_bids_sql(object_content['offer_id'], object_content['bid_id'])
 
             except KeyError as e:

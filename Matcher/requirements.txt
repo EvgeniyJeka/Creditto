@@ -2,3 +2,4 @@ kafka-python
 pymysql
 cryptography
 simplejson
+credittomodels

@@ -3,12 +3,12 @@ from datetime import datetime
 from decimal import Decimal
 import simplejson
 
-from statuses import OfferStatuses
+from credittomodels import statuses
 from sql_recovery_reader import SqlRecoveryReader
 from local_config import Config, MatchingAlgorithm
-from models.Match import Match
-from models.Offer import Offer
-from models.Bid import Bid
+from credittomodels import Match
+from credittomodels import Offer
+from credittomodels import Bid
 from producer_from_matcher import ProducerFromMatcher
 import logging
 
@@ -52,7 +52,7 @@ class Matcher(object):
             if offer.id == bid.target_offer_id:
                 logging.info(f"MATCHER: Adding bid {bid.id} - in progress. Targeted offer {offer.id} found.")
 
-                if offer.status not in (OfferStatuses.OPEN.value, OfferStatuses.PARTIALLY_MATCHED.value):
+                if offer.status not in (statuses.OfferStatuses.OPEN.value, statuses.OfferStatuses.PARTIALLY_MATCHED.value):
                     logging.error(f"MATCHER: Adding bid {bid.id} - failed. Targeted offer {offer.id} is no longer available")
 
                 self.pool[offer].append(bid)
@@ -64,7 +64,7 @@ class Matcher(object):
 
                 # If Match object returned by 'is_match' it means that new bid addition has resulted in a match.
                 # Newly created match must be sent to the 'matches' topic
-                if isinstance(is_match, Match):
+                if isinstance(is_match, Match.Match):
                     self.matched_offer = offer
                     match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)
 
@@ -101,7 +101,7 @@ class Matcher(object):
 
             print(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")
 
-            created_match = Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
+            created_match = Match.Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
                                   str(datetime.now()), offer.allow_partial_fill)
 
             return created_match

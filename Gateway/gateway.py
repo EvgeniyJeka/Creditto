@@ -4,10 +4,15 @@ import logging
 import simplejson
 
 from reporter import Reporter
-from models.Bid import Bid
-from models.Offer import Offer
+from credittomodels import Bid
+from credittomodels import Offer
 from producer_from_api import ProducerFromApi
-from statuses import Types
+from credittomodels import statuses
+
+# 1. Add automated tests: match flow, API + SQL. Make tests to run in a separate container (e2e test)
+# 2. Add validation on Offer/Bid placement - respond only after confirmation
+# 3. Start writing read.me file (will be also considered as a spec)
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,7 +63,7 @@ def place_offer():
 
     next_id = reporter.get_next_id('offers')
 
-    if offer['type'] != Types.OFFER.value:
+    if offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_offer_params:
@@ -66,7 +71,7 @@ def place_offer():
             return {"error": "Required parameter is missing in provided offer"}
 
     # In future versions it is possible that the offer will be converted to Google Proto message
-    placed_offer = Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
+    placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
     offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
@@ -90,7 +95,7 @@ def place_bid():
 
     next_id = reporter.get_next_id('bids')
 
-    if bid['type'] != Types.BID.value:
+    if bid['type'] != statuses.Types.BID.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_bid_params:
@@ -105,10 +110,10 @@ def place_bid():
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
-        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
+        placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
 
     else:
-        placed_bid = Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
+        placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
     bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
 

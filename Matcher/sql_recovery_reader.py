@@ -1,19 +1,20 @@
 from decimal import Decimal
 
-from models.SqlBasic import SqlBasic
-from models.Offer import Offer
-from models.Bid import Bid
+
+from credittomodels import Offer
+from credittomodels import Bid
+from SqlBasic import SqlBasic
 import logging
 
 
 logging.basicConfig(level=logging.INFO)
+
 
 class SqlRecoveryReader(SqlBasic):
 
     def __init__(self):
         super().__init__()
         self.create_validate_tables(self.cursor)
-
 
     def recover_offers_bids_sql(self):
         recovery_pool = {}
@@ -24,7 +25,7 @@ class SqlRecoveryReader(SqlBasic):
 
         # Converting offer tuple extracted from SQL DB to Offer object
         for db_offer in relevant_offers_db:
-            recovered_offer = Offer(db_offer[0], db_offer[1], db_offer[2], db_offer[3], Decimal(db_offer[4]),
+            recovered_offer = Offer.Offer(db_offer[0], db_offer[1], db_offer[2], db_offer[3], Decimal(db_offer[4]),
                                     db_offer[5], db_offer[6], db_offer[7])
 
             logging.info(f"SqlRecoveryReader: Recovered offer from DB on system start: {recovered_offer}")
@@ -41,7 +42,7 @@ class SqlRecoveryReader(SqlBasic):
             if len(recovered_bids_db) > 0:
                 for recovered_bid in recovered_bids_db:
                     print(recovered_bid)
-                    bid = Bid(recovered_bid[0], recovered_bid[1], Decimal(recovered_bid[2]), recovered_bid[3],
+                    bid = Bid.Bid(recovered_bid[0], recovered_bid[1], Decimal(recovered_bid[2]), recovered_bid[3],
                               recovered_bid[4], date_added=recovered_bid[5], status=recovered_bid[6])
 
                     recovery_pool[offer].append(bid)
