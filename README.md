@@ -42,7 +42,14 @@ the bid with the lowest interest rate is selected when the fifth bid is received
     partial_only: an optional flag (T.B.D.)
     partial_sum: an option (T.B.D.)
 
-
+3. Match:
+    offer_id: matched offer ID
+    bid_id: matching bid ID
+    offer_owner_id: the ID of the borrower
+    bid_owner_id: the ID of the lender
+    match_time: indicated when the offer was matched (T.B.D)
+    partial: an option (T.B.D.)
+    monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
 
 
 System components:
