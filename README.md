@@ -79,6 +79,18 @@ System components:
  Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
  Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
  
+
+4. SQL Writer: the component responsible for updating the data in MySQL DB.
+   Consumes offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
+   
+   a. Once new 'offer' message is received it's decoded.
+   If Offer status is OPEN the retrieved offer is inserted to 'offers' SQL table.
+   Else - existing offer status is updated.
+   
+   b. Once new 'bid' message is received it's decoded.
+   If Bid status is PLACED the retrieved bid is inserted to 'bids' SQL table.
+   Else - existing bid status is updated.
+ 
  
  
  
