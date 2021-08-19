@@ -50,8 +50,8 @@ the bid with the lowest interest rate is selected when the fifth bid is received
     match_time: indicated when the offer was matched (T.B.D)
     partial: an option (T.B.D.)
     monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
-
-
+    
+ 
 System components:
 
 1. Kafka queue manager, topics:
@@ -66,3 +66,17 @@ System components:
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
  Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
+ Access SQL DB to validate received data. 
+ 
+ API methods:
+ a. place_offer: add new offer to the system. Offer data is validated
+ b. place_bid: add new bid to the system. Bid data ais validated
+ c. get_offer_status: get offer status by provided ID (T.B.D.)
+ d. get_bid_status: get bid status by provided ID (T.B.D.)
+ e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
+ 
+ 
+ 
+ 
+ Receives: JSON from parsed POST and GET requests
+ 
