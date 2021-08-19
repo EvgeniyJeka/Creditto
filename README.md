@@ -1,6 +1,6 @@
 # Creditto
 
-1. General product description
+#1. General product description
 
 The purpose of the system is to mediate between customers that would like to borrow money, borrowers,
 and customers that would like to provide a loan, money lenders.
@@ -23,6 +23,30 @@ all other bids on that offer will become 'expired'.
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
  
+#2 Models description:
+
+1. Offer:
+    owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
+    sum: loan sum in USD
+    duration: loan duration
+    offered_interest: the max interest rate the borrower is willing to offer
+    status: current loan status (see statuses list below)
+    matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
 
 
 
+
+System components:
+
+1. Kafka queue manager, topics:
+ a. Offers
+ b. Bids
+ c. Matches
+ 
+2. MySQL DB, database name: "creditto", tables:
+ a. offers
+ b. bids
+ c. matches
+
+3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
+ Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
