@@ -65,35 +65,48 @@ System components:
  c. matches
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
- Receives: JSON from parsed POST and GET requests. 
- Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
- Access SQL DB to validate received data. 
- 
- API methods:
- a. place_offer: add new offer to the system. Offer data is validated
- b. place_bid: add new bid to the system. Bid data ais validated
- c. get_offer_status: get offer status by provided ID (T.B.D.)
- d. get_bid_status: get bid status by provided ID (T.B.D.)
- e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
- 
- Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
- Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
+
+     Receives: JSON from parsed POST and GET requests. 
+     Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
+     Access SQL DB to validate received data. 
+     
+     API methods:
+     a. place_offer: add new offer to the system. Offer data is validated
+     b. place_bid: add new bid to the system. Bid data ais validated
+     c. get_offer_status: get offer status by provided ID (T.B.D.)
+     d. get_bid_status: get bid status by provided ID (T.B.D.)
+     e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
+     
+     Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
+     Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
  
 
 4. SQL Writer: the component responsible for updating the data in MySQL DB.
-   Consumes offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
+
+    Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
+    Inserts and updated data in MySQL DB.
+    
+    a. Once new 'offer' message is received it's decoded.
+    If Offer status is OPEN the retrieved offer is inserted to 'offers' SQL table.
+    Else - existing offer status is updated (T.B.D.)
+    
+    b. Once new 'bid' message is received it's decoded.
+    If Bid status is PLACED the retrieved bid is inserted to 'bids' SQL table.
+    Else - existing bid status is updated (T.B.D.)
+    
+    c. Once new 'match' message is received it's decoded.
+    The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
+    are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
+    
+5. Matcher: the component responsible for matching between offers and bids. All offers and bids, that are currently 
+   available for matching are kept in service cache, in a pool of offers and bids. 
+   When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
-   a. Once new 'offer' message is received it's decoded.
-   If Offer status is OPEN the retrieved offer is inserted to 'offers' SQL table.
-   Else - existing offer status is updated (T.B.D.)
+   Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
+   Adds all received offers and bids to the pool kept in service cache.
+    
    
-   b. Once new 'bid' message is received it's decoded.
-   If Bid status is PLACED the retrieved bid is inserted to 'bids' SQL table.
-   Else - existing bid status is updated (T.B.D.)
    
-   c. Once new 'match' message is received it's decoded.
-   The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
-   are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
  
  
  
