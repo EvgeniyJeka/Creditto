@@ -22,6 +22,8 @@ all other bids on that offer will become 'expired'.
 
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
+
+
  
 #2 Models description:
 
@@ -52,7 +54,8 @@ the bid with the lowest interest rate is selected when the fifth bid is received
     monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
     
  
-System components:
+#System components
+Each component is a micro service. Components communicate with each other via Kafka topics. 
 
 1. Kafka queue manager, topics:
  a. Offers
@@ -104,6 +107,41 @@ System components:
    
    Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
    Adds all received offers and bids to the pool kept in service cache.
+   
+   Consumed Offer is added to the pool. Consumed Bid is added to the pool as well and triggers matching check - 
+   the service checks if one of the Bids placed on that offer meets the match criteria. 
+   
+   Matching algorithm ID is taken from service config file (will be moved to SQL - T.B.D.), the selected algorithm is applied
+   to determine if there is a match. 
+   
+   New Offer = > Added to the pool;     
+   
+   New Bid = > Added to the pool => Checking for a match = > 
+   => In case of a match produce a 'match' message to "Matches" Kafka topic.
+   
+   Once the offer is matched with one of the bids it's status changes to MATCHED and it is no longer presented
+   in 'available offers' list and no bids can be placed one it. Matching bid status is changed to MATCHED as well.
+   
+   
+# Statuses
+
+1. Offer:
+    OPEN: the offer is available for matching
+    MATCHED: the offer is matched
+    PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
+    CANCELLED: the offer was cancelled by the customer that has placed the offer (T.B.D.)
+    REMOVED: the offer was removed by the admin (T.B.D.)
+    HIDDEN: the offer was temporary hidden by the admin (T.B.D.)
+    
+2. Bid:
+    PLACED: the bid was placed, waiting for matching algorithm to be applied
+    MATCHED : the bid was matched with the target offer
+    CANCELLED : the bid was cancelled since other bid was matched with the target offer
+    REMOVED: the bid was removed by the admin (T.B.D.)
+    HIDDEN: the bid was temporary hidden by the admin.
+   
+                                                     
+   
     
    
    
