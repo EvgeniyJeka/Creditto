@@ -33,9 +33,9 @@ logging.basicConfig(level=logging.INFO)
 # Received ID will be increased by 1, and the Offer will be sent to Kafka topic with the new ID
 # Wait X sec
 # Call Reporter and verify that Offer with the new ID was added to SQL DB
-# Send response with the new ID ('Your Offer was successfully placed, ID: 1231')
+# Send response with the new ID ('Your Offer was successfully placed, ID: 1231') - D
 
-# New Bids will be accepted only if bid_interest < offered_interest (validation will be added on Phase 3)
+# New Bids will be accepted only if bid_interest < offered_interest (validation will be added on Phase 3) - D
 
 # Initiating API Server
 app = Flask(__name__)
@@ -102,11 +102,10 @@ def place_bid():
         if param not in bid.keys():
             return {"error": "Required parameter is missing in provided bid"}
 
-    # T.B.D : Before placing the bid, call Reporter and validate that the target offer exists
-    logging.info("Validating target offer with provided ID exists")
-    # T.B.D. : Before placing the bid, call Reporter and validate that bid interest
-    # lower than the offered interest of target offer
-    logging.info("Validating Bid interest against target offer")
+    logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
+    response = reporter.validate_bid(bid)
+    if 'error' in response.keys():
+        return response
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
