@@ -56,7 +56,6 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
     bid_interest: the interest asked by the lender
     status: current bid status (see statuses list below)
     target_offer: the offer that current bid seeks to match
-    sum: bid sum - taken from the offer by default
     partial_only: an optional flag (T.B.D.)
     partial_sum: an option (T.B.D.)
 

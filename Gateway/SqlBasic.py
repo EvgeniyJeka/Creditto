@@ -45,8 +45,8 @@ class SqlBasic(object):
             return cursor
 
         # Wrong Credentials error
-        except pymysql.err.OperationalError:
-            print("Wrong Credentials or Host")
+        except pymysql.err.OperationalError as e:
+            print(f"Wrong Credentials or Host: {e}")
 
         # Wrong DB name error
         except pymysql.err.InternalError:
@@ -121,3 +121,64 @@ class SqlBasic(object):
         except IndexError as e:
             logging.warning(f"Reporter: The table {table_name} is currently empty. Receiving first record")
             return 1
+
+    def get_columns(cls, table):
+        """
+        # Author: Evgeniy
+        Returns a list of column names
+        @param table: existing table, str
+        @return: list of str
+        """
+        query = 'show columns from ''%s'';' % table
+
+        try:
+            columns = cls.run_sql_query(query)
+            result = []
+
+            for cl in columns:
+                result.append(cl[0])
+
+            return result
+
+        except Exception as e:
+            logging.error(f" Failed to fetch column names of table {table} - {e}")
+            return False
+
+    def pack_to_dict(cls, query, table):
+        """
+        This method can be used to extract data from SQL table and pack it to list of dicts
+        @param query: query to execute
+        @param table: SQL table
+        @return: list of dicts
+        """
+        try:
+            columns = cls.get_columns(table)
+            data = cls.run_sql_query(query)
+
+            if data is None:
+                logging.warning(f"Couldn't find the requested data by provided param")
+                return []
+
+            elif len(data) == 1:
+                cnt = 0
+                result = {}
+                for column in columns:
+                    result[column] = data[0][cnt]
+                    cnt += 1
+                return [result]
+
+            result = []
+            for contact in data:
+                cnt = 0
+                record = {}
+                for column in columns:
+                    record[column] = contact[cnt]
+                    cnt += 1
+                result.append(record)
+            return result
+
+        except Exception as e:
+            logging.error(f"Failed to get data from SQL, query: {query}, {e}")
+            raise e
+
+
