@@ -23,6 +23,22 @@ all other bids on that offer will become 'expired'.
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
 
+# Use Case:
+
+Albert needs to borrow 10000 USD for 3 years. He is an authorized customer and can place both offers and bids.
+Albert places an offer - he is willing to pay up to 7% annual interest rate.
+
+Bill is also an authorized customer, he is looking for new attractive offers. He is sending a request 
+for all available offers and see Albert's offer. He decides to lend the required sum to Albert and he
+is willing to do so for 6.8% annual interest rate. Bill places a bid. 
+
+Bill's bid is the 5th bid on Albert's offer. His bid placement triggers the matcher, and it checks all
+bids placed on Albert's offer to find the best one for match. Since Sally's bid, that was placed earlier, 
+has 6.4% annual interest rate it is selected and it's status changes to MATCHED, all other bids, including Bill's, expire 
+and their status is changed to CANCELLED.  Offer status is changed to MATCHED as well.
+
+
+
 
  
 #2 Models description:
