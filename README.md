@@ -22,6 +22,7 @@ all other bids on that offer will become 'expired'.
 
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
+If there are several bids with identical interest rate the bid that was placed first is selected.
 
 # Use Case:
 
@@ -44,29 +45,29 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
 #2 Models description:
 
 1. Offer:
-    owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
-    sum: loan sum in USD
-    duration: loan duration
-    offered_interest: the max interest rate the borrower is willing to offer
-    status: current offer status (see statuses list below)
-    matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
-    
+   owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
+   sum: loan sum in USD
+   duration: loan duration
+   offered_interest: the max interest rate the borrower is willing to offer
+   status: current offer status (see statuses list below)
+   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
+
 3. Bid:
-    owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
-    bid_interest: the interest asked by the lender
-    status: current bid status (see statuses list below)
-    target_offer: the offer that current bid seeks to match
-    partial_only: an optional flag (T.B.D.)
-    partial_sum: an option (T.B.D.)
+   owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
+   bid_interest: the interest asked by the lender
+   status: current bid status (see statuses list below)
+   target_offer: the offer that current bid seeks to match
+   partial_only: an optional flag (T.B.D.)
+   partial_sum: an option (T.B.D.)
 
 3. Match:
-    offer_id: matched offer ID
-    bid_id: matching bid ID
-    offer_owner_id: the ID of the borrower
-    bid_owner_id: the ID of the lender
-    match_time: indicated when the offer was matched (T.B.D)
-    partial: an option (T.B.D.)
-    monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
+   offer_id: matched offer ID
+   bid_id: matching bid ID
+   offer_owner_id: the ID of the borrower
+   bid_owner_id: the ID of the lender
+   match_time: indicated when the offer was matched (T.B.D)
+   partial: an option (T.B.D.)
+   monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
     
  
 #System components
