@@ -55,23 +55,34 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
    
    status: current offer status (see statuses list below)
    
-   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
+   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default (T.B.D.)
 
 3. Bid:
    owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
+   
    bid_interest: the interest asked by the lender
+   
    status: current bid status (see statuses list below)
+   
    target_offer: the offer that current bid seeks to match
+   
    partial_only: an optional flag (T.B.D.)
+   
    partial_sum: an option (T.B.D.)
 
 3. Match:
    offer_id: matched offer ID
+   
    bid_id: matching bid ID
+   
    offer_owner_id: the ID of the borrower
+   
    bid_owner_id: the ID of the lender
+   
    match_time: indicated when the offer was matched (T.B.D)
+   
    partial: an option (T.B.D.)
+   
    monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
     
  
