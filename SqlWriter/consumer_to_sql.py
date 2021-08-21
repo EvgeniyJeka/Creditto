@@ -62,6 +62,7 @@ class ConsumerToSql(object):
                                         object_content['date_added'],
                                         object_content['status'])
 
+                    # T.B.D. - Add handling for incoming offer with status CANCELLED (update DB, change status)
                     self.sql_writer.insert_offer(added_offer)
 
                 elif object_content['type'] == statuses.Types.BID.value:

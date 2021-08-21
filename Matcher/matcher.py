@@ -10,6 +10,7 @@ from credittomodels import Match
 from credittomodels import Offer
 from credittomodels import Bid
 from producer_from_matcher import ProducerFromMatcher
+from best_of_five_oldest import BestOfFiveOldest
 import logging
 
 producer = ProducerFromMatcher()
@@ -30,6 +31,7 @@ class Matcher(object):
     def add_offer(self, offer: Offer):
         logging.info("MATCHER: Adding a new OFFER to the matching pool")
 
+        # T.B.D. - add handling for incoming offer with status CANCELLED (default status is OPEN)
         if offer.id not in self.get_all_existing_offers_ids():
             self.pool[offer] = []
 
@@ -86,26 +88,14 @@ class Matcher(object):
         :return: Match object on success
         """
         # Default match algorithm - Bid with the lowest interest is selected among 5 available bids.
-        if match_algorithm == MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST.value:
+        if match_algorithm == MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST_OLDEST.value:
             bids_for_offer = self.pool[offer]
 
             if len(bids_for_offer) < Config.MIN_BIDS_EXPECTED.value:
                 logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
                 return False
 
-            print([x.bid_interest for x in bids_for_offer])
-
-            bids_for_offer.sort(key=lambda x: Decimal(x.bid_interest))
-
-            selected_bid = bids_for_offer[0]
-
-            print(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")
-
-            created_match = Match.Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
-                                  str(datetime.now()), offer.allow_partial_fill)
-
-            return created_match
-
+            return BestOfFiveOldest.find_best_bid(bids_for_offer, offer)
 
     def get_all_existing_offers_ids(self):
         """
