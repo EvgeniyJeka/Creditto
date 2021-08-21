@@ -45,12 +45,12 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
 #2 Models description:
 
 1. Offer:
-   owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
-   sum: loan sum in USD
-   duration: loan duration
-   offered_interest: the max interest rate the borrower is willing to offer
-   status: current offer status (see statuses list below)
-   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
+   1.1 owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
+   1.2 sum: loan sum in USD
+   1.3 duration: loan duration
+   1.4 offered_interest: the max interest rate the borrower is willing to offer
+   1.5 status: current offer status (see statuses list below)
+   1.6 matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default
 
 3. Bid:
    owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
