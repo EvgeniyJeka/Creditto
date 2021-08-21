@@ -19,6 +19,7 @@ from credittomodels import statuses
 # 8. Kafka messages - PROTOBUF (??)
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID)
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL
+# 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 
 
 
@@ -109,7 +110,7 @@ def place_bid():
     verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
 
     bid = request.get_json()
-    logging.info(f"Bid received: {bid}")
+    logging.info(f"Gateway: Bid received {bid}")
 
     next_id = reporter.get_next_id('bids')
 
@@ -149,6 +150,24 @@ def get_offers_by_status(status):
 @app.route("/get_all_offers", methods=['GET'])
 def get_all_offers():
     return simplejson.dumps(reporter.get_offers_by_status(-1))
+
+
+@app.route("/get_all_my_bids", methods=['POST'])
+def get_my_bids():
+    """
+    This API method can be used to get all bids placed by customer with provided customer ID.
+    :return: JSON
+    """
+    bids_request = request.get_json()
+
+    lender_id = bids_request['owner_id']
+    token = bids_request['token']
+
+    logging.info(f"Gateway: get all my bids, lender token validated: {token}")
+    return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
+
+
+
 
 
 
