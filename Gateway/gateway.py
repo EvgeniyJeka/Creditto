@@ -17,7 +17,7 @@ from credittomodels import statuses
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
 # 8. Kafka messages - PROTOBUF (??)
-# 9. Add API methods - all_available_offers, offers_by_status, get_my_bids (by CID)
+# 9. Add API methods -  offers_by_status, get_my_bids (by CID)
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL
 
 
@@ -88,13 +88,23 @@ def place_offer():
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
-
     #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
     return {"result": f"Added new offer, ID {next_id} assigned"}
+
 
 @app.route("/place_bid", methods=['POST'])
 def place_bid():
     """
+    This API method can be used to place new bids on existing offer.
+    Bid is placed only if it passes validation.
+    Expecting for a POST request with JSON body, example:
+    {
+    "type":"bid",
+    "owner_id":"2032",
+    "bid_interest":0.061,
+    "target_offer_id":2,
+    "partial_only":0
+    }
     """
     verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
 
@@ -132,8 +142,13 @@ def place_bid():
 
 
 @app.route("/get_offers_by_status/<status>", methods=['GET'])
-def get_open_offers(status):
+def get_offers_by_status(status):
     return simplejson.dumps(reporter.get_offers_by_status(status))
+
+
+@app.route("/get_all_offers", methods=['GET'])
+def get_all_offers():
+    return simplejson.dumps(reporter.get_offers_by_status(-1))
 
 
 

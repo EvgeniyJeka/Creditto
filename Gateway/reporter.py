@@ -23,11 +23,15 @@ class Reporter(SqlBasic):
         """
          Fetches offers from SQL DB by provided status.
          Returns a list of dicts - each dict contains data on one offer.
-         Returns an empty list if there are no offers in SQL DB with requested status
+         Returns an empty list if there are no offers in SQL DB with requested status.
+         Special case: status '-1' is received - all offers are returned in that case.
         :param status: int
         :return: list of dicts
         """
-        query = f'select * from offers where status = {status}'
+        if status == -1:
+            query = 'select * from offers'
+        else:
+            query = f'select * from offers where status = {status}'
         return self.pack_to_dict(query, "offers")
 
     def validate_bid(self, bid: dict):
