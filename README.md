@@ -79,7 +79,7 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
    
    bid_owner_id: the ID of the lender
    
-   match_time: indicated when the offer was matched (T.B.D)
+   match_time: indicated when the offer was matched 
    
    partial: an option (T.B.D.)
    
