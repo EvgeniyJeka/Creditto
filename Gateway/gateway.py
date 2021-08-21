@@ -157,6 +157,11 @@ def get_my_bids():
     """
     This API method can be used to get all bids placed by customer with provided customer ID.
     :return: JSON
+    Body sample:
+    {
+    "owner_id":"1032",
+    "token": "a#rf$1vc"
+    }
     """
     bids_request = request.get_json()
 
@@ -165,9 +170,6 @@ def get_my_bids():
 
     logging.info(f"Gateway: get all my bids, lender token validated: {token}")
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
-
-
-
 
 
 
