@@ -20,6 +20,7 @@ from credittomodels import statuses
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
+# 12. Offer - add property 'final_interest', add in package and in DB as well
 
 
 
