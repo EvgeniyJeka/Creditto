@@ -31,6 +31,7 @@ class Matcher(object):
     def add_offer(self, offer: Offer):
         logging.info("MATCHER: Adding a new OFFER to the matching pool")
 
+        # T.B.D. - add handling for incoming offer with status CANCELLED (default status is OPEN)
         if offer.id not in self.get_all_existing_offers_ids():
             self.pool[offer] = []
 
