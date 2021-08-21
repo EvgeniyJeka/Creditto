@@ -17,7 +17,7 @@ class SqlWriter(SqlBasic):
         Offer object is expected
         """
         query = f'insert into offers values({offer.id}, {offer.owner_id}, {offer.sum}, {offer.duration}, ' \
-            f'{offer.offered_interest}, {offer.allow_partial_fill}, "{offer.date_added}", {offer.status})'
+            f'{offer.offered_interest}, {offer.allow_partial_fill}, "{offer.date_added}", {offer.status}, {offer.matching_bid})'
 
         self.cursor.execute(query)
         return True
