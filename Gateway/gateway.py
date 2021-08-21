@@ -131,6 +131,12 @@ def place_bid():
     return {"result": f"Added new bid, ID {next_id} assigned"}
 
 
+@app.route("/get_offers_by_status/<status>", methods=['GET'])
+def get_open_offers(status):
+    return simplejson.dumps(reporter.get_offers_by_status(status))
+
+
+
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
 
