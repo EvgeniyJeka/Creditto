@@ -10,8 +10,14 @@ from producer_from_api import ProducerFromApi
 from credittomodels import statuses
 
 # 1. Add automated tests: match flow, API + SQL. Make tests to run in a separate container (e2e test)
-# 2. Add validation on Offer/Bid placement - respond only after confirmation
-# 3. Start writing read.me file (will be also considered as a spec)
+# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
+# 3. Start writing read.me file (will be also considered as a spec) - D
+# 4. Matching logic - move to separate files, update existing - D
+# 5. Matching logic - move config to SQL (needed for tests)
+# 6. Add Cancel Bid flow (?)
+# 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
+# 8. Kafka messages - PROTOBUF (??)
+
 
 
 logging.basicConfig(level=logging.INFO)
