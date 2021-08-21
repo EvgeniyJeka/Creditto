@@ -17,8 +17,10 @@ from credittomodels import statuses
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
 # 8. Kafka messages - PROTOBUF (??)
-# 9. Add API methods - all_available_offers, offers_by_status, get_my_bids (by CID)
-# 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL
+# 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
+# 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
+# 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
+# 12. Offer - add property 'final_interest', add in package and in DB as well
 
 
 
@@ -88,18 +90,28 @@ def place_offer():
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
-
     #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
     return {"result": f"Added new offer, ID {next_id} assigned"}
+
 
 @app.route("/place_bid", methods=['POST'])
 def place_bid():
     """
+    This API method can be used to place new bids on existing offer.
+    Bid is placed only if it passes validation.
+    Expecting for a POST request with JSON body, example:
+    {
+    "type":"bid",
+    "owner_id":"2032",
+    "bid_interest":0.061,
+    "target_offer_id":2,
+    "partial_only":0
+    }
     """
     verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
 
     bid = request.get_json()
-    logging.info(f"Bid received: {bid}")
+    logging.info(f"Gateway: Bid received {bid}")
 
     next_id = reporter.get_next_id('bids')
 
@@ -129,6 +141,37 @@ def place_bid():
     print(producer.produce_message(bid_to_producer, 'bids'))
 
     return {"result": f"Added new bid, ID {next_id} assigned"}
+
+
+@app.route("/get_offers_by_status/<status>", methods=['GET'])
+def get_offers_by_status(status):
+    return simplejson.dumps(reporter.get_offers_by_status(status))
+
+
+@app.route("/get_all_offers", methods=['GET'])
+def get_all_offers():
+    return simplejson.dumps(reporter.get_offers_by_status(-1))
+
+
+@app.route("/get_all_my_bids", methods=['POST'])
+def get_my_bids():
+    """
+    This API method can be used to get all bids placed by customer with provided customer ID.
+    :return: JSON
+    Body sample:
+    {
+    "owner_id":"1032",
+    "token": "a#rf$1vc"
+    }
+    """
+    bids_request = request.get_json()
+
+    lender_id = bids_request['owner_id']
+    token = bids_request['token']
+
+    logging.info(f"Gateway: get all my bids, lender token validated: {token}")
+    return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
+
 
 
 if __name__ == "__main__":

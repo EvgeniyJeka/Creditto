@@ -83,7 +83,7 @@ class SqlBasic(object):
             logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
             query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
                     "duration int, offered_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
-                    "status int, PRIMARY KEY (ID));"
+                    "status int,  matching_bid int, PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
