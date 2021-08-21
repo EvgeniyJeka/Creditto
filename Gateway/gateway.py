@@ -17,8 +17,8 @@ from credittomodels import statuses
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
 # 8. Kafka messages - PROTOBUF (??)
-# 9. Add API methods -  offers_by_status, get_my_bids (by CID)
-# 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL
+# 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
+# 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 
 
