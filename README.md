@@ -158,18 +158,29 @@ Each component is a micro service. Components communicate with each other via Ka
 # Statuses
 
 1. Offer:
+
     OPEN: the offer is available for matching
+    
     MATCHED: the offer is matched
+    
     PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
+    
     CANCELLED: the offer was cancelled by the customer that has placed the offer (T.B.D.)
+    
     REMOVED: the offer was removed by the admin (T.B.D.)
+    
     HIDDEN: the offer was temporary hidden by the admin (T.B.D.)
     
 2. Bid:
+
     PLACED: the bid was placed, waiting for matching algorithm to be applied
+    
     MATCHED : the bid was matched with the target offer
+    
     CANCELLED : the bid was cancelled since other bid was matched with the target offer
+    
     REMOVED: the bid was removed by the admin (T.B.D.)
+    
     HIDDEN: the bid was temporary hidden by the admin.
    
                                                      
