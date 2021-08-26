@@ -42,7 +42,8 @@ class SqlWriter(SqlBasic):
         new_match_id = self.get_next_id('matches')
 
         query = f'insert into matches values({new_match_id}, {match.offer_id}, ' \
-            f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}", {match.partial}, -1)'
+            f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}",' \
+            f' {match.partial}, {match.final_interest}, -1)'
 
         self.cursor.execute(query)
         return True

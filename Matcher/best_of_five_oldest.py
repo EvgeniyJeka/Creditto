@@ -31,7 +31,7 @@ class BestOfFiveOldest:
 
         logging.info(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")
         created_match = Match.Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
-                                    str(datetime.now()), offer.allow_partial_fill)
+                                    str(datetime.now()), offer.allow_partial_fill, best_interest_rate)
 
         return created_match
 

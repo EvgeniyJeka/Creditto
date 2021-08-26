@@ -26,7 +26,7 @@ class SqlRecoveryReader(SqlBasic):
         # Converting offer tuple extracted from SQL DB to Offer object
         for db_offer in relevant_offers_db:
             recovered_offer = Offer.Offer(db_offer[0], db_offer[1], db_offer[2], db_offer[3], Decimal(db_offer[4]),
-                                    db_offer[5], db_offer[6], db_offer[7])
+                                    db_offer[6], db_offer[7], db_offer[8])
 
             logging.info(f"SqlRecoveryReader: Recovered offer from DB on system start: {recovered_offer}")
 
