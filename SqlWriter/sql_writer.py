@@ -57,6 +57,15 @@ class SqlWriter(SqlBasic):
         self.cursor.execute(query)
         return True
 
+    def update_offer_final_interest_sql(self, offer_id: int, final_interest):
+        """
+        This method can be used to update offer final_interest in SQL table 'offers'.
+        Offer ID and new offer status is expected
+        """
+        query = f'update offers set offers.final_interest = {final_interest} where offers.id = {offer_id};'
+        self.cursor.execute(query)
+        return True
+
     def update_bid_status_sql(self, bid_id: int, new_status):
         """
         This method can be used to update bid status in SQL table 'bids'.
