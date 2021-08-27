@@ -86,13 +86,13 @@ class ConsumerToSql(object):
                                         object_content['offer_owner_id'],
                                         object_content['bid_owner_id'],
                                         object_content['match_time'],
-                                        object_content['partial'])
+                                        object_content['partial'],
+                                        object_content['final_interest'])
 
                     # Inserting match record, updating matched offer , matched bid and unmatched bids statuses
                     self.sql_writer.insert_match(added_match)
-                    self.sql_writer.update_offer_status_sql(object_content['offer_id'], object_content['bid_id'],
-                                                            statuses.OfferStatuses.MATCHED.value)
-
+                    self.sql_writer.update_offer_status_sql(object_content['offer_id'], statuses.OfferStatuses.MATCHED.value)
+                    self.sql_writer.update_offer_final_interest_sql(object_content['offer_id'], added_match.final_interest)
                     self.sql_writer.update_bid_status_sql(object_content['bid_id'], statuses.BidStatuses.MATCHED.value)
                     self.sql_writer.cancel_remaining_bids_sql(object_content['offer_id'], object_content['bid_id'])
 

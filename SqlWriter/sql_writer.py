@@ -17,7 +17,7 @@ class SqlWriter(SqlBasic):
         Offer object is expected
         """
         query = f'insert into offers values({offer.id}, {offer.owner_id}, {offer.sum}, {offer.duration}, ' \
-            f'{offer.offered_interest}, {offer.allow_partial_fill}, "{offer.date_added}", {offer.status}, {offer.matching_bid})'
+            f'{offer.offered_interest}, {offer.final_interest}, {offer.allow_partial_fill}, "{offer.date_added}", {offer.status})'
 
         self.cursor.execute(query)
         return True
@@ -42,20 +42,27 @@ class SqlWriter(SqlBasic):
         new_match_id = self.get_next_id('matches')
 
         query = f'insert into matches values({new_match_id}, {match.offer_id}, ' \
-            f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}", {match.partial}, -1)'
+            f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}",' \
+            f' {match.partial}, {match.final_interest}, -1)'
 
         self.cursor.execute(query)
         return True
 
-    def update_offer_status_sql(self, offer_id: int, matching_bid_id: int, new_status):
+    def update_offer_status_sql(self, offer_id: int, new_status):
         """
-        This method can be used to update offer status and matching bid ID in SQL table 'offers'.
-        Offer ID, matching Bid ID and new offer status is expected
+        This method can be used to update offer status in SQL table 'offers'.
+        Offer ID and new offer status is expected
         """
         query = f'update offers set status = {new_status} where offers.id = {offer_id};'
         self.cursor.execute(query)
+        return True
 
-        query = f'update offers set matching_bid = {matching_bid_id} where offers.id = {offer_id};'
+    def update_offer_final_interest_sql(self, offer_id: int, final_interest):
+        """
+        This method can be used to update offer  final_interest in SQL table 'offers'.
+        Offer ID and new offer status is expected
+        """
+        query = f'update offers set offers.final_interest = {final_interest} where offers.id = {offer_id};'
         self.cursor.execute(query)
         return True
 
