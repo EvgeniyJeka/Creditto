@@ -173,7 +173,6 @@ def get_my_bids():
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
 
-
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
 
