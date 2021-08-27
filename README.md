@@ -53,6 +53,8 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
    
    offered_interest: the max interest rate the borrower is willing to offer
    
+   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
+   
    status: current offer status (see statuses list below)
    
    matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default (T.B.D.)
@@ -82,6 +84,8 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
    match_time: indicated when the offer was matched 
    
    partial: an option (T.B.D.)
+   
+   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
    
    monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
     
