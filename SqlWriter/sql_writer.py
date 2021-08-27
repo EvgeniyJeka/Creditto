@@ -59,7 +59,7 @@ class SqlWriter(SqlBasic):
 
     def update_offer_final_interest_sql(self, offer_id: int, final_interest):
         """
-        This method can be used to update offer final_interest in SQL table 'offers'.
+        This method can be used to update offer  final_interest in SQL table 'offers'.
         Offer ID and new offer status is expected
         """
         query = f'update offers set offers.final_interest = {final_interest} where offers.id = {offer_id};'
