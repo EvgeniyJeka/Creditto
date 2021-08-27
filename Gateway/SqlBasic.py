@@ -108,6 +108,7 @@ class SqlBasic(object):
                     "description value  varchar(255));"
 
             cursor.execute(query)
+            logging.warning("Logs: ADDING THE DEFAULT CONFIG")
 
     def get_next_id(self, table_name):
         """
