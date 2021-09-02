@@ -134,3 +134,13 @@ class SqlBasic(object):
         except IndexError as e:
             logging.warning(f"Reporter: The table {table_name} is currently empty. Receiving first record")
             return 1
+
+    def fetch_config_from_db(self, config_param):
+        """
+        This method can be used to fetch local config params from SQL DB table 'local_config'
+        :param config_param: requested config property, string
+        :return: current config (value), string
+        """
+        query = f"select value from local_config where property = '{config_param}';"
+        result = self.run_sql_query(query)[0][0]
+        return result
