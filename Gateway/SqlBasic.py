@@ -82,8 +82,8 @@ class SqlBasic(object):
         if 'offers' not in tables:
             logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
             query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
-                    "duration int, offered_interest varchar(255), final_interest varchar(255), allow_partial_fill int," \
-                    " date_added varchar(255), status int, PRIMARY KEY (ID));"
+                    "duration int, offered_interest varchar(255), final_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
+                    "status int, PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
@@ -98,9 +98,22 @@ class SqlBasic(object):
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
             query = "CREATE TABLE matches (id int, offer_id int, bid_id int, offer_owner_id int, bid_owner_id int, " \
-                    "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255));"
+                    "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255)," \
+                    " PRIMARY KEY (ID));"
 
             cursor.execute(query)
+
+        if 'local_config' not in tables:
+            logging.warning("Logs: 'local_config' table is missing! Creating the 'bids' table")
+            query = "CREATE TABLE local_config (id int, property varchar(255), " \
+                    "value  varchar(255), description varchar(255), PRIMARY KEY (ID));"
+
+            cursor.execute(query)
+            logging.warning("Logs: ADDING THE DEFAULT CONFIG")
+
+            query = f'insert into local_config values(1, "matching_logic", 1, "selected matching algorithm")'
+            cursor.execute(query)
+            logging.warning("Logs: SETTING THE DEFAULT CONFIG")
 
     def get_next_id(self, table_name):
         """
@@ -180,5 +193,15 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"Failed to get data from SQL, query: {query}, {e}")
             raise e
+
+    def fetch_config_from_db(self, config_param):
+        """
+        This method can be used to fetch local config params from SQL DB table 'local_config'
+        :param config_param: requested config property, string
+        :return: current config (value), string
+        """
+        query = f"select value from local_config where property = '{config_param}';"
+        result = self.run_sql_query(query)[0][0]
+        return result
 
 
