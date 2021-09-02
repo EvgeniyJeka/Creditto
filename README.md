@@ -42,7 +42,7 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
 
 
  
-#2 Models description:
+# 2 Models description:
 
 1. Offer:
    owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
@@ -90,7 +90,7 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
    monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
     
  
-#System components
+# 3 System components
 Each component is a micro service. Components communicate with each other via Kafka topics. 
 
 1. Kafka queue manager, topics:
@@ -102,6 +102,7 @@ Each component is a micro service. Components communicate with each other via Ka
  a. offers
  b. bids
  c. matches
+ d. local_config
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
 
@@ -159,7 +160,7 @@ Each component is a micro service. Components communicate with each other via Ka
    in 'available offers' list and no bids can be placed one it. Matching bid status is changed to MATCHED as well.
    
    
-# Statuses
+# 4 Statuses
 
 1. Offer:
 
@@ -186,6 +187,13 @@ Each component is a micro service. Components communicate with each other via Ka
     REMOVED: the bid was removed by the admin (T.B.D.)
     
     HIDDEN: the bid was temporary hidden by the admin.
+    
+  
+  # 5 Matching logic - available algorithms:
+  
+    1. Bid with the lowest interest is selected when 5 bids are placed on one given offer. If there are several bids with equally low interest the OLDEST bid is selected.
+    
+    2. Bid with the lowest interest is selected when 10 bids are placed on one given offer. If there are several bids with equally low interest the NEWEST bid is selected.
    
                                                      
    
