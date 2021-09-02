@@ -82,8 +82,8 @@ class SqlBasic(object):
         if 'offers' not in tables:
             logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
             query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
-                    "duration int, offered_interest varchar(255), final_interest varchar(255), allow_partial_fill int," \
-                    " date_added varchar(255), status int, PRIMARY KEY (ID));"
+                    "duration int, offered_interest varchar(255), final_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
+                    "status int, PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
@@ -98,14 +98,15 @@ class SqlBasic(object):
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
             query = "CREATE TABLE matches (id int, offer_id int, bid_id int, offer_owner_id int, bid_owner_id int, " \
-                    "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255));"
+                    "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255)," \
+                    " PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
         if 'local_config' not in tables:
             logging.warning("Logs: 'local_config' table is missing! Creating the 'bids' table")
             query = "CREATE TABLE local_config (id int, property varchar(255), " \
-                    "value  varchar(255), description varchar(255));"
+                    "value  varchar(255), description varchar(255), PRIMARY KEY (ID));"
 
             cursor.execute(query)
             logging.warning("Logs: ADDING THE DEFAULT CONFIG")

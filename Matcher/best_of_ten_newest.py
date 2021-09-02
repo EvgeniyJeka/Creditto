@@ -5,13 +5,14 @@ from credittomodels import Bid
 from datetime import datetime
 import logging
 
+
 class BestOfTenNewest:
 
     @staticmethod
     def find_best_bid(bids_for_offer, offer: Offer):
 
         if len(bids_for_offer) < 10:
-            logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
+            logging.info(f"MATCHER: Not enough bids for offer {offer.id}, expecting for at least 10, no match")
             return False
 
         logging.info("Matcher: Selected matching logic - match the offer with the best bid when the 5th bid is received,"
@@ -21,7 +22,7 @@ class BestOfTenNewest:
         print([x.bid_interest for x in bids_for_offer])
 
         # Sorting bids by interest rate
-        bids_for_offer.sort(key=lambda x: Decimal(x.bid_interest), reverse=True )
+        bids_for_offer.sort(key=lambda x: Decimal(x.bid_interest))
 
         best_interest_bid = bids_for_offer[0]
         best_interest_rate = best_interest_bid.bid_interest
@@ -30,7 +31,7 @@ class BestOfTenNewest:
         list_bids_best_interest = [x for x in bids_for_offer if x.bid_interest == best_interest_rate]
 
         # Sorting the bids by date in ascending order, selecting the oldest bid
-        list_bids_best_interest.sort(key=lambda x: x.date_added)
+        list_bids_best_interest.sort(key=lambda x: x.date_added, reverse=True)
         selected_bid = list_bids_best_interest[0]
 
         logging.info(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")

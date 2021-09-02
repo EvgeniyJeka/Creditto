@@ -5,15 +5,16 @@ import simplejson
 
 from credittomodels import statuses
 from sql_recovery_reader import SqlRecoveryReader
-from local_config import Config, MatchingAlgorithm
 from credittomodels import Match
 from credittomodels import Offer
 from credittomodels import Bid
 from producer_from_matcher import ProducerFromMatcher
 from best_of_five_oldest import BestOfFiveOldest
+from best_of_ten_newest import BestOfTenNewest
 import logging
 
 producer = ProducerFromMatcher()
+
 
 
 class Matcher(object):
@@ -24,8 +25,8 @@ class Matcher(object):
 
         logging.info("MATCHER: Creating SQL RECOVERY READER instance")
         logging.info("MATCHER: Using the created instance to perform full recovery from SQL on start")
-        read_sql_recovery = SqlRecoveryReader()
-        self.pool = read_sql_recovery.recover_offers_bids_sql()
+        self.read_sql_recovery = SqlRecoveryReader()
+        self.pool = self.read_sql_recovery.recover_offers_bids_sql()
         self.matched_offer = None
 
     def add_offer(self, offer: Offer):
@@ -62,7 +63,7 @@ class Matcher(object):
                 print(self.pool)
 
                 logging.info(f"MATCHER: Checking match criteria for offer {offer} ")
-                is_match = self.check_match(offer, Config.SELECTED_MATCHING_ALGORITHM.value)
+                is_match = self.check_match(offer)
 
                 # If Match object returned by 'is_match' it means that new bid addition has resulted in a match.
                 # Newly created match must be sent to the 'matches' topic
@@ -79,23 +80,29 @@ class Matcher(object):
             self.pool.pop(self.matched_offer)
             self.matched_offer = None
 
-    # Consider making a separate method for each matching algorithm
-    def check_match(self, offer: Offer, match_algorithm: int):
+    def check_match(self, offer: Offer):
         """
-        # This method checks if match cretirea for provided offer is matched
+        This method fetches the selected matching algorithm from SQL DB local_config and
+        applies it to provided offer and all existing bids on that offer.
+        If a match is created as a result of that application, 'Match' object is returned.
+        Else the method returns 'False'.
         :param offer: Offer object
-        :param match_algorithm: selected match algorithm ID, int
         :return: Match object on success
         """
-        # Default match algorithm - Bid with the lowest interest is selected among 5 available bids.
-        if match_algorithm == MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST_OLDEST.value:
-            bids_for_offer = self.pool[offer]
 
-            # if len(bids_for_offer) < Config.MIN_BIDS_EXPECTED.value:
-            #     logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
-            #     return False
+        # Getting all available bids for given offer
+        bids_for_offer = self.pool[offer]
 
-            return BestOfFiveOldest.find_best_bid(bids_for_offer, offer)
+        # Available matching methods
+        available_matching_algorithms = [BestOfFiveOldest.find_best_bid, BestOfTenNewest.find_best_bid]
+
+        # Fetching config from SQL
+        matching_algorithm_config_sql = int(self.read_sql_recovery.fetch_config_from_db("matching_logic"))
+
+        # Using the selected matching algorithm
+        matching_algorithm = available_matching_algorithms[matching_algorithm_config_sql - 1]
+
+        return matching_algorithm(bids_for_offer, offer)
 
     def get_all_existing_offers_ids(self):
         """
