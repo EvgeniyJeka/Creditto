@@ -10,6 +10,10 @@ class BestOfFiveOldest:
     @staticmethod
     def find_best_bid(bids_for_offer, offer: Offer):
 
+        if len(bids_for_offer) < 5:
+            logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
+            return False
+
         logging.info("Matcher: Selected matching logic - match the offer with the best bid when the 5th bid is received,"
                      "best has the lowest interest rate, "
                      "the oldest bit is selected if there are 2 or more bids with the same rate")

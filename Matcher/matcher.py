@@ -91,9 +91,9 @@ class Matcher(object):
         if match_algorithm == MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST_OLDEST.value:
             bids_for_offer = self.pool[offer]
 
-            if len(bids_for_offer) < Config.MIN_BIDS_EXPECTED.value:
-                logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
-                return False
+            # if len(bids_for_offer) < Config.MIN_BIDS_EXPECTED.value:
+            #     logging.info(f"MATCHER: Not enough bids for offer {offer.id}, no match")
+            #     return False
 
             return BestOfFiveOldest.find_best_bid(bids_for_offer, offer)
 
