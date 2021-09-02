@@ -102,6 +102,18 @@ class SqlBasic(object):
 
             cursor.execute(query)
 
+        if 'local_config' not in tables:
+            logging.warning("Logs: 'local_config' table is missing! Creating the 'bids' table")
+            query = "CREATE TABLE local_config (id int, property varchar(255), " \
+                    "value  varchar(255), description varchar(255));"
+
+            cursor.execute(query)
+            logging.warning("Logs: ADDING THE DEFAULT CONFIG")
+
+            query = f'insert into local_config values(1, "matching_logic", 1, "selected matching algorithm")'
+            cursor.execute(query)
+            logging.warning("Logs: SETTING THE DEFAULT CONFIG")
+
     def get_next_id(self, table_name):
         """
         This method can be used to get the next valid number that can be used as ID for new record in given table
