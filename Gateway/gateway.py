@@ -92,7 +92,7 @@ def place_offer():
     print(producer.produce_message(offer_to_producer, 'offers'))
 
     #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
-    return {"result": f"Added new offer, ID {next_id} assigned"}
+    return {"result": f"Added new offer, ID {next_id} assigned", "offer_id": next_id}
 
 
 @app.route("/place_bid", methods=['POST'])
@@ -141,7 +141,7 @@ def place_bid():
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")
     print(producer.produce_message(bid_to_producer, 'bids'))
 
-    return {"result": f"Added new bid, ID {next_id} assigned"}
+    return {"result": f"Added new bid, ID {next_id} assigned", "bid_id": next_id}
 
 
 @app.route("/get_offers_by_status/<status>", methods=['GET'])
