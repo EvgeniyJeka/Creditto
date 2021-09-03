@@ -116,9 +116,9 @@ class GatewayRequests(object):
             raise e
 
 
-if __name__ == '__main__':
-    gr = GatewayRequests()
-    # print(gr.place_offer("1021", 100000, 12, 0.08, 0 ))
-    # print(gr.place_bid("223", 0.06, 5, 0))
-    # print(gr.get_offers_by_status(3))
-    print(gr.get_bids_by_owner(223, "ghyf"))
+# if __name__ == '__main__':
+#     gr = GatewayRequests()
+#     # print(gr.place_offer("1021", 100000, 12, 0.08, 0 ))
+#     # print(gr.place_bid("223", 0.07, 6, 0))
+#     # print(gr.get_offers_by_status(1))
+#     print(gr.get_bids_by_owner(223, "ghyf"))

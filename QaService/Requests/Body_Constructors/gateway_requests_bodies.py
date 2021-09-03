@@ -2,6 +2,7 @@ import requests
 from base_config import BaseConfig
 import json
 import logging
+from Requests.Body_Constructors.requests_constants import *
 
 
 class GatewayRequestsBodies:
@@ -10,12 +11,12 @@ class GatewayRequestsBodies:
     def place_offer_request_body(owner_id, _sum, duration_months, offered_interest, allow_partial_fill):
 
         payload_composed = {
-            "type": "offer",
-            "owner_id": owner_id,
-            "sum": _sum,
-            "duration": duration_months,
-            "offered_interest": offered_interest,
-            "allow_partial_fill": allow_partial_fill
+            TYPE: "offer",
+            OWNER_ID: owner_id,
+            SUM: _sum,
+            DURATION: duration_months,
+            OFFERED_INTEREST: offered_interest,
+            ALLOW_PARTIAL_FILL: allow_partial_fill
         }
 
         return payload_composed
@@ -24,11 +25,11 @@ class GatewayRequestsBodies:
     def place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only):
 
         payload_composed = {
-            "type": "bid",
-            "owner_id": owner_id,
-            "bid_interest": bid_interest,
-            "target_offer_id": target_offer_id,
-            "partial_only": partial_only
+            TYPE: "bid",
+            OWNER_ID: owner_id,
+            BID_INTEREST: bid_interest,
+            TARGET_OFFER_ID: target_offer_id,
+            PARTIAL_ONLY: partial_only
         }
 
         return payload_composed
@@ -36,8 +37,8 @@ class GatewayRequestsBodies:
     @staticmethod
     def get_bids_by_owner(owner_id, token):
         payload_composed = {
-            "owner_id": owner_id,
-            "token": token
+            OWNER_ID: owner_id,
+            TOKEN: token
         }
 
         return payload_composed

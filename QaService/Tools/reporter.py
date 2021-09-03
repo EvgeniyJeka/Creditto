@@ -76,5 +76,5 @@ class Reporter(SqlBasic):
 
 if __name__ == '__main__':
     rp = Reporter()
-    print(rp.get_offer_data(1))
+    print(rp.get_bids_by_lender(223))
 
