@@ -4,12 +4,12 @@ from local_config import SqlConfig
 from base_config import BaseConfig
 
 
-
 class SqlBasic(object):
+
     hst = BaseConfig.SQL_HOST
-    # usr = SqlConfig.SQL_USER.value
-    # pwd = SqlConfig.SQL_PASSWORD.value
-    # db_name = SqlConfig.DB_NAME.value
+    usr = BaseConfig.SQL_USER
+    pwd = BaseConfig.SQL_PASSWORD
+    db_name = BaseConfig.SQL_DB_NAME
     cursor = None
 
     def __init__(self):
