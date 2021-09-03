@@ -1,4 +1,6 @@
 import requests
+
+from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
 from base_config import BaseConfig
 import json
 import logging
@@ -16,20 +18,11 @@ class GatewayRequests(object):
 
         url = base_url + 'place_offer'
 
-        payload_composed = {
-            "type": "offer",
-            "owner_id": owner_id,
-            "sum": sum,
-            "duration": duration_months,
-            "offered_interest": offered_interest,
-            "allow_partial_fill": allow_partial_fill
-        }
-
-        payload = json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4)
+        payload = GatewayRequestsBodies.place_offer_request_body(owner_id, sum, duration_months, offered_interest,
+                                                                 allow_partial_fill)
 
         try:
-            print(f"URL used: {url}")
-            response = requests.post(url, json=payload_composed,  timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload,  timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -39,7 +32,7 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} cancel_order failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
             raise e
 
 
