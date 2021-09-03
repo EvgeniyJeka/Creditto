@@ -32,3 +32,12 @@ class GatewayRequestsBodies:
         }
 
         return payload_composed
+
+    @staticmethod
+    def get_bids_by_owner(owner_id, token):
+        payload_composed = {
+            "owner_id": owner_id,
+            "token": token
+        }
+
+        return payload_composed
