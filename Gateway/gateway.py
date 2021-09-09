@@ -22,6 +22,7 @@ from credittomodels import statuses
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 # 12. Offer - add property 'final_interest', add in package and in DB as well - D
 # 13. Consider adding Expirator/TimeManager service (?)
+# 14. Test framework - request must be printed and/or logged.
 
 
 

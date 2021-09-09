@@ -4,8 +4,8 @@ from datetime import datetime
 import logging
 from credittomodels import statuses
 
+from Tools.SqlBasic import SqlBasic
 from credittomodels import Offer
-from SqlBasic import SqlBasic
 from decimal import *
 
 
@@ -16,6 +16,10 @@ class Reporter(SqlBasic):
         self.create_validate_tables(self.cursor)
 
     def get_offer_data(self, offer_id: int) -> dict:
+        query = f'select * from offers where id = {offer_id}'
+        return self.pack_to_dict(query, "offers")
+
+    def get_offer_by_id(self, offer_id):
         query = f'select * from offers where id = {offer_id}'
         return self.pack_to_dict(query, "offers")
 
