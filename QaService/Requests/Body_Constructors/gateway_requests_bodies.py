@@ -3,6 +3,7 @@ from base_config import BaseConfig
 import json
 import logging
 from Requests.Body_Constructors.requests_constants import *
+logging.basicConfig(level=logging.INFO)
 
 
 class GatewayRequestsBodies:
@@ -19,6 +20,8 @@ class GatewayRequestsBodies:
             ALLOW_PARTIAL_FILL: allow_partial_fill
         }
 
+        logging.info(json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4))
+
         return payload_composed
 
     @staticmethod
@@ -32,6 +35,8 @@ class GatewayRequestsBodies:
             PARTIAL_ONLY: partial_only
         }
 
+        logging.info(json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4))
+
         return payload_composed
 
     @staticmethod
@@ -40,5 +45,7 @@ class GatewayRequestsBodies:
             OWNER_ID: owner_id,
             TOKEN: token
         }
+
+        logging.info(json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4))
 
         return payload_composed

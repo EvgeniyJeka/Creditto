@@ -5,7 +5,9 @@ from base_config import BaseConfig
 import json
 import logging
 
+
 base_url = BaseConfig.BASE_URL
+
 
 
 class GatewayRequests(object):

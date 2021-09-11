@@ -42,6 +42,11 @@ class Reporter(SqlBasic):
         query = f'select * from bids where owner_id = {lender_id}'
         return self.pack_to_dict(query, "bids")
 
+    def get_match_by_offer_id(self, offer_id: int):
+        query = f'select * from matches where offer_id = {offer_id}'
+        return self.pack_to_dict(query, "matches")
+
+
 
     def validate_bid(self, bid: dict):
         """
