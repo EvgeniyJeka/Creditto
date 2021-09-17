@@ -205,4 +205,8 @@ class SqlBasic(object):
         result = self.run_sql_query(query)[0][0]
         return result
 
+    def set_config_in_db(self, id, new_config):
+        query = f"UPDATE `creditto`.`local_config` SET `value` = '{new_config}' WHERE (`id` = '{id}');"
+        self.run_sql_query(query)
+
 

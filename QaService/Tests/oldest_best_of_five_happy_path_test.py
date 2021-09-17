@@ -1,5 +1,6 @@
 import time
 from credittomodels import Offer
+import pytest
 
 from Requests.postman import Postman
 from Tools import reporter
@@ -39,7 +40,8 @@ class TestBestOfFive(object):
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5]
 
-    def test_placing_offer(self):
+    @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic):
         response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
                                                         test_duration, test_offer_interest_low, 0)
 
