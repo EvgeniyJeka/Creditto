@@ -58,8 +58,7 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- Invalid offer ID in BID - step passed "
                      f"----------------------------------\n")
 
-    def test_no_bid_interest_above_suggested(self, set_matching_logic, offer_placed):
-        TestBidPlacement.offer_id = offer_placed
+    def test_no_bid_interest_above_suggested(self):
 
         response = postman.gateway_requests. \
             place_bid(self.bid_owners[0], test_offer_interest_low * 2, self.offer_id, 0)
@@ -70,4 +69,24 @@ class TestBidPlacement(object):
         assert response['error'] == f'Interest rate above offer interest rate {test_offer_interest_low}'
 
         logging.info(f"----------------------- BID Interest Greater Then Offer Interest - step passed "
+                     f"----------------------------------\n")
+
+    def test_matched_bid_cant_be_matched(self):
+
+        # Placing 5 bids so the offer will become matched
+        for i in range(0, 5):
+            response = postman.gateway_requests. \
+                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+            logging.info(response)
+
+        response = postman.gateway_requests. \
+            place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == f"Bids can't be placed on offers in status {Offer.OfferStatuses.MATCHED.value}"
+
+        logging.info(f"----------------------- BID Can't Be Placed On Matched Offer' - step passed "
                      f"----------------------------------\n")
