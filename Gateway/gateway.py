@@ -92,7 +92,10 @@ def place_offer():
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
-    #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
+    # Verifying placed offer was saved to 'offers' SQL table
+    if not reporter.verify_offer_by_id(next_id):
+        return {"error": f"Failed to place a new offer"}
+
     return {"result": f"Added new offer, ID {next_id} assigned", "offer_id": next_id}
 
 

@@ -19,6 +19,16 @@ class Reporter(SqlBasic):
         query = f'select * from offers where id = {offer_id}'
         return self.pack_to_dict(query, "offers")
 
+    def verify_offer_by_id(self, offer_id):
+
+        offer_data = self.get_offer_data(offer_id)
+        if offer_data == []:
+            for i in range(0, 3):
+                offer_data = self.get_offer_data(offer_id)
+
+        return len(offer_data) > 0
+
+
     def get_offers_by_status(self, status: int):
         """
          Fetches offers from SQL DB by provided status.
