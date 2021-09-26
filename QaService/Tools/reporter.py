@@ -1,17 +1,13 @@
-import time
 
 import pymysql
 from datetime import datetime
 import logging
 from credittomodels import statuses
 
+from Tools.SqlBasic import SqlBasic
 from credittomodels import Offer
-from SqlBasic import SqlBasic
 from decimal import *
 
-# Move to config or to global env. vars
-fetch_from_sql_retries = 3
-fetch_from_sql_delay = 5
 
 class Reporter(SqlBasic):
 
@@ -23,24 +19,9 @@ class Reporter(SqlBasic):
         query = f'select * from offers where id = {offer_id}'
         return self.pack_to_dict(query, "offers")
 
-    def verify_offer_by_id(self, offer_id):
-        """
-        Verifying offer with given ID was saved to SQL DB
-        :param offer_id: int
-        :return: bool
-        """
-        offer_data = self.get_offer_data(offer_id)
-        if offer_data == []:
-            for i in range(0, fetch_from_sql_retries):
-                time.sleep(fetch_from_sql_delay)
-                offer_data = self.get_offer_data(offer_id)
-
-        return len(offer_data) > 0
-
-    def get_bid_data(self, bid_id: int) -> dict:
-        query = f'select * from bids where id = {bid_id}'
-        return self.pack_to_dict(query, "bids")
-
+    def get_offer_by_id(self, offer_id):
+        query = f'select * from offers where id = {offer_id}'
+        return self.pack_to_dict(query, "offers")
 
     def get_offers_by_status(self, status: int):
         """
@@ -60,6 +41,11 @@ class Reporter(SqlBasic):
     def get_bids_by_lender(self, lender_id: int):
         query = f'select * from bids where owner_id = {lender_id}'
         return self.pack_to_dict(query, "bids")
+
+    def get_match_by_offer_id(self, offer_id: int):
+        query = f'select * from matches where offer_id = {offer_id}'
+        return self.pack_to_dict(query, "matches")
+
 
 
     def validate_bid(self, bid: dict):
@@ -99,5 +85,5 @@ class Reporter(SqlBasic):
 
 if __name__ == '__main__':
     rp = Reporter()
-    print(rp.get_offer_data(1))
+    print(rp.get_bids_by_lender(223))
 

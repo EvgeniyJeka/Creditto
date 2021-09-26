@@ -13,7 +13,7 @@ from credittomodels import statuses
 # 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
 # 3. Start writing read.me file (will be also considered as a spec) - D
 # 4. Matching logic - move to separate files, update existing - D
-# 5. Matching logic - move config to SQL (needed for tests)
+# 5. Matching logic - move config to SQL (needed for tests) - D
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
 # 8. Kafka messages - PROTOBUF (??)
@@ -21,6 +21,8 @@ from credittomodels import statuses
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 # 12. Offer - add property 'final_interest', add in package and in DB as well - D
+# 13. Consider adding Expirator/TimeManager service (?)
+# 14. Test framework - request must be printed and/or logged.
 
 
 
@@ -90,8 +92,11 @@ def place_offer():
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
     print(producer.produce_message(offer_to_producer, 'offers'))
 
-    #T.B.D. Before responding with confirmation address reporter and verify offer was added to SQL DB
-    return {"result": f"Added new offer, ID {next_id} assigned"}
+    # Verifying placed offer was saved to 'offers' SQL table
+    if not reporter.verify_offer_by_id(next_id):
+        return {"error": f"Failed to place a new offer"}
+
+    return {"result": f"Added new offer, ID {next_id} assigned", "offer_id": next_id}
 
 
 @app.route("/place_bid", methods=['POST'])
@@ -140,7 +145,7 @@ def place_bid():
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")
     print(producer.produce_message(bid_to_producer, 'bids'))
 
-    return {"result": f"Added new bid, ID {next_id} assigned"}
+    return {"result": f"Added new bid, ID {next_id} assigned", "bid_id": next_id}
 
 
 @app.route("/get_offers_by_status/<status>", methods=['GET'])
