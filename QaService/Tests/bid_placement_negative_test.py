@@ -79,6 +79,8 @@ class TestBidPlacement(object):
                 place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
             logging.info(response)
 
+        time.sleep(5)
+
         response = postman.gateway_requests. \
             place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
         logging.info(response)
