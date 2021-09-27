@@ -41,16 +41,36 @@ class ConsumerToSql(object):
         self.consumer = KafkaConsumer('offers', 'bids', 'matches', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
                                       auto_offset_reset='earliest', enable_auto_commit=True, group_id="sql_consumer")
 
+    def extract_message_type(self, kafka_message):
+        if kafka_message.headers is None or len(kafka_message.headers) < 1:
+            logging.warning("Matcher Consumer: Kafka message with no valid metadata, no message type in header")
+            return False
+
+        message_header = kafka_message.headers[0]
+        if message_header[0] == 'type':
+            return message_header[1].decode('utf-8')
+
+        else:
+            logging.warning("Matcher Consumer: No message type in header")
+            return False
+
 
     def consume_write(self):
         for msg in self.consumer:
+
+            print(f"Extracted message type: {self.extract_message_type(msg)}")
+
+            message_type = self.extract_message_type(msg)
+            if not message_type:
+                logging.warning("Matcher Consumer: Received a message with no valid type in headers, skipping.")
+
             message_content = msg.value.decode('utf-8')
             object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
             try:
-                if object_content['type'] == statuses.Types.OFFER.value:
+                if message_type == statuses.Types.OFFER.value:
                     logging.info("ConsumerToSql: Processing OFFER")
 
                     added_offer = Offer.Offer(object_content['id'],
@@ -65,7 +85,7 @@ class ConsumerToSql(object):
                     # T.B.D. - Add handling for incoming offer with status CANCELLED (update DB, change status)
                     self.sql_writer.insert_offer(added_offer)
 
-                elif object_content['type'] == statuses.Types.BID.value:
+                elif message_type == statuses.Types.BID.value:
                     logging.info("ConsumerToSql: Processing BID")
 
                     added_bid = Bid.Bid(object_content['id'],
@@ -78,7 +98,7 @@ class ConsumerToSql(object):
 
                     self.sql_writer.insert_bid(added_bid)
 
-                elif object_content['type'] == statuses.Types.MATCH.value:
+                elif message_type == statuses.Types.MATCH.value:
                     logging.info("ConsumerToSql: Processing MATCH")
 
                     added_match = Match.Match(object_content['offer_id'],
