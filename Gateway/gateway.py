@@ -88,7 +88,7 @@ def place_offer():
                          offer['allow_partial_fill'])
 
     offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
-    offer_record_headers = ("type", bytearray('offer'))
+    offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
     logging.info(offer_to_producer)
     logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
@@ -142,7 +142,7 @@ def place_bid():
         placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
     bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
-    bid_record_headers = ("type", bytearray('bid'))
+    bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
     logging.info(bid_to_producer)
     logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")

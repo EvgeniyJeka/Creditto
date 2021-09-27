@@ -55,6 +55,10 @@ class ConsumerToMatcher(object):
 
     def consume_process(self):
         for msg in self.consumer:
+
+            message_header = msg.headers
+            logging.warning(message_header)
+
             message_content = msg.value.decode('utf-8')
             object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
