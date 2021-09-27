@@ -53,11 +53,23 @@ class ConsumerToMatcher(object):
         self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
                                     auto_offset_reset='earliest', enable_auto_commit=True, group_id="matcher_consumer")
 
+    def extract_message_type(self, kafka_message):
+        if kafka_message.headers is None or len(kafka_message.headers) < 1:
+            logging.warning("Matcher Consumer: Kafka message with no valid metadata, no message type in header")
+            return False
+
+        message_header = kafka_message.headers[0]
+        if message_header[0] == 'type':
+            return message_header[1].decode('utf-8')
+
+        else:
+            logging.warning("Matcher Consumer: No message type in header")
+            return False
+
     def consume_process(self):
         for msg in self.consumer:
 
-            message_header = msg.headers
-            logging.warning(message_header)
+            print(f"Extracted message type: {self.extract_message_type(msg)}")
 
             message_content = msg.value.decode('utf-8')
             object_content = simplejson.loads(simplejson.loads(message_content))
