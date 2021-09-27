@@ -70,10 +70,11 @@ class Matcher(object):
                 if isinstance(is_match, Match.Match):
                     self.matched_offer = offer
                     match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)
+                    match_record_headers = [("type", bytes('match', encoding='utf8'))]
 
                     logging.info(match_to_producer)
                     logging.info("MATCHER: Using Producer instance to send the match to Kafka topic 'matches' ")
-                    print(producer.produce_message(match_to_producer, 'matches'))
+                    print(producer.produce_message(match_to_producer, 'matches', match_record_headers))
 
         # Removing offer that was matched (if there was a match) and all bids on it from the pool
         if self.matched_offer:

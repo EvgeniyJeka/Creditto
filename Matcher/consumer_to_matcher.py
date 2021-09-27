@@ -71,12 +71,16 @@ class ConsumerToMatcher(object):
 
             print(f"Extracted message type: {self.extract_message_type(msg)}")
 
+            message_type = self.extract_message_type(msg)
+            if not message_type:
+                logging.warning("Matcher Consumer: Received a message with no valid type in headers, skipping.")
+
             message_content = msg.value.decode('utf-8')
             object_content = simplejson.loads(simplejson.loads(message_content))
             print(object_content)
             logging.info(f"ConsumerToSql: Received message {object_content}")
 
-            if object_content['type'] == statuses.Types.OFFER.value:
+            if message_type == statuses.Types.OFFER.value:
                 logging.info("ConsumerToMatcher: Processing OFFER")
 
                 received_offer = Offer.Offer(object_content['id'],
@@ -90,7 +94,7 @@ class ConsumerToMatcher(object):
 
                 self.matcher.add_offer(received_offer)
 
-            elif object_content['type'] == statuses.Types.BID.value:
+            elif message_type == statuses.Types.BID.value:
                 logging.info("ConsumerToMatcher: Processing BID")
 
                 received_bid = Bid.Bid(object_content['id'],
