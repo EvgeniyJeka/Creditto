@@ -15,8 +15,7 @@ from local_config import KafkaConfig
 class ProducerFromApi(object):
 
     def __init__(self):
-        self.producer = KafkaProducer(value_serializer=lambda m: json.dumps(m).encode('utf-8'),
-                                      bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value])
+        self.producer = KafkaProducer(bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value])
 
     # headers (optional): a list of header key value pairs. List items
     #                 are tuples of str key and bytes value.

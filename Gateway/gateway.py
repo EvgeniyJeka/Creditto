@@ -9,6 +9,8 @@ from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 from credittomodels import statuses
 
+from credittomodels import protobuf_handler
+
 # 1. Add automated tests: match flow, API + SQL - D
 # 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
 # 3. Start writing read.me file (will be also considered as a spec) - D
@@ -58,6 +60,9 @@ producer = ProducerFromApi()
 
 # Initiating Reporter - needed for contact with SQL DB
 reporter = Reporter()
+
+# Protobuf handler - used to serialize bids and offers to proto
+proto_handler = protobuf_handler.ProtoHandler
 
 
 @app.route("/place_offer", methods=['POST'])
@@ -131,8 +136,8 @@ def place_bid():
 
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
     response = reporter.validate_bid(bid)
-    if 'error' in response.keys():
-        return response
+    # if 'error' in response.keys():
+    #     return response
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
@@ -141,7 +146,11 @@ def place_bid():
     else:
         placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
-    bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
+    #bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
+
+    # Bid - serializing to proto
+    bid_to_producer = proto_handler.serialize_bid_to_proto(placed_bid)
+
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
     logging.info(bid_to_producer)
