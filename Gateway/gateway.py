@@ -92,7 +92,9 @@ def place_offer():
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
-    offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
+    # Offer - serializing to proto
+    offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
+
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
     logging.info(offer_to_producer)
@@ -136,8 +138,8 @@ def place_bid():
 
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
     response = reporter.validate_bid(bid)
-    # if 'error' in response.keys():
-    #     return response
+    if 'error' in response.keys():
+        return response
 
     # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
@@ -145,8 +147,6 @@ def place_bid():
 
     else:
         placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
-
-    #bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
 
     # Bid - serializing to proto
     bid_to_producer = proto_handler.serialize_bid_to_proto(placed_bid)

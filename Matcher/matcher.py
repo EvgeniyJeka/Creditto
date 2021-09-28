@@ -13,9 +13,16 @@ from best_of_five_oldest import BestOfFiveOldest
 from best_of_ten_newest import BestOfTenNewest
 import logging
 
+
+
+from credittomodels import protobuf_handler
+
+logging.basicConfig(level=logging.INFO)
+
 producer = ProducerFromMatcher()
 
-
+# Protobuf handler - used to serialize bids and offers to proto
+proto_handler = protobuf_handler.ProtoHandler
 
 class Matcher(object):
 
@@ -69,7 +76,11 @@ class Matcher(object):
                 # Newly created match must be sent to the 'matches' topic
                 if isinstance(is_match, Match.Match):
                     self.matched_offer = offer
-                    match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)
+
+                    #match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)\
+
+                    match_to_producer = proto_handler.serialize_match_to_proto(is_match)
+
                     match_record_headers = [("type", bytes('match', encoding='utf8'))]
 
                     logging.info(match_to_producer)
@@ -116,12 +127,3 @@ class Matcher(object):
 if __name__ == "__main__":
     matcher = Matcher()
 
-    # second_offer = None
-    #
-    # for offer in matcher.pool.keys():
-    #     if offer.id == 2:
-    #         second_offer = offer
-    #
-    # print(second_offer)
-    # print(matcher.pool[second_offer])
-    # print(matcher.check_match(second_offer, 1))

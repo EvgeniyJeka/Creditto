@@ -9,7 +9,12 @@ from credittomodels import Bid
 from credittomodels import statuses
 from local_config import KafkaConfig
 
+from credittomodels import protobuf_handler
+
 logging.basicConfig(level=logging.INFO)
+
+# Protobuf handler - used to serialize bids and offers to proto
+proto_handler = protobuf_handler.ProtoHandler
 
 # Create one 'matcher' instance
 # Create one 'producer_from_matcher' instance
@@ -68,42 +73,24 @@ class ConsumerToMatcher(object):
 
     def consume_process(self):
         for msg in self.consumer:
-
-            print(f"Extracted message type: {self.extract_message_type(msg)}")
-
             message_type = self.extract_message_type(msg)
             if not message_type:
                 logging.warning("Matcher Consumer: Received a message with no valid type in headers, skipping.")
 
-            message_content = msg.value.decode('utf-8')
-            object_content = simplejson.loads(simplejson.loads(message_content))
-            print(object_content)
-            logging.info(f"ConsumerToSql: Received message {object_content}")
+            message_content = msg.value
+            logging.info(f"ConsumerToSql: Received message {message_content}")
 
             if message_type == statuses.Types.OFFER.value:
                 logging.info("ConsumerToMatcher: Processing OFFER")
 
-                received_offer = Offer.Offer(object_content['id'],
-                                    object_content['owner_id'],
-                                    object_content['sum'],
-                                    object_content['duration'],
-                                    object_content['offered_interest'],
-                                    object_content['allow_partial_fill'],
-                                    object_content['date_added'],
-                                    object_content['status'])
+                received_offer = proto_handler.deserialize_proto_to_offer(msg.value)
 
                 self.matcher.add_offer(received_offer)
 
             elif message_type == statuses.Types.BID.value:
                 logging.info("ConsumerToMatcher: Processing BID")
 
-                received_bid = Bid.Bid(object_content['id'],
-                                object_content['owner_id'],
-                                object_content['bid_interest'],
-                                object_content['target_offer_id'],
-                                object_content['partial_only'],
-                                date_added=object_content['date_added'],
-                                status=object_content['status'])
+                received_bid = proto_handler.deserialize_proto_to_bid(msg.value)
 
                 self.matcher.add_bid(received_bid)
 

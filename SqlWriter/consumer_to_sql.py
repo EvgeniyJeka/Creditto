@@ -75,48 +75,37 @@ class ConsumerToSql(object):
             logging.info(f"ConsumerToSql: Received message {message_content}")
 
             try:
-                # if message_type == statuses.Types.OFFER.value:
-                #     logging.info("ConsumerToSql: Processing OFFER")
-                #
-                #     added_offer = Offer.Offer(object_content['id'],
-                #                         object_content['owner_id'],
-                #                         object_content['sum'],
-                #                         object_content['duration'],
-                #                         object_content['offered_interest'],
-                #                         object_content['allow_partial_fill'],
-                #                         object_content['date_added'],
-                #                         object_content['status'])
-                #
-                #     # T.B.D. - Add handling for incoming offer with status CANCELLED (update DB, change status)
-                #     self.sql_writer.insert_offer(added_offer)
+                if message_type == statuses.Types.OFFER.value:
+                    logging.info("ConsumerToSql: Processing OFFER")
 
-                if message_type == statuses.Types.BID.value:
+                    added_offer = proto_handler.deserialize_proto_to_offer(msg.value)
+
+                    # T.B.D. - Add handling for incoming offer with status CANCELLED (update DB, change status)
+                    self.sql_writer.insert_offer(added_offer)
+
+                elif message_type == statuses.Types.BID.value:
                     logging.info("ConsumerToSql: Processing BID")
 
                     added_bid = proto_handler.deserialize_proto_to_bid(msg.value)
-
                     self.sql_writer.insert_bid(added_bid)
 
-                # elif message_type == statuses.Types.MATCH.value:
-                #     logging.info("ConsumerToSql: Processing MATCH")
-                #
-                #     added_match = Match.Match(object_content['offer_id'],
-                #                         object_content['bid_id'],
-                #                         object_content['offer_owner_id'],
-                #                         object_content['bid_owner_id'],
-                #                         object_content['match_time'],
-                #                         object_content['partial'],
-                #                         object_content['final_interest'])
-                #
-                #     # Inserting match record, updating matched offer , matched bid and unmatched bids statuses
-                #     self.sql_writer.insert_match(added_match)
-                #     self.sql_writer.update_offer_status_sql(object_content['offer_id'], statuses.OfferStatuses.MATCHED.value)
-                #     self.sql_writer.update_offer_final_interest_sql(object_content['offer_id'], added_match.final_interest)
-                #     self.sql_writer.update_bid_status_sql(object_content['bid_id'], statuses.BidStatuses.MATCHED.value)
-                #     self.sql_writer.cancel_remaining_bids_sql(object_content['offer_id'], object_content['bid_id'])
+                elif message_type == statuses.Types.MATCH.value:
+                    logging.info("ConsumerToSql: Processing MATCH")
 
+                    added_match = proto_handler.deserialize_proto_to_match(msg.value)
+
+                    # Inserting match record, updating matched offer , matched bid and unmatched bids statuses
+                    self.sql_writer.insert_match(added_match)
+
+                    self.sql_writer.update_offer_status_sql(added_match.offer_id, statuses.OfferStatuses.MATCHED.value)
+                    self.sql_writer.update_offer_final_interest_sql(added_match.offer_id, added_match.final_interest)
+
+                    self.sql_writer.update_bid_status_sql(added_match.bid_id, statuses.BidStatuses.MATCHED.value)
+                    self.sql_writer.cancel_remaining_bids_sql(added_match.offer_id, added_match.bid_id,)
+
+            # Change the exception logic or remove try/catch
             except KeyError as e:
-                logging.critical(f"Consumer To SQL: INVALID kafka message received: {object_content}")
+                logging.critical(f"Consumer To SQL: INVALID kafka message received: {msg.value}")
                 logging.critical(f"Consumer To SQL: {e}")
 
 
