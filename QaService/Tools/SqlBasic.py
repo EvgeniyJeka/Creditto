@@ -1,6 +1,5 @@
 import pymysql
 import logging
-from local_config import SqlConfig
 from base_config import BaseConfig
 
 
