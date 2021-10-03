@@ -18,15 +18,17 @@ from credittomodels import protobuf_handler
 # 5. Matching logic - move config to SQL (needed for tests) - D
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
-# 8. Kafka messages - PROTOBUF  - In Progress..
+# 8. Kafka messages - PROTOBUF  - In Progress - D
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 # 12. Offer - add property 'final_interest', add in package and in DB as well - D
 # 13. Consider adding Expirator/TimeManager service (?)
 # 14. Test framework - request must be printed and/or logged - D
-# 15. Add headers to Kafka records, message type should be in record header (VIP)
+# 15. Add headers to Kafka records, message type should be in record header - D
 # 16. Make tests to run in a separate container (e2e test)
+# 17. Negative tests needed - invalid data type in requests (service must NOT crash)
+# 18. Solve the 'duplicates' problem (bug) - UUID
 
 
 logging.basicConfig(level=logging.INFO)
