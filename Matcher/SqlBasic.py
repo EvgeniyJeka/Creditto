@@ -81,7 +81,7 @@ class SqlBasic(object):
         # Creating the 'offers' table if not exists - column for each "Offer" object property.
         if 'offers' not in tables:
             logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
-            query = "CREATE TABLE offers (id int, owner_id int, sum varchar(255), " \
+            query = "CREATE TABLE offers (id bigint, owner_id int, sum varchar(255), " \
                     "duration int, offered_interest varchar(255), final_interest varchar(255), allow_partial_fill int, date_added varchar(255), " \
                     "status int, PRIMARY KEY (ID));"
 
@@ -90,22 +90,22 @@ class SqlBasic(object):
         # Creating the 'bids' table if not exists - column for each "Bid" object property.
         if 'bids' not in tables:
             logging.warning("Logs: 'bids' table is missing! Creating the 'bids' table")
-            query = "CREATE TABLE bids (id int, owner_id int, bid_interest varchar(255), target_offer_id int, " \
+            query = "CREATE TABLE bids (id bigint, owner_id int, bid_interest varchar(255), target_offer_id bigint, " \
                     "partial_only int, date_added varchar(255), status int, PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
-            query = "CREATE TABLE matches (id int, offer_id int, bid_id int, offer_owner_id int, bid_owner_id int, " \
+            query = "CREATE TABLE matches (id bigint, offer_id bigint, bid_id bigint, offer_owner_id int, bid_owner_id int, " \
                     "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255)," \
                     " PRIMARY KEY (ID));"
 
             cursor.execute(query)
 
         if 'local_config' not in tables:
-            logging.warning("Logs: 'local_config' table is missing! Creating the 'bids' table")
-            query = "CREATE TABLE local_config (id int, property varchar(255), " \
+            logging.warning("Logs: 'local_config' table is missing! Creating the 'local_config' table")
+            query = "CREATE TABLE local_config (id bigint, property varchar(255), " \
                     "value  varchar(255), description varchar(255), PRIMARY KEY (ID));"
 
             cursor.execute(query)

@@ -8,6 +8,7 @@ from credittomodels import Bid
 from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 from credittomodels import statuses
+import uuid
 
 from credittomodels import protobuf_handler
 
@@ -81,7 +82,7 @@ def place_offer():
         # Once passed - create new Offer object and fill it with data received in the request
         # Use producer method to produce new kafka message - send Offer as JSON
 
-    next_id = reporter.get_next_id('offers')
+    next_id = uuid.uuid4().int & (1<<60)-1
 
     if offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
@@ -129,7 +130,7 @@ def place_bid():
     bid = request.get_json()
     logging.info(f"Gateway: Bid received {bid}")
 
-    next_id = reporter.get_next_id('bids')
+    next_id = uuid.uuid4().int & (1<<60)-1
 
     if bid['type'] != statuses.Types.BID.value:
         return {"error": "Invalid object type for this API method"}
