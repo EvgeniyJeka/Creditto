@@ -80,7 +80,7 @@ class TestBestOfFive(object):
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
         assert offer_sql['status'] == Offer.OfferStatuses.OPEN.value, "Offer was matched before 3 bids were placed"
-        assert offer_sql['final_interest'] == '-1'
+        assert offer_sql['final_interest'] == '-1.0'
 
         logging.info(f"----------------------- No Match On Third Bid verification - step passed ----------"
                      f"------------------------\n")

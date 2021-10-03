@@ -9,6 +9,8 @@ from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 from credittomodels import statuses
 
+from credittomodels import protobuf_handler
+
 # 1. Add automated tests: match flow, API + SQL - D
 # 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
 # 3. Start writing read.me file (will be also considered as a spec) - D
@@ -16,15 +18,17 @@ from credittomodels import statuses
 # 5. Matching logic - move config to SQL (needed for tests) - D
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
-# 8. Kafka messages - PROTOBUF  - In Progress..
+# 8. Kafka messages - PROTOBUF  - In Progress - D
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
 # 12. Offer - add property 'final_interest', add in package and in DB as well - D
 # 13. Consider adding Expirator/TimeManager service (?)
 # 14. Test framework - request must be printed and/or logged - D
-# 15. Add headers to Kafka records, message type should be in record header (VIP)
+# 15. Add headers to Kafka records, message type should be in record header - D
 # 16. Make tests to run in a separate container (e2e test)
+# 17. Negative tests needed - invalid data type in requests (service must NOT crash)
+# 18. Solve the 'duplicates' problem (bug) - UUID
 
 
 logging.basicConfig(level=logging.INFO)
@@ -59,6 +63,9 @@ producer = ProducerFromApi()
 # Initiating Reporter - needed for contact with SQL DB
 reporter = Reporter()
 
+# Protobuf handler - used to serialize bids and offers to proto
+proto_handler = protobuf_handler.ProtoHandler
+
 
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
@@ -87,7 +94,9 @@ def place_offer():
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
-    offer_to_producer = simplejson.dumps(placed_offer.__dict__, use_decimal=True)
+    # Offer - serializing to proto
+    offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
+
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
     logging.info(offer_to_producer)
@@ -141,7 +150,9 @@ def place_bid():
     else:
         placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'], bid['target_offer_id'], bid['partial_only'])
 
-    bid_to_producer = simplejson.dumps(placed_bid.__dict__, use_decimal=True)
+    # Bid - serializing to proto
+    bid_to_producer = proto_handler.serialize_bid_to_proto(placed_bid)
+
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
     logging.info(bid_to_producer)
