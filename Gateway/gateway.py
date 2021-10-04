@@ -29,7 +29,7 @@ from credittomodels import protobuf_handler
 # 15. Add headers to Kafka records, message type should be in record header - D
 # 16. Make tests to run in a separate container (e2e test)
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash)
-# 18. Solve the 'duplicates' problem (bug) - UUID
+# 18. Solve the 'duplicates' problem (bug)  UUID - D
 
 
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +71,17 @@ proto_handler = protobuf_handler.ProtoHandler
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
     """
+    This API method can be used to place new offers.
+    Offer is placed only if it passes validation.
+    Expecting for a POST request with JSON body, example:
+    {
+    "type":"offer",
+    "owner_id":1200,
+    "sum":110000,
+    "duration":12,
+    "offered_interest":0.09,
+    "allow_partial_fill":0
+    }
     """
     verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
 
@@ -97,7 +108,8 @@ def place_offer():
 
     # Offer - serializing to proto
     offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
-    
+
+    # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
     if not offer_to_producer:
         return {"error": f"Failed to place a new offer, invalid data in request"}
 
@@ -156,6 +168,10 @@ def place_bid():
 
     # Bid - serializing to proto
     bid_to_producer = proto_handler.serialize_bid_to_proto(placed_bid)
+
+    # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
+    if not bid_to_producer:
+        return {"error": f"Failed to place a new offer, invalid data in request"}
 
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
