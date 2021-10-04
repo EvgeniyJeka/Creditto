@@ -13,13 +13,13 @@ import uuid
 from credittomodels import protobuf_handler
 
 # 1. Add automated tests: match flow, API + SQL - D
-# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
+# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D. (?)
 # 3. Start writing read.me file (will be also considered as a spec) - D
 # 4. Matching logic - move to separate files, update existing - D
 # 5. Matching logic - move config to SQL (needed for tests) - D
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
-# 8. Kafka messages - PROTOBUF  - In Progress - D
+# 8. Kafka messages - PROTOBUF  - D
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
@@ -30,6 +30,9 @@ from credittomodels import protobuf_handler
 # 16. Make tests to run in a separate container (e2e test)
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash)
 # 18. Solve the 'duplicates' problem (bug)  UUID - D
+# 19. Offer/Bid validation in SQL - consider to change the logic, since customer is notified that 
+# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway 
+# and consumed by the Matcher and it is in the pool and possibly can be matched. Perhaps a confirmation should be sent after the message was successfully produced to Kafka. 
 
 
 logging.basicConfig(level=logging.INFO)

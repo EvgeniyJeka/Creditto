@@ -60,6 +60,31 @@ class GatewayRequests(object):
         except Exception as e:
             logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
             raise e
+        
+        
+    def place_bid_custom_body(self, bid_body : json) -> json:
+        """
+        Sends HTTP POST request to Gateway in order to place a new Bid - receives Bid body as an arg
+        :return: Response body as a json.
+        """
+
+        url = base_url + 'place_bid'
+
+        payload = bid_body
+
+        try:
+            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            raise e
 
     def get_offers_by_status(self, requested_status) -> json:
         """
