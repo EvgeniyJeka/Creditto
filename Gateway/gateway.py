@@ -97,6 +97,9 @@ def place_offer():
 
     # Offer - serializing to proto
     offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
+    
+    if not offer_to_producer:
+        return {"error": f"Failed to place a new offer, invalid data in request"}
 
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
