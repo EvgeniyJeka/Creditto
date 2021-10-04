@@ -72,28 +72,32 @@ class Reporter(SqlBasic):
         :param bid: dict
         :return: JSON
         """
-        offer_in_sql = self.get_offer_data(bid['target_offer_id'])
+        try:
+            offer_in_sql = self.get_offer_data(bid['target_offer_id'])
 
-        # Returning error message if bid is placed on non-existing offer
-        if offer_in_sql == []:
-            logging.warning(f"Reporter: detected an attempt to place a bid on non-existing offer: {bid['target_offer_id']}")
-            return {"error": f"Offer {bid['target_offer_id']} does not exist"}
+            # Returning error message if bid is placed on non-existing offer
+            if offer_in_sql == []:
+                logging.warning(f"Reporter: detected an attempt to place a bid on non-existing offer: {bid['target_offer_id']}")
+                return {"error": f"Offer {bid['target_offer_id']} does not exist"}
 
-        offer_in_sql = offer_in_sql[0]
+            offer_in_sql = offer_in_sql[0]
 
-        # Returning error message if bid interest rate is above offer interest rate
-        if Decimal(bid['bid_interest']) > Decimal(offer_in_sql['offered_interest']):
-            logging.warning(f"Reporter: detected an attempt to place a bid with interest rate {bid['bid_interest']}, "
-                            f"while offer interest rate is {offer_in_sql['offered_interest']}")
-            return {"error": f"Interest rate above offer interest rate {offer_in_sql['offered_interest']}"}
+            # Returning error message if bid interest rate is above offer interest rate
+            if Decimal(bid['bid_interest']) > Decimal(offer_in_sql['offered_interest']):
+                logging.warning(f"Reporter: detected an attempt to place a bid with interest rate {bid['bid_interest']}, "
+                                f"while offer interest rate is {offer_in_sql['offered_interest']}")
+                return {"error": f"Interest rate above offer interest rate {offer_in_sql['offered_interest']}"}
 
-        # Returning error message if target offer status isn't OPEN
-        if offer_in_sql['status'] != statuses.OfferStatuses.OPEN.value:
-            logging.warning(
-                f"Reporter: detected an attempt to place a bid on an offer in status: {offer_in_sql['status']}")
-            return {"error": f"Bids can't be placed on offers in status {offer_in_sql['status']}"}
+            # Returning error message if target offer status isn't OPEN
+            if offer_in_sql['status'] != statuses.OfferStatuses.OPEN.value:
+                logging.warning(
+                    f"Reporter: detected an attempt to place a bid on an offer in status: {offer_in_sql['status']}")
+                return {"error": f"Bids can't be placed on offers in status {offer_in_sql['status']}"}
 
-        return {"confirmed": "given bid can be placed"}
+            return {"confirmed": "given bid can be placed"}
+
+        except TypeError:
+            return {"error": f"Bid request is invalid, 'NULL' is detected in one of the key fields"}
 
 
 

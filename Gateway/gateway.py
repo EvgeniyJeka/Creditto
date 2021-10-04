@@ -160,6 +160,7 @@ def place_bid():
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
     response = reporter.validate_bid(bid)
     if 'error' in response.keys():
+        logging.warning(f"Bid {next_id} has failed validation and was rejected")
         return response
 
     # In future versions it is possible that the bid will be converted to Google Proto message

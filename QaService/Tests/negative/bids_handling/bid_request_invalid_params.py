@@ -13,7 +13,6 @@ logging.basicConfig(level=logging.INFO)
 postman = Postman()
 reporter = reporter.Reporter()
 
-
 test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_sum = 20000
@@ -34,6 +33,10 @@ test_bid_interest_5 = 0.037
 
 @pytest.mark.incremental
 class TestBidPlacement(object):
+    """
+    In those tests we verify that:
+    1. Bid placement request with missing mandatory fields will be rejected - verifying error message
+    """
 
     offer_id = 0
     matching_bid_id = 0
@@ -72,3 +75,66 @@ class TestBidPlacement(object):
         # response = postman.gateway_requests. \
         #     place_bid(self.bid_owners[0], None, self.offer_id, 0)
 
+    def test_missing_bid_interest_field(self):
+        bid_body_no_interest = {
+            TYPE: "bid",
+            OWNER_ID: self.bid_owners[0],
+            TARGET_OFFER_ID: self.offer_id,
+            PARTIAL_ONLY: 0
+        }
+
+        logging.info(json.dumps(bid_body_no_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_no_interest)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == 'Required parameter is missing in provided bid'
+
+        logging.info(f"----------------------- Invalid Bid without Interest can't be placed ' - step passed "
+                     f"----------------------------------\n")
+
+    def test_missing_target_offer_field(self):
+        bid_body_no_target_offer = {
+            TYPE: "bid",
+            OWNER_ID: self.bid_owners[0],
+            BID_INTEREST: self.bid_interest_list[0],
+            PARTIAL_ONLY: 0
+        }
+
+        logging.info(json.dumps(bid_body_no_target_offer, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_no_target_offer)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == 'Required parameter is missing in provided bid'
+
+        logging.info(f"----------------------- Invalid Bid without Target Offer ID can't be placed ' - step passed "
+                     f"----------------------------------\n")
+
+    def test_null_in_bid_interest_field(self):
+        bid_body_no_target_offer = {
+            TYPE: "bid",
+            OWNER_ID: self.bid_owners[0],
+            BID_INTEREST: None,
+            TARGET_OFFER_ID: self.offer_id,
+            PARTIAL_ONLY: 0
+        }
+
+        logging.info(json.dumps(bid_body_no_target_offer, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_no_target_offer)
+        logging.info(response)
+
+        # assert 'bid_id' not in response.keys()
+        # assert 'result' not in response.keys()
+        # assert 'error' in response.keys()
+        # assert response['error'] == 'Required parameter is missing in provided bid'
+        #
+        # logging.info(f"----------------------- Invalid Bid without Target Offer ID can't be placed ' - step passed "
+        #              f"----------------------------------\n")
