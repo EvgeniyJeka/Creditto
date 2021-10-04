@@ -35,7 +35,8 @@ test_bid_interest_5 = 0.037
 class TestBidPlacement(object):
     """
     In those tests we verify that:
-    1. Bid placement request with missing mandatory fields will be rejected - verifying error message
+    1. Bid placement request with missing mandatory field will be rejected - verifying error message
+    2. Bid placement request with NULL in mandatory field will be rejected - verifying error message
     """
 
     offer_id = 0
@@ -71,9 +72,6 @@ class TestBidPlacement(object):
 
         logging.info(f"----------------------- Invalid Bid without Owner ID can't be placed ' - step passed "
                      f"----------------------------------\n")
-
-        # response = postman.gateway_requests. \
-        #     place_bid(self.bid_owners[0], None, self.offer_id, 0)
 
     def test_missing_bid_interest_field(self):
         bid_body_no_interest = {
@@ -131,10 +129,10 @@ class TestBidPlacement(object):
         response = postman.gateway_requests.place_bid_custom_body(bid_body_no_target_offer)
         logging.info(response)
 
-        # assert 'bid_id' not in response.keys()
-        # assert 'result' not in response.keys()
-        # assert 'error' in response.keys()
-        # assert response['error'] == 'Required parameter is missing in provided bid'
-        #
-        # logging.info(f"----------------------- Invalid Bid without Target Offer ID can't be placed ' - step passed "
-        #              f"----------------------------------\n")
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == "Bid request is invalid, 'NULL' is detected in one of the key fields"
+
+        logging.info(f"----------------------- Invalid Bid NULL in Interest field can't be placed ' - step passed "
+                     f"----------------------------------\n")
