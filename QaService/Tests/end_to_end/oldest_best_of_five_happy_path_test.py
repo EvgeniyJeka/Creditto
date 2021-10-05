@@ -5,6 +5,7 @@ import pytest
 from Requests.postman import Postman
 from Tools import reporter
 import logging
+from decimal import Decimal
 
 logging.basicConfig(level=logging.INFO)
 
@@ -124,3 +125,23 @@ class TestBestOfFive(object):
 
         logging.info(f"----------------------- Verifying Match Data in SQL - step passed --------------------"
                      f"--------------\n")
+
+
+    def test_get_offers_by_status(self):
+        response = postman.gateway_requests.get_offers_by_status(Offer.OfferStatuses.OPEN.value)
+        logging.info(response)
+
+        assert isinstance(response, list), "Invalid data type in API response"
+        assert len(response) > 0, "Placed offer wasn't returned in API response "
+        assert isinstance(response[0], dict), "Invalid data type in API response"
+
+        for offer in response:
+            if offer['id'] == TestBestOfFive.offer_id:
+                assert offer['owner_id'] == test_offer_owner_1
+                assert Decimal(offer['sum']) == Decimal(test_sum)
+                assert offer['duration'] == test_duration
+                assert offer['offered_interest'] == str(test_offer_interest_low)
+                assert offer['status'] == Offer.OfferStatuses.MATCHED.value
+
+        logging.info(f"----------------------- Get All MATCHED Offers  API method - data verified "
+                     f"------------------------------\n")
