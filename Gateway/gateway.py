@@ -13,13 +13,13 @@ import uuid
 from credittomodels import protobuf_handler
 
 # 1. Add automated tests: match flow, API + SQL - D
-# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D.
+# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D. (?)
 # 3. Start writing read.me file (will be also considered as a spec) - D
 # 4. Matching logic - move to separate files, update existing - D
 # 5. Matching logic - move config to SQL (needed for tests) - D
 # 6. Add Cancel Bid flow (?)
 # 7. In SQL - make a list of authorized lenders and borrowers, verify each customer is limited to X offer/bids (?)
-# 8. Kafka messages - PROTOBUF  - In Progress - D
+# 8. Kafka messages - PROTOBUF  - D
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
 # 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
@@ -29,7 +29,10 @@ from credittomodels import protobuf_handler
 # 15. Add headers to Kafka records, message type should be in record header - D
 # 16. Make tests to run in a separate container (e2e test)
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash)
-# 18. Solve the 'duplicates' problem (bug) - UUID
+# 18. Solve the 'duplicates' problem (bug)  UUID - D
+# 19. Offer/Bid validation in SQL - consider to change the logic, since customer is notified that 
+# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway 
+# and consumed by the Matcher and it is in the pool and possibly can be matched. Perhaps a confirmation should be sent after the message was successfully produced to Kafka. 
 
 
 logging.basicConfig(level=logging.INFO)
@@ -71,20 +74,27 @@ proto_handler = protobuf_handler.ProtoHandler
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
     """
+    This API method can be used to place new offers.
+    Offer is placed only if it passes validation.
+    Expecting for a POST request with JSON body, example:
+    {
+    "type":"offer",
+    "owner_id":1200,
+    "sum":110000,
+    "duration":12,
+    "offered_interest":0.09,
+    "allow_partial_fill":0
+    }
     """
     verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
 
     offer = request.get_json()
-    logging.info(f"Offer received: {offer}")
-
-    # Validation
-
-        # Once passed - create new Offer object and fill it with data received in the request
-        # Use producer method to produce new kafka message - send Offer as JSON
+    logging.info(f"Gateway: Offer received: {offer}")
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if offer['type'] != statuses.Types.OFFER.value:
+    # Rejecting invalid and malformed offer placement requests
+    if not isinstance(offer, dict) or 'type' not in offer.keys() or offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_offer_params:
@@ -97,6 +107,10 @@ def place_offer():
 
     # Offer - serializing to proto
     offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
+
+    # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
+    if not offer_to_producer:
+        return {"error": f"Failed to place a new offer, invalid data in request"}
 
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
@@ -132,7 +146,9 @@ def place_bid():
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if bid['type'] != statuses.Types.BID.value:
+    # Rejecting invalid and malformed bid placement requests
+    if not isinstance(bid, dict) or 'type' not in bid.keys() or bid['type'] != statuses.Types.BID.value:
+        logging.warning(f"Gateway: Invalid Bid request received: {bid}")
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_bid_params:
@@ -142,6 +158,7 @@ def place_bid():
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
     response = reporter.validate_bid(bid)
     if 'error' in response.keys():
+        logging.warning(f"Bid {next_id} has failed validation and was rejected")
         return response
 
     # In future versions it is possible that the bid will be converted to Google Proto message
@@ -153,6 +170,10 @@ def place_bid():
 
     # Bid - serializing to proto
     bid_to_producer = proto_handler.serialize_bid_to_proto(placed_bid)
+
+    # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
+    if not bid_to_producer:
+        return {"error": f"Failed to place a new offer, invalid data in request"}
 
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
