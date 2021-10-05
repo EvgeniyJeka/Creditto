@@ -98,7 +98,7 @@ def place_offer():
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if offer['type'] != statuses.Types.OFFER.value:
+    if 'type' not in offer.keys() or offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_offer_params:
@@ -150,7 +150,7 @@ def place_bid():
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if bid['type'] != statuses.Types.BID.value:
+    if 'type' not in bid.keys() or bid['type'] != statuses.Types.BID.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_bid_params:
