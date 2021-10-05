@@ -89,16 +89,12 @@ def place_offer():
     verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
 
     offer = request.get_json()
-    logging.info(f"Offer received: {offer}")
-
-    # Validation
-
-        # Once passed - create new Offer object and fill it with data received in the request
-        # Use producer method to produce new kafka message - send Offer as JSON
+    logging.info(f"Gateway: Offer received: {offer}")
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if 'type' not in offer.keys() or offer['type'] != statuses.Types.OFFER.value:
+    # Rejecting invalid and malformed offer placement requests
+    if not isinstance(offer, dict) or 'type' not in offer.keys() or offer['type'] != statuses.Types.OFFER.value:
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_offer_params:
@@ -150,7 +146,9 @@ def place_bid():
 
     next_id = uuid.uuid4().int & (1<<60)-1
 
-    if 'type' not in bid.keys() or bid['type'] != statuses.Types.BID.value:
+    # Rejecting invalid and malformed bid placement requests
+    if not isinstance(bid, dict) or 'type' not in bid.keys() or bid['type'] != statuses.Types.BID.value:
+        logging.warning(f"Gateway: Invalid Bid request received: {bid}")
         return {"error": "Invalid object type for this API method"}
 
     for param in verified_bid_params:

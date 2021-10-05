@@ -39,6 +39,7 @@ class TestBidPlacement(object):
     2. Bid placement request with NULL in mandatory field will be rejected - verifying error message
     3. Bid placement request with invalid data type will be rejected - verifying error message
     4. Bid placement request with no type in request body will be rejected - verifying error message
+    5. Bid placement request is rejected, unless it's body is a valid JSON - verifying error message
 
     NOTE: Error message successful validation confirms that Gateway hasn't crashed and handled the invalid input
     # as expected.
@@ -75,7 +76,7 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == 'Required parameter is missing in provided bid'
 
-        logging.info(f"----------------------- Invalid Bid without Owner ID can't be placed ' - step passed "
+        logging.info(f"----------------------- 'Invalid Bid without Owner ID can't be placed ' - step passed "
                      f"----------------------------------\n")
 
     def test_missing_bid_interest_field(self):
@@ -96,7 +97,7 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == 'Required parameter is missing in provided bid'
 
-        logging.info(f"----------------------- Invalid Bid without Interest can't be placed ' - step passed "
+        logging.info(f"----------------------- 'Invalid Bid without Interest can't be placed ' - step passed "
                      f"----------------------------------\n")
 
     def test_missing_target_offer_field(self):
@@ -117,11 +118,11 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == 'Required parameter is missing in provided bid'
 
-        logging.info(f"----------------------- Invalid Bid without Target Offer ID can't be placed ' - step passed "
+        logging.info(f"----------------------- 'Invalid Bid without Target Offer ID can't be placed ' - step passed "
                      f"----------------------------------\n")
 
     def test_null_in_bid_interest_field(self):
-        bid_body_no_target_offer = {
+        bid_body_null_in_bid_interest = {
             TYPE: "bid",
             OWNER_ID: self.bid_owners[0],
             BID_INTEREST: None,
@@ -129,9 +130,9 @@ class TestBidPlacement(object):
             PARTIAL_ONLY: 0
         }
 
-        logging.info(json.dumps(bid_body_no_target_offer, default=lambda o: vars(o), sort_keys=True, indent=4))
+        logging.info(json.dumps(bid_body_null_in_bid_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_bid_custom_body(bid_body_no_target_offer)
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_null_in_bid_interest)
         logging.info(response)
 
         assert 'bid_id' not in response.keys()
@@ -139,7 +140,7 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == "Bid request is invalid, 'NULL' is detected in one of the key fields"
 
-        logging.info(f"----------------------- Invalid Bid NULL in Interest field can't be placed ' - step passed "
+        logging.info(f"-----------------------'' Invalid Bid NULL in Interest field can't be placed ' - step passed "
                      f"----------------------------------\n")
 
     def test_invalid_data_types(self):
@@ -161,20 +162,13 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == "Invalid object type for this API method"
 
-        logging.info(f"----------------------- Invalid data types in request - Bid can't be placed ' - step passed "
+        logging.info(f"----------------------- 'Invalid data types in request - Bid can't be placed ' - step passed "
                      f"----------------------------------\n")
 
-    def test_no_type_field(self):
-        bid_body_no_target_offer = {
-            OWNER_ID: self.bid_owners[0],
-            BID_INTEREST: self.bid_interest_list[0],
-            TARGET_OFFER_ID: self.offer_id,
-            PARTIAL_ONLY: 0
-        }
+    def test_non_json_body(self):
+        logging.info("bad_request_body_string")
 
-        logging.info(json.dumps(bid_body_no_target_offer, default=lambda o: vars(o), sort_keys=True, indent=4))
-
-        response = postman.gateway_requests.place_bid_custom_body(bid_body_no_target_offer)
+        response = postman.gateway_requests.place_bid_custom_body("bad_request_body_string")
         logging.info(response)
 
         assert 'bid_id' not in response.keys()
@@ -182,5 +176,5 @@ class TestBidPlacement(object):
         assert 'error' in response.keys()
         assert response['error'] == "Invalid object type for this API method"
 
-        logging.info(f"----------------------- Invalid Bid with mp type in request body can't be placed ' - step passed "
+        logging.info(f"----------------------- 'Non-JSON body in request - Bid can't be placed ' - step passed"
                      f"----------------------------------\n")
