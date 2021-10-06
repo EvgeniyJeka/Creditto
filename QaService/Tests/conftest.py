@@ -1,13 +1,14 @@
 import pytest
-from ..Tools import reporter
-from ..Requests import postman
+#from Tools.reporter import Reporter
+#from Requests.postman import Postman
 import logging
-
-
+from Tools import *
+from ..Tools import reporter
+from Requests.postman import *
 
 logging.basicConfig(level=logging.INFO)
 
-postman = postman.Postman()
+postman = Postman()
 reporter = reporter.Reporter()
 
 
