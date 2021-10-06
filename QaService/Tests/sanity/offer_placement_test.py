@@ -1,15 +1,19 @@
-import time
 from credittomodels import Offer
-from credittomodels import Bid
 import pytest
 from decimal import Decimal
-from Requests.postman import Postman
-from Tools import reporter
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
+try:
+    from Requests import postman
+    from Tools import reporter
+
+except ModuleNotFoundError:
+    from ...Requests import postman
+    from ...Tools import reporter
+
+postman = postman.Postman()
 reporter = reporter.Reporter()
 
 
@@ -41,21 +45,20 @@ test_bid_interest_8 = 0.039
 test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
-test_token = '1Aa@<>12'
-
 
 @pytest.mark.sanity
 @pytest.mark.incremental
-class TestBidSanity(object):
+class TestOfferSanity(object):
     """
-    In those tests we verify that:
-    1. Bid can be successfully placed on existing OPEN offer
-    2. API method 'get_my_bids' (get bids by owner) provides valid data on placed Bid
-    3. Placed Bid has status PLACED (until matched, cancelled or expired)
-    """
+       In those tests we verify that:
+       1. Offer can be successfully placed
+       2. API method 'get_all_offers' (get all existing offers) provide valid data on placed Offer
+       3. API method 'get_offers_by_status' (get all bids with provided status) provide valid data on placed Offer
+       4. Placed Offer has status OPEN (until matched, cancelled or expired)
+       """
 
     offer_id = 0
-    bid_id = 0
+    matching_bid_id = 0
 
     bid_owners = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5,
                   test_bid_owner_6, test_bid_owner_7, test_bid_owner_8, test_bid_owner_9, test_bid_owner_10]
@@ -69,7 +72,7 @@ class TestBidSanity(object):
         response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
                                                         test_duration, test_offer_interest_low, 0)
 
-        TestBidSanity.offer_id = response['offer_id']
+        TestOfferSanity.offer_id = response['offer_id']
         logging.info(f"Offer placement: response received {response}")
 
         assert 'offer_id' in response.keys(), "Offer Placement error - no OFFER ID in response"
@@ -79,37 +82,41 @@ class TestBidSanity(object):
 
         logging.info(f"----------------------- Offer Placement - step passed ----------------------------------\n")
 
-    def test_placing_bid(self):
-
-        response = postman.gateway_requests.\
-            place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id, 0)
-        logging.info(response)
-
-        TestBidSanity.bid_id = response['bid_id']
-
-        assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
-        assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
-        assert isinstance(response['bid_id'], int),  "BID Placement error - invalid BID ID in response "
-
-        logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
-
-
-    def test_bids_by_owner(self):
-
-        response = postman.gateway_requests.get_bids_by_owner(self.bid_owners[0], test_token)
+    def test_get_all_offers(self):
+        response = postman.gateway_requests.get_all_offers()
         logging.info(response)
 
         assert isinstance(response, list), "Invalid data type in API response"
         assert len(response) > 0, "Placed offer wasn't returned in API response "
         assert isinstance(response[0], dict), "Invalid data type in API response"
 
-        for bid in response:
-            if bid['id'] == TestBidSanity.bid_id:
-                print(bid)
-                assert bid['owner_id'] == test_bid_owner_1
-                assert bid['bid_interest'] == str(self.bid_interest_list[0])
-                assert bid['target_offer_id'] == TestBidSanity.offer_id
-                assert bid['status'] == Bid.BidStatuses.PLACED.value
+        for offer in response:
+            if offer['id'] == TestOfferSanity.offer_id:
+                assert offer['owner_id'] == test_offer_owner_1
+                assert Decimal(offer['sum']) == Decimal(test_sum)
+                assert offer['duration'] == test_duration
+                assert offer['offered_interest'] == str(test_offer_interest_low)
+                assert offer['status'] == Offer.OfferStatuses.OPEN.value
 
-        logging.info(f"----------------------- Get All Bids By Owner API method - data verified ---------"
-                     f"-------------------------\n")
+        logging.info(f"----------------------- Get All Offers API method - data verified "
+                     f"------------------------------\n")
+
+    def test_get_offers_by_status(self):
+        response = postman.gateway_requests.get_offers_by_status(Offer.OfferStatuses.OPEN.value)
+        logging.info(response)
+
+        assert isinstance(response, list), "Invalid data type in API response"
+        assert len(response) > 0, "Placed offer wasn't returned in API response "
+        assert isinstance(response[0], dict), "Invalid data type in API response"
+
+        for offer in response:
+            if offer['id'] == TestOfferSanity.offer_id:
+                assert offer['owner_id'] == test_offer_owner_1
+                assert Decimal(offer['sum']) == Decimal(test_sum)
+                assert offer['duration'] == test_duration
+                assert offer['offered_interest'] == str(test_offer_interest_low)
+                assert offer['status'] == Offer.OfferStatuses.OPEN.value
+
+        logging.info(f"----------------------- Get All OPEN Offers  API method - data verified "
+                     f"------------------------------\n")
+

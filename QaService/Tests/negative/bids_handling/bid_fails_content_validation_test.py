@@ -1,14 +1,20 @@
 import time
 from credittomodels import Offer
 import pytest
-
-from Requests.postman import Postman
-from Tools import reporter
 import logging
+
+try:
+    from Requests.postman import postman
+    from Tools import reporter
+
+except ModuleNotFoundError:
+    from ....Requests import postman
+    from ....Tools import reporter
+
 
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
+postman = postman.Postman()
 reporter = reporter.Reporter()
 
 
