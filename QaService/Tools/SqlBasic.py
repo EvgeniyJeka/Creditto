@@ -1,14 +1,18 @@
 import pymysql
 import logging
-from base_config import BaseConfig
+
+try:
+    from Config import base_config
+except ModuleNotFoundError:
+    from ..Config import base_config
 
 
 class SqlBasic(object):
 
-    hst = BaseConfig.SQL_HOST
-    usr = BaseConfig.SQL_USER
-    pwd = BaseConfig.SQL_PASSWORD
-    db_name = BaseConfig.SQL_DB_NAME
+    hst = base_config.BaseConfig.SQL_HOST
+    usr = base_config.BaseConfig.SQL_USER
+    pwd = base_config.BaseConfig.SQL_PASSWORD
+    db_name = base_config.BaseConfig.SQL_DB_NAME
     cursor = None
 
     def __init__(self):

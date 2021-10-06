@@ -1,9 +1,15 @@
 import requests
-
-from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
-from base_config import BaseConfig
 import json
 import logging
+
+try:
+    from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
+    from Config.base_config import BaseConfig
+
+except ModuleNotFoundError:
+    from .Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
+    from ..Config.base_config import BaseConfig
+
 
 
 base_url = BaseConfig.BASE_URL
