@@ -35,6 +35,8 @@ test_bid_interest_3 = 0.044
 test_bid_interest_4 = 0.037
 test_bid_interest_5 = 0.037
 
+
+@pytest.mark.container
 @pytest.mark.negative
 @pytest.mark.incremental
 class TestBidPlacement(object):

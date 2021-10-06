@@ -47,6 +47,7 @@ test_bid_interest_10 = 0.041
 test_token = '1Aa@<>12'
 
 
+@pytest.mark.container
 @pytest.mark.sanity
 @pytest.mark.incremental
 class TestBidSanity(object):

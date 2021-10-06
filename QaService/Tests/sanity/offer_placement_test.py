@@ -46,6 +46,7 @@ test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
 
+@pytest.mark.container
 @pytest.mark.sanity
 @pytest.mark.incremental
 class TestOfferSanity(object):
