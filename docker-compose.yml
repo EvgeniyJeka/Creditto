@@ -82,3 +82,20 @@ services:
       - kafka
     networks:
       - creditto_main
+
+#  sanity_tests_container:
+#    image: sanity_tests_container:latest
+#    build: ./QaService
+#    networks:
+#      - creditto_main
+#    environment:
+#      BASE_URL=creditto_gateway
+#      SQL_HOST=cabin_db
+#      SQL_PORT=3306
+#      SQL_USER=root
+#      SQL_PASSWORD=123456
+#      WAIT_BEFORE_TIMEOUT=15
+#
+
+
+
