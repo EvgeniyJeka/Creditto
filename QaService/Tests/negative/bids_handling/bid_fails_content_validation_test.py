@@ -4,7 +4,7 @@ import pytest
 import logging
 
 try:
-    from Requests.postman import postman
+    from Requests  import postman
     from Tools import reporter
 
 except ModuleNotFoundError:
@@ -35,7 +35,7 @@ test_bid_interest_3 = 0.044
 test_bid_interest_4 = 0.037
 test_bid_interest_5 = 0.037
 
-
+@pytest.mark.negative
 @pytest.mark.incremental
 class TestBidPlacement(object):
 
