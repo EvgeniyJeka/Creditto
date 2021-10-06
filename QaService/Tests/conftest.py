@@ -1,12 +1,14 @@
 import pytest
-from Tools.reporter import Reporter
-from Requests.postman import Postman
+from ..Tools import reporter
+from ..Requests import postman
 import logging
+
+
 
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
-reporter = Reporter()
+postman = postman.Postman()
+reporter = reporter.Reporter()
 
 
 @pytest.fixture(scope='class')

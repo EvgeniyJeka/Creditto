@@ -1,8 +1,6 @@
-import requests
-from base_config import BaseConfig
 import json
 import logging
-from Requests.Body_Constructors.requests_constants import *
+from .requests_constants import *
 logging.basicConfig(level=logging.INFO)
 
 

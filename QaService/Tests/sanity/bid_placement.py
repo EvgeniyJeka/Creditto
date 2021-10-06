@@ -1,8 +1,5 @@
-import time
-from credittomodels import Offer
 from credittomodels import Bid
 import pytest
-from decimal import Decimal
 from Requests.postman import Postman
 from Tools import reporter
 import logging
@@ -44,6 +41,7 @@ test_bid_interest_10 = 0.041
 test_token = '1Aa@<>12'
 
 
+@pytest.mark.sanity
 @pytest.mark.incremental
 class TestBidSanity(object):
     """

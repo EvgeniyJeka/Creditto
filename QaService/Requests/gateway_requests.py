@@ -1,7 +1,7 @@
 import requests
 
-from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
-from base_config import BaseConfig
+from .Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
+from ..base_config import BaseConfig
 import json
 import logging
 

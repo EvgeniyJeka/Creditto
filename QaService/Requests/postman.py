@@ -1,6 +1,4 @@
-from Requests.gateway_requests import GatewayRequests
-from credittomodels import Offer
-
+from .gateway_requests import GatewayRequests
 
 
 class Postman(object):

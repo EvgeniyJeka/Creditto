@@ -1,6 +1,6 @@
 import pymysql
 import logging
-from base_config import BaseConfig
+from ..base_config import BaseConfig
 
 
 class SqlBasic(object):

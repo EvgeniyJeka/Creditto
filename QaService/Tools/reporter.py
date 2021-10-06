@@ -4,7 +4,7 @@ from datetime import datetime
 import logging
 from credittomodels import statuses
 
-from Tools.SqlBasic import SqlBasic
+from .SqlBasic import SqlBasic
 from credittomodels import Offer
 from decimal import *
 
