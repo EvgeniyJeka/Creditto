@@ -9,11 +9,8 @@ from producer_from_matcher import ProducerFromMatcher
 from best_of_five_oldest import BestOfFiveOldest
 from best_of_ten_newest import BestOfTenNewest
 import logging
-
-
-
 from credittomodels import protobuf_handler
-from credittomodels.utils import Calculator
+
 
 logging.basicConfig(level=logging.INFO)
 
@@ -66,7 +63,7 @@ class Matcher(object):
 
                 self.pool[offer].append(bid)
                 logging.info(f"MATCHER: Bid {bid.id} was successfully attached to offer {offer.id}.")
-                print(self.pool)
+                logging.info(self.pool)
 
                 logging.info(f"MATCHER: Checking match criteria for offer {offer} ")
                 is_match = self.check_match(offer)
@@ -76,9 +73,7 @@ class Matcher(object):
                 if isinstance(is_match, Match.Match):
                     self.matched_offer = offer
 
-                    # Updating the Match instance
-                    is_match.sum = offer.sum
-                    is_match.monthly_payment = 0
+                    logging.info(is_match)
 
                     # Producing MATCH message to kafka (after it serialized to match proto message)
                     match_to_producer = proto_handler.serialize_match_to_proto(is_match)

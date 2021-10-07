@@ -22,7 +22,7 @@ reporter = reporter.Reporter()
 
 test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
-test_sum = 20000
+test_sum = 30000
 test_duration = 24
 
 test_bid_owner_1 = 393
