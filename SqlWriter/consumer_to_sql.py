@@ -1,5 +1,4 @@
 from kafka import KafkaConsumer
-import simplejson
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
