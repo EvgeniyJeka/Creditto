@@ -1,7 +1,4 @@
 #? On start - get all Offers and Bids from SQL DB / Kafka (from offset 0) ?
-from datetime import datetime
-from decimal import Decimal
-import simplejson
 
 from credittomodels import statuses
 from sql_recovery_reader import SqlRecoveryReader
@@ -16,10 +13,12 @@ import logging
 
 
 from credittomodels import protobuf_handler
+from credittomodels.utils import Calculator
 
 logging.basicConfig(level=logging.INFO)
 
 producer = ProducerFromMatcher()
+
 
 # Protobuf handler - used to serialize bids and offers to proto
 proto_handler = protobuf_handler.ProtoHandler
@@ -77,15 +76,18 @@ class Matcher(object):
                 if isinstance(is_match, Match.Match):
                     self.matched_offer = offer
 
-                    #match_to_producer = simplejson.dumps(is_match.__dict__, use_decimal=True)\
+                    # Updating the Match instance
+                    is_match.sum = offer.sum
+                    is_match.monthly_payment = 0
 
+                    # Producing MATCH message to kafka (after it serialized to match proto message)
                     match_to_producer = proto_handler.serialize_match_to_proto(is_match)
 
                     match_record_headers = [("type", bytes('match', encoding='utf8'))]
 
                     logging.info(match_to_producer)
                     logging.info("MATCHER: Using Producer instance to send the match to Kafka topic 'matches' ")
-                    print(producer.produce_message(match_to_producer, 'matches', match_record_headers))
+                    producer.produce_message(match_to_producer, 'matches', match_record_headers)
 
         # Removing offer that was matched (if there was a match) and all bids on it from the pool
         if self.matched_offer:
