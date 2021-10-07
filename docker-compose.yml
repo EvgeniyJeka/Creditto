@@ -1,7 +1,9 @@
 version: '3'
 
+networks:
+  creditto_main:
+    driver: bridge
 
-    
 services:
 
   
@@ -11,6 +13,8 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
+    networks:
+      - creditto_main
     volumes:
       - ./volumes/zookeeper/data:/opt/zookeeper-3.4.6/data
   
@@ -24,6 +28,8 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    networks:
+      - creditto_main
     volumes:
       - ./volumes/kafka/var:/var
       - ./volumes/kafka/kafka:/kafka
@@ -39,6 +45,8 @@ services:
     restart: always
     ports:
       - 3306:3306
+    networks:
+      - creditto_main
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: sys
@@ -54,6 +62,8 @@ services:
     depends_on:
       - cabin_db
       - kafka
+    networks:
+      - creditto_main
       
   sql_writer:
     image: sql_writer:latest
@@ -61,6 +71,8 @@ services:
     depends_on:
       - cabin_db
       - kafka
+    networks:
+      - creditto_main
       
   creditto_matcher:
     image: creditto_matcher:latest
@@ -68,3 +80,23 @@ services:
     depends_on:
       - cabin_db
       - kafka
+    networks:
+      - creditto_main
+
+  sanity_tests_container:
+    image: sanity_tests_container:latest
+    command: ["pytest", "-v", "-m", "sanity"]
+    build: ./QaService
+    networks:
+      - creditto_main
+    environment:
+      - BASE_URL=http://creditto_creditto_gateway_1:5000
+      - SQL_HOST=cabin_db
+      - SQL_PORT=3306
+      - SQL_USER=root
+      - SQL_PASSWORD=123456
+      - WAIT_BEFORE_TIMEOUT=15
+
+
+
+

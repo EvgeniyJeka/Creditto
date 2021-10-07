@@ -30,7 +30,7 @@ class BaseConfig(object):
         SQL_USER = os.getenv('SQL_USER')
         SQL_PASSWORD = os.getenv('SQL_PASSWORD')
         SQL_DB_NAME = 'creditto'
-        WAIT_BEFORE_TIMEOUT = os.getenv('WAIT_BEFORE_TIMEOUT')
+        WAIT_BEFORE_TIMEOUT = int(os.getenv('WAIT_BEFORE_TIMEOUT'))
 
 
 if __name__ == '__main__':

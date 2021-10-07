@@ -1,15 +1,20 @@
 import time
 from credittomodels import Offer
 import pytest
-
-from Requests.postman import Postman
-from Tools import reporter
 import logging
 from decimal import Decimal
 
+try:
+    from Requests import postman
+    from Tools import reporter
+
+except ModuleNotFoundError:
+    from ...Requests import postman
+    from ...Tools import reporter
+
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
+postman = postman.Postman()
 reporter = reporter.Reporter()
 
 
@@ -42,6 +47,8 @@ test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
 
+@pytest.mark.container
+@pytest.mark.end2end
 @pytest.mark.incremental
 class TestBestOfTen(object):
 

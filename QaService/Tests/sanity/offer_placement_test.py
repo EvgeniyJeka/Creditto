@@ -1,14 +1,19 @@
-import time
 from credittomodels import Offer
 import pytest
 from decimal import Decimal
-from Requests.postman import Postman
-from Tools import reporter
 import logging
 
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
+try:
+    from Requests import postman
+    from Tools import reporter
+
+except ModuleNotFoundError:
+    from ...Requests import postman
+    from ...Tools import reporter
+
+postman = postman.Postman()
 reporter = reporter.Reporter()
 
 
@@ -41,6 +46,8 @@ test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
 
+@pytest.mark.container
+@pytest.mark.sanity
 @pytest.mark.incremental
 class TestOfferSanity(object):
     """

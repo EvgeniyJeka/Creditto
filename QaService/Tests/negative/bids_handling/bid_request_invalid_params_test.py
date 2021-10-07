@@ -1,16 +1,21 @@
 import json
-import time
-from credittomodels import Offer
 import pytest
-
-from Requests.postman import Postman
-from Tools import reporter
 import logging
-from Requests.Body_Constructors.requests_constants import *
+
+
+try:
+    from Requests import postman
+    from Tools import reporter
+    from Requests.Body_Constructors.requests_constants import *
+
+except ModuleNotFoundError:
+    from ....Requests import postman
+    from ....Tools import reporter
+    from ....Requests.Body_Constructors.requests_constants import *
 
 logging.basicConfig(level=logging.INFO)
 
-postman = Postman()
+postman = postman.Postman()
 reporter = reporter.Reporter()
 
 test_offer_owner_1 = 1024
@@ -31,6 +36,8 @@ test_bid_interest_4 = 0.037
 test_bid_interest_5 = 0.037
 
 
+@pytest.mark.container
+@pytest.mark.negative
 @pytest.mark.incremental
 class TestBidPlacement(object):
     """

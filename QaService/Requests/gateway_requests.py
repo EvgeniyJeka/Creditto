@@ -1,9 +1,15 @@
 import requests
-
-from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
-from base_config import BaseConfig
 import json
 import logging
+
+try:
+    from Requests.Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
+    from Config.base_config import BaseConfig
+
+except ModuleNotFoundError:
+    from .Body_Constructors.gateway_requests_bodies import GatewayRequestsBodies
+    from ..Config.base_config import BaseConfig
+
 
 
 base_url = BaseConfig.BASE_URL
@@ -18,7 +24,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + 'place_offer'
+        url = base_url + '/place_offer'
 
         payload = GatewayRequestsBodies.place_offer_request_body(owner_id, _sum, duration_months, offered_interest,
                                                                  allow_partial_fill)
@@ -43,7 +49,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + 'place_bid'
+        url = base_url + '/place_bid'
 
         payload = GatewayRequestsBodies.place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only)
 
@@ -68,7 +74,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + 'place_bid'
+        url = base_url + '/place_bid'
 
         payload = bid_body
 
@@ -92,7 +98,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + f'get_offers_by_status/{requested_status}'
+        url = base_url + f'/get_offers_by_status/{requested_status}'
 
         try:
             response = requests.get(url, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
@@ -110,7 +116,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + f'get_all_offers'
+        url = base_url + f'/get_all_offers'
 
         try:
             response = requests.get(url, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
@@ -128,7 +134,7 @@ class GatewayRequests(object):
         :return: Response body as a json.
         """
 
-        url = base_url + f'get_all_my_bids'
+        url = base_url + f'/get_all_my_bids'
 
         payload = GatewayRequestsBodies.get_bids_by_owner(owner_id, token)
 

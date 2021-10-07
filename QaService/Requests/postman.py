@@ -1,6 +1,9 @@
-from Requests.gateway_requests import GatewayRequests
-from credittomodels import Offer
 
+try:
+    from Requests.gateway_requests import GatewayRequests
+
+except ModuleNotFoundError:
+    from .gateway_requests import GatewayRequests
 
 
 class Postman(object):
