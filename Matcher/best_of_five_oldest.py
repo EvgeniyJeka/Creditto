@@ -1,9 +1,11 @@
 from decimal import Decimal
 from credittomodels import Match
 from credittomodels import Offer
-from credittomodels import Bid
 from datetime import datetime
 import logging
+
+from credittomodels.utils import Calculator as Calculator
+
 
 class BestOfFiveOldest:
 
@@ -35,9 +37,13 @@ class BestOfFiveOldest:
         list_bids_best_interest.sort(key=lambda x: x.date_added)
         selected_bid = list_bids_best_interest[0]
 
+        monthly_payment = Calculator.calculate_monthly_payment(Decimal(offer.sum), Decimal(best_interest_rate),
+                                                               Decimal(offer.duration), 4)
+
         logging.info(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")
         created_match = Match.Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
-                                    str(datetime.now()), offer.allow_partial_fill, best_interest_rate)
+                                    str(datetime.now()), offer.allow_partial_fill, best_interest_rate, monthly_payment,
+                                    Decimal(offer.sum))
 
         return created_match
 

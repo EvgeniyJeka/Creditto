@@ -85,7 +85,7 @@ services:
 
   sanity_tests_container:
     image: sanity_tests_container:latest
-    command: ["pytest", "-v", "-m", "sanity"]
+    command: ["pytest", "-v", "-m", "container"]
     build: ./QaService
     networks:
       - creditto_main

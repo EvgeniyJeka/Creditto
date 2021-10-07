@@ -98,7 +98,8 @@ class SqlBasic(object):
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
             query = "CREATE TABLE matches (id bigint, offer_id bigint, bid_id bigint, offer_owner_id int, bid_owner_id int, " \
-                    "match_time varchar(255), partial int, final_interest varchar(255), monthly_payment varchar(255)," \
+                    "match_time varchar(255), partial int, sum varchar(255), final_interest varchar(255), " \
+                    "monthly_payment varchar(255)," \
                     " PRIMARY KEY (ID));"
 
             cursor.execute(query)

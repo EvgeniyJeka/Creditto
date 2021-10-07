@@ -43,7 +43,7 @@ class SqlWriter(SqlBasic):
 
         query = f'insert into matches values({new_match_id}, {match.offer_id}, ' \
             f'{match.bid_id}, {match.offer_owner_id}, {match.bid_owner_id}, "{match.match_time}",' \
-            f' {match.partial}, {match.final_interest}, -1)'
+            f' {match.partial}, {match.sum}, {match.final_interest}, {match.monthly_payment})'
 
         self.cursor.execute(query)
         return True

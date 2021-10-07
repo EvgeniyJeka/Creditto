@@ -27,13 +27,15 @@ from credittomodels import protobuf_handler
 # 13. Consider adding Expirator/TimeManager service (?)
 # 14. Test framework - request must be printed and/or logged - D
 # 15. Add headers to Kafka records, message type should be in record header - D
-# 16. Make tests to run in a separate container (sanity, e2e test)
+# 16. Make tests to run in a separate container - D
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash) - D
 # 18. Solve the 'duplicates' problem (bug)  UUID - D
 # 19. Offer/Bid validation in SQL - consider to change the logic, since customer is notified that 
 # his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway 
-# and consumed by the Matcher and it is in the pool and possibly can be matched. Perhaps a confirmation should be sent after the message was successfully produced to Kafka. 
+# and consumed by the Matcher and it is in the pool and possibly can be matched.
+# Perhaps a confirmation should be sent after the message was successfully produced to Kafka.
 # 20. Consider save logs to a file, file should be saved in container volumes
+# 21. Monthly payment rounding im Matcher - move the tail digits to config in SQL
 
 logging.basicConfig(level=logging.INFO)
 
@@ -212,6 +214,15 @@ def get_my_bids():
 
     logging.info(f"Gateway: get all my bids, lender token validated: {token}")
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
+
+@app.route("/get_all_my_offers", methods=['POST'])
+def get_my_offers(owner_id: int):
+    pass
+
+
+@app.route("/get_all_my_matches", methods=['POST'])
+def get_my_matches(owner_id: int):
+    pass
 
 
 if __name__ == "__main__":
