@@ -213,6 +213,15 @@ def get_my_bids():
     logging.info(f"Gateway: get all my bids, lender token validated: {token}")
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
+@app.route("/get_all_my_offers", methods=['POST'])
+def get_my_offers(owner_id: int):
+    pass
+
+
+@app.route("/get_all_my_matches", methods=['POST'])
+def get_my_matches(owner_id: int):
+    pass
+
 
 if __name__ == "__main__":
     app.run(debug=True, host='0.0.0.0')
