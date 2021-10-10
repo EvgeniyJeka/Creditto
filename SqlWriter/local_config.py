@@ -7,6 +7,7 @@ class MatchingAlgorithm(Enum):
 class Config(Enum):
     MIN_BIDS_EXPECTED = 5
     SELECTED_MATCHING_ALGORITHM = MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST.value
+    ROUNDING_PLACES = 3
 
 
 class SqlConfig(Enum):
