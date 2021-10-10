@@ -23,6 +23,10 @@ class Reporter(SqlBasic):
         query = f'select * from offers where id = {offer_id}'
         return self.pack_to_dict(query, "offers")
 
+    def get_bids_by_offer(self, offer_id: int) -> list:
+        query = f'select * from bids where target_offer_id = {offer_id};'
+        return self.pack_to_dict(query, 'bids')
+
     def verify_offer_by_id(self, offer_id):
         """
         Verifying offer with given ID was saved to SQL DB
@@ -75,6 +79,8 @@ class Reporter(SqlBasic):
         try:
             offer_in_sql = self.get_offer_data(bid['target_offer_id'])
 
+            existing_bids_on_offer = self.get_bids_by_offer(bid['target_offer_id'])
+
             # Returning error message if bid is placed on non-existing offer
             if offer_in_sql == []:
                 logging.warning(f"Reporter: detected an attempt to place a bid on non-existing offer: {bid['target_offer_id']}")
@@ -93,6 +99,12 @@ class Reporter(SqlBasic):
                 logging.warning(
                     f"Reporter: detected an attempt to place a bid on an offer in status: {offer_in_sql['status']}")
                 return {"error": f"Bids can't be placed on offers in status {offer_in_sql['status']}"}
+
+            # Returning error message if given lender has already placed a bid on the targeted offer
+            if len(existing_bids_on_offer) > 0:
+                for existing_bid in existing_bids_on_offer:
+                    if existing_bid['owner_id'] == bid['owner_id']:
+                        return {"error": f"Lender is allowed to place only one Bid on each Offer"}
 
             return {"confirmed": "given bid can be placed"}
 

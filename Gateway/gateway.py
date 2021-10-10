@@ -116,13 +116,8 @@ def place_offer():
 
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
-    logging.info(offer_to_producer)
-    logging.info("Using Producer instance to send the offer to Kafka topic 'offers' ")
-    print(producer.produce_message(offer_to_producer, 'offers', offer_record_headers))
-
-    # Verifying placed offer was saved to 'offers' SQL table
-    if not reporter.verify_offer_by_id(next_id):
-        return {"error": f"Failed to place a new offer"}
+    logging.info(f"Using Producer instance to send the offer to Kafka topic 'offers': {offer_to_producer} ")
+    producer.produce_message(offer_to_producer, 'offers', offer_record_headers)
 
     return {"result": f"Added new offer, ID {next_id} assigned", "offer_id": next_id}
 
@@ -159,6 +154,7 @@ def place_bid():
 
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
     response = reporter.validate_bid(bid)
+
     if 'error' in response.keys():
         logging.warning(f"Bid {next_id} has failed validation and was rejected")
         return response
@@ -179,9 +175,8 @@ def place_bid():
 
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
-    logging.info(bid_to_producer)
-    logging.info("Using Producer instance to send the bid to Kafka topic 'bids' ")
-    print(producer.produce_message(bid_to_producer, 'bids', bid_record_headers))
+    logging.info(f"Using Producer instance to send the bid to Kafka topic 'bids': {bid_to_producer} ")
+    producer.produce_message(bid_to_producer, 'bids', bid_record_headers)
 
     return {"result": f"Added new bid, ID {next_id} assigned", "bid_id": next_id}
 

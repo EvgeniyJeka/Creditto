@@ -79,10 +79,31 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- BID Interest Greater Then Offer Interest - step passed "
                      f"----------------------------------\n")
 
+    def test_lender_can_place_one_bid_on_offer(self):
+        response = postman.gateway_requests. \
+            place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id, 0)
+        logging.info(response)
+
+        assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
+        assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
+        assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
+
+        response = postman.gateway_requests. \
+            place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id, 0)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == f'Lender is allowed to place only one Bid on each Offer'
+
+        logging.info(f"----------------------- Lender Can Place One Bid On Each Offer - step passed "
+                     f"----------------------------------\n")
+
     def test_matched_bid_cant_be_matched(self):
 
         # Placing 5 bids so the offer will become matched
-        for i in range(0, 5):
+        for i in range(1, 5):
             response = postman.gateway_requests. \
                 place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
             logging.info(response)
