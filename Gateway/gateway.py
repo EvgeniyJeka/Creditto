@@ -70,21 +70,17 @@ def place_offer():
     "allow_partial_fill":0
     }
     """
-    verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
-
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
-    # Rejecting invalid and malformed offer placement requests
-    if not isinstance(offer, dict) or 'type' not in offer.keys() or None in offer.values() \
-            or offer['type'] != statuses.Types.OFFER.value:
-        return {"error": "Invalid object type for this API method"}
+    logging.info("Validating offer placement request")
+    response = reporter.validate_offer(offer, ConfigParams.verified_offer_params.value)
 
-    for param in verified_offer_params:
-        if param not in offer.keys():
-            return {"error": "Required parameter is missing in provided offer"}
+    if 'error' in response.keys():
+        logging.warning(f"Offer {next_id} has failed validation and was rejected")
+        return response
 
     # In future versions it is possible that the offer will be converted to Google Proto message
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],

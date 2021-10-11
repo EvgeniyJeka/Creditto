@@ -65,7 +65,6 @@ class Reporter(SqlBasic):
         query = f'select * from bids where owner_id = {lender_id}'
         return self.pack_to_dict(query, "bids")
 
-
     def validate_bid(self, bid: dict, verified_bid_params: list):
         """
         This method can be used to validate bid data.
@@ -123,6 +122,19 @@ class Reporter(SqlBasic):
 
         except TypeError:
             return {"error": f"Bid request is invalid, 'NULL' is detected in one of the key fields"}
+
+    def validate_offer(self, offer: Offer, verified_offer_params: list):
+
+        # Rejecting invalid and malformed offer placement requests
+        if not isinstance(offer, dict) or 'type' not in offer.keys() or None in offer.values() \
+                or offer['type'] != statuses.Types.OFFER.value:
+            return {"error": "Invalid object type for this API method"}
+
+        for param in verified_offer_params:
+            if param not in offer.keys():
+                return {"error": "Required parameter is missing in provided offer"}
+
+        return {"confirmed": "given offer can be placed"}
 
 
 

@@ -1,15 +1,6 @@
 from enum import Enum
 
 
-class MatchingAlgorithm(Enum):
-    BEST_OF_FIVE_LOWEST_INTEREST = 1
-
-
-class Config(Enum):
-    MIN_BIDS_EXPECTED = 5
-    SELECTED_MATCHING_ALGORITHM = MatchingAlgorithm.BEST_OF_FIVE_LOWEST_INTEREST.value
-
-
 class SqlConfig(Enum):
     SQL_HOST = "creditto_cabin_db_1"
     #SQL_HOST = "127.0.0.1"
@@ -24,3 +15,9 @@ class KafkaConfig(Enum):
 
 class WebConfig(Enum):
     RUN_ON_HOST = ""
+
+
+class ConfigParams(Enum):
+    verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
+    verified_offer_params = ['owner_id', 'sum', 'duration', 'offered_interest', 'allow_partial_fill']
+    generated_uuid_length = 60
