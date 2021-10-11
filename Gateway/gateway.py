@@ -171,6 +171,11 @@ def get_my_bids():
     }
     """
     bids_request = request.get_json()
+    processed_match_request = reporter. \
+        validate_personal_data_request(bids_request, ConfigParams.verified_personal_data_request_params.value)
+
+    if 'error' in processed_match_request.keys():
+        return processed_match_request
 
     lender_id = bids_request['owner_id']
     token = bids_request['token']
@@ -180,7 +185,13 @@ def get_my_bids():
 
 @app.route("/get_all_my_offers", methods=['POST'])
 def get_my_offers():
+
     offers_request = request.get_json()
+    processed_match_request = reporter. \
+        validate_personal_data_request(offers_request, ConfigParams.verified_personal_data_request_params.value)
+
+    if 'error' in processed_match_request.keys():
+        return processed_match_request
 
     borrower_id = offers_request['owner_id']
     token = offers_request['token']
@@ -190,8 +201,20 @@ def get_my_offers():
 
 
 @app.route("/get_all_my_matches", methods=['POST'])
-def get_my_matches(owner_id: int):
-    pass
+def get_my_matches():
+
+    matches_request = request.get_json()
+    processed_match_request = reporter.\
+        validate_personal_data_request(matches_request, ConfigParams.verified_personal_data_request_params.value)
+
+    if 'error' in processed_match_request.keys():
+        return processed_match_request
+
+    owner_id = matches_request['owner_id']
+    token = matches_request['token']
+
+    logging.info(f"Gateway: get all my matches, customer's token validated: {token}")
+    return simplejson.dumps(reporter.get_matches_by_owner(owner_id))
 
 
 if __name__ == "__main__":

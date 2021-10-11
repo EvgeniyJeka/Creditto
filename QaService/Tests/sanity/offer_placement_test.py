@@ -45,6 +45,7 @@ test_bid_interest_8 = 0.039
 test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
+test_token = '1Aa@<>12'
 
 @pytest.mark.container
 @pytest.mark.sanity
@@ -122,7 +123,7 @@ class TestOfferSanity(object):
                      f"------------------------------\n")
 
     def test_get_offers_by_borrower(self):
-        response = postman.gateway_requests.get_offers_by_owner(test_offer_owner_1, "1Aa@>?")
+        response = postman.gateway_requests.get_offers_by_owner(test_offer_owner_1, test_token)
         logging.info(response)
 
         assert isinstance(response, list), "Invalid data type in API response"

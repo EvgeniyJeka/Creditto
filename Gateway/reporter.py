@@ -69,6 +69,30 @@ class Reporter(SqlBasic):
         query = f'select * from offers where owner_id = {borrower_id};'
         return self.pack_to_dict(query, "offers")
 
+    def get_matches_by_owner(self, owner_id: int):
+        query = f'select * from matches where offer_owner_id = {owner_id} or bid_owner_id = {owner_id};'
+        return self.pack_to_dict(query, "matches")
+
+    def validate_personal_data_request(self, request_data, verified_fields):
+        try:
+            if not isinstance(request_data, dict):
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid and malformed personal data requests
+            if None in request_data.values():
+                logging.warning(f"Gateway: Invalid personal data request received: {request_data}")
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid personal data requests with missing mandatory params
+            for param in verified_fields:
+                if param not in request_data.keys():
+                    return {"error": "Required parameter is missing in provided personal data request"}
+
+            return {"confirmed": "given personal data request can be placed"}
+
+        except TypeError:
+            return {"error": f"Personal data request is invalid, 'NULL' is detected in one of the key fields"}
+
     def validate_bid(self, bid: dict, verified_bid_params: list):
         """
         This method can be used to validate bid data.
