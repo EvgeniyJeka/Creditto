@@ -66,19 +66,32 @@ class Reporter(SqlBasic):
         return self.pack_to_dict(query, "bids")
 
 
-    def validate_bid(self, bid: dict):
+    def validate_bid(self, bid: dict, verified_bid_params: list):
         """
         This method can be used to validate bid data.
         Bid can be placed only if it meets several criteria:
-        a. Target offer exist in DB
-        b. Offer interest rate > Bid interest rate
-        c. Offer status is OPEN
+        a. Bid request is valid
+        b. Target offer exist in DB
+        c. Offer interest rate > Bid interest rate
+        d. Offer status is OPEN
+        e. Lender hasn't placed yet any bids on targeted offer
         :param bid: dict
         :return: JSON
         """
         try:
-            offer_in_sql = self.get_offer_data(bid['target_offer_id'])
 
+            # Rejecting invalid and malformed bid placement requests
+            if not isinstance(bid, dict) or 'type' not in bid.keys() or \
+                    None in bid.values() or bid['type'] != statuses.Types.BID.value:
+                logging.warning(f"Gateway: Invalid Bid request received: {bid}")
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid bid placement requests with missing mandatory params
+            for param in verified_bid_params:
+                if param not in bid.keys():
+                    return {"error": "Required parameter is missing in provided bid"}
+
+            offer_in_sql = self.get_offer_data(bid['target_offer_id'])
             existing_bids_on_offer = self.get_bids_by_offer(bid['target_offer_id'])
 
             # Returning error message if bid is placed on non-existing offer

@@ -3,6 +3,7 @@ from flask import request
 import logging
 import simplejson
 
+from local_config import ConfigParams
 from reporter import Reporter
 from credittomodels import Bid
 from credittomodels import Offer
@@ -74,7 +75,7 @@ def place_offer():
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
 
-    next_id = uuid.uuid4().int & (1<<60)-1
+    next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
     # Rejecting invalid and malformed offer placement requests
     if not isinstance(offer, dict) or 'type' not in offer.keys() or None in offer.values() \
@@ -118,31 +119,18 @@ def place_bid():
     "partial_only":0
     }
     """
-    verified_bid_params = ['owner_id', 'bid_interest', 'target_offer_id', 'partial_only']
-
     bid = request.get_json()
     logging.info(f"Gateway: Bid received {bid}")
 
-    next_id = uuid.uuid4().int & (1<<60)-1
-
-    # Rejecting invalid and malformed bid placement requests
-    if not isinstance(bid, dict) or 'type' not in bid.keys() or \
-            None in bid.values() or  bid['type'] != statuses.Types.BID.value:
-        logging.warning(f"Gateway: Invalid Bid request received: {bid}")
-        return {"error": "Invalid object type for this API method"}
-
-    for param in verified_bid_params:
-        if param not in bid.keys():
-            return {"error": "Required parameter is missing in provided bid"}
+    next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
     logging.info("Validating target offer with provided ID is OPEN, validating Bid interest against target offer")
-    response = reporter.validate_bid(bid)
+    response = reporter.validate_bid(bid, ConfigParams.verified_bid_params.value)
 
     if 'error' in response.keys():
         logging.warning(f"Bid {next_id} has failed validation and was rejected")
         return response
 
-    # In future versions it is possible that the bid will be converted to Google Proto message
     if bid['partial_only'] == 1:
         placed_bid = Bid.Bid(next_id, bid['owner_id'], bid['bid_interest'],
                              bid['target_offer_id'], bid['partial_only'], bid['partial_sum'])
@@ -155,7 +143,7 @@ def place_bid():
 
     # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
     if not bid_to_producer:
-        return {"error": f"Failed to place a new offer, invalid data in request"}
+        return {"error": f"Failed to place a new bid, invalid data in request"}
 
     bid_record_headers = [("type", bytes('bid', encoding='utf8'))]
 
