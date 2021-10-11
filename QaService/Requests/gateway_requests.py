@@ -30,6 +30,7 @@ class GatewayRequests(object):
                                                                  allow_partial_fill)
 
         try:
+            logging.info(url)
             response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -54,6 +55,7 @@ class GatewayRequests(object):
         payload = GatewayRequestsBodies.place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only)
 
         try:
+            logging.info(url)
             response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -79,6 +81,7 @@ class GatewayRequests(object):
         payload = bid_body
 
         try:
+            logging.info(url)
             response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -103,6 +106,7 @@ class GatewayRequests(object):
         payload = offer_body
 
         try:
+            logging.info(url)
             response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -125,6 +129,7 @@ class GatewayRequests(object):
         url = base_url + f'/get_offers_by_status/{requested_status}'
 
         try:
+            logging.info(url)
             response = requests.get(url, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -133,6 +138,29 @@ class GatewayRequests(object):
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
+
+    def get_offers_by_owner(self, owner_id, token) -> json:
+        """
+        Sends HTTP POST request to Gateway in order to receive offers placed by given borrower as JSON
+        :return: Response body as a json.
+        """
+
+        url = base_url + f'/get_all_my_offers'
+
+        payload = GatewayRequestsBodies.get_offers_by_owner(owner_id, token)
+
+        try:
+            logging.info(url)
+            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+
 
     def get_all_offers(self) -> json:
         """
@@ -143,6 +171,7 @@ class GatewayRequests(object):
         url = base_url + f'/get_all_offers'
 
         try:
+            logging.info(url)
             response = requests.get(url, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
@@ -163,6 +192,7 @@ class GatewayRequests(object):
         payload = GatewayRequestsBodies.get_bids_by_owner(owner_id, token)
 
         try:
+            logging.info(url)
             response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))

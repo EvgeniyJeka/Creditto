@@ -65,6 +65,10 @@ class Reporter(SqlBasic):
         query = f'select * from bids where owner_id = {lender_id}'
         return self.pack_to_dict(query, "bids")
 
+    def get_offers_by_borrower(self, borrower_id: int):
+        query = f'select * from offers where owner_id = {borrower_id};'
+        return self.pack_to_dict(query, "offers")
+
     def validate_bid(self, bid: dict, verified_bid_params: list):
         """
         This method can be used to validate bid data.

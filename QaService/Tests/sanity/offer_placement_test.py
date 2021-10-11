@@ -121,3 +121,24 @@ class TestOfferSanity(object):
         logging.info(f"----------------------- Get All OPEN Offers  API method - data verified "
                      f"------------------------------\n")
 
+    def test_get_offers_by_borrower(self):
+        response = postman.gateway_requests.get_offers_by_owner(test_offer_owner_1, "1Aa@>?")
+        logging.info(response)
+
+        assert isinstance(response, list), "Invalid data type in API response"
+        assert len(response) > 0, "Placed offer wasn't returned in API response "
+        assert isinstance(response[0], dict), "Invalid data type in API response"
+
+        for offer in response:
+            if offer['id'] == TestOfferSanity.offer_id:
+                assert offer['owner_id'] == test_offer_owner_1
+                assert Decimal(offer['sum']) == Decimal(test_sum)
+                assert offer['duration'] == test_duration
+                assert offer['offered_interest'] == str(test_offer_interest_low)
+                assert offer['status'] == Offer.OfferStatuses.OPEN.value
+
+        logging.info(f"----------------------- Get All Offers Placed By Given Borrower API method - data verified "
+                     f"------------------------------\n")
+
+
+

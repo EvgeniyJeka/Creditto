@@ -179,8 +179,14 @@ def get_my_bids():
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
 @app.route("/get_all_my_offers", methods=['POST'])
-def get_my_offers(owner_id: int):
-    pass
+def get_my_offers():
+    offers_request = request.get_json()
+
+    borrower_id = offers_request['owner_id']
+    token = offers_request['token']
+
+    logging.info(f"Gateway: get all my offers, borrower token validated: {token}")
+    return simplejson.dumps(reporter.get_offers_by_borrower(borrower_id))
 
 
 @app.route("/get_all_my_matches", methods=['POST'])
