@@ -56,7 +56,8 @@ services:
       
   creditto_gateway:
     image: creditto_gateway:latest
-    build: ./Gateway 
+    build: ./Gateway
+    restart: always    
     ports:
       - "5000:5000"
     depends_on:
@@ -68,6 +69,7 @@ services:
   sql_writer:
     image: sql_writer:latest
     build: ./SqlWriter
+    restart: always
     depends_on:
       - cabin_db
       - kafka
@@ -77,6 +79,7 @@ services:
   creditto_matcher:
     image: creditto_matcher:latest
     build: ./Matcher
+    restart: always
     depends_on:
       - cabin_db
       - kafka
@@ -85,7 +88,7 @@ services:
 
   sanity_tests_container:
     image: sanity_tests_container:latest
-    command: ["pytest", "-v", "-m", "container"]
+    command: ["pytest", "-v", "-m", "sanity"]
     build: ./QaService
     networks:
       - creditto_main

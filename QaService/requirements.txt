@@ -4,3 +4,4 @@ requests
 PyMySQL
 cryptography
 credittomodels
+numpy_financial

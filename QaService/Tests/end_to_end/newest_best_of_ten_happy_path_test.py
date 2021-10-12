@@ -147,7 +147,7 @@ class TestBestOfTen(object):
                      f"--------------\n")
 
     def test_get_offers_by_status(self):
-        response = postman.gateway_requests.get_offers_by_status(Offer.OfferStatuses.OPEN.value)
+        response = postman.gateway_requests.get_offers_by_status(Offer.OfferStatuses.MATCHED.value)
         logging.info(response)
 
         assert isinstance(response, list), "Invalid data type in API response"

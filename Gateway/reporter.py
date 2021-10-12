@@ -23,6 +23,10 @@ class Reporter(SqlBasic):
         query = f'select * from offers where id = {offer_id}'
         return self.pack_to_dict(query, "offers")
 
+    def get_bids_by_offer(self, offer_id: int) -> list:
+        query = f'select * from bids where target_offer_id = {offer_id};'
+        return self.pack_to_dict(query, 'bids')
+
     def verify_offer_by_id(self, offer_id):
         """
         Verifying offer with given ID was saved to SQL DB
@@ -61,19 +65,61 @@ class Reporter(SqlBasic):
         query = f'select * from bids where owner_id = {lender_id}'
         return self.pack_to_dict(query, "bids")
 
+    def get_offers_by_borrower(self, borrower_id: int):
+        query = f'select * from offers where owner_id = {borrower_id};'
+        return self.pack_to_dict(query, "offers")
 
-    def validate_bid(self, bid: dict):
+    def get_matches_by_owner(self, owner_id: int):
+        query = f'select * from matches where offer_owner_id = {owner_id} or bid_owner_id = {owner_id};'
+        return self.pack_to_dict(query, "matches")
+
+    def validate_personal_data_request(self, request_data, verified_fields):
+        try:
+            if not isinstance(request_data, dict):
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid and malformed personal data requests
+            if None in request_data.values():
+                logging.warning(f"Gateway: Invalid personal data request received: {request_data}")
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid personal data requests with missing mandatory params
+            for param in verified_fields:
+                if param not in request_data.keys():
+                    return {"error": "Required parameter is missing in provided personal data request"}
+
+            return {"confirmed": "given personal data request can be placed"}
+
+        except TypeError:
+            return {"error": f"Personal data request is invalid, 'NULL' is detected in one of the key fields"}
+
+    def validate_bid(self, bid: dict, verified_bid_params: list):
         """
         This method can be used to validate bid data.
         Bid can be placed only if it meets several criteria:
-        a. Target offer exist in DB
-        b. Offer interest rate > Bid interest rate
-        c. Offer status is OPEN
+        a. Bid request is valid
+        b. Target offer exist in DB
+        c. Offer interest rate > Bid interest rate
+        d. Offer status is OPEN
+        e. Lender hasn't placed yet any bids on targeted offer
         :param bid: dict
         :return: JSON
         """
         try:
+
+            # Rejecting invalid and malformed bid placement requests
+            if not isinstance(bid, dict) or 'type' not in bid.keys() or \
+                    None in bid.values() or bid['type'] != statuses.Types.BID.value:
+                logging.warning(f"Gateway: Invalid Bid request received: {bid}")
+                return {"error": "Invalid object type for this API method"}
+
+            # Rejecting invalid bid placement requests with missing mandatory params
+            for param in verified_bid_params:
+                if param not in bid.keys():
+                    return {"error": "Required parameter is missing in provided bid"}
+
             offer_in_sql = self.get_offer_data(bid['target_offer_id'])
+            existing_bids_on_offer = self.get_bids_by_offer(bid['target_offer_id'])
 
             # Returning error message if bid is placed on non-existing offer
             if offer_in_sql == []:
@@ -94,10 +140,29 @@ class Reporter(SqlBasic):
                     f"Reporter: detected an attempt to place a bid on an offer in status: {offer_in_sql['status']}")
                 return {"error": f"Bids can't be placed on offers in status {offer_in_sql['status']}"}
 
+            # Returning error message if given lender has already placed a bid on the targeted offer
+            if len(existing_bids_on_offer) > 0:
+                for existing_bid in existing_bids_on_offer:
+                    if existing_bid['owner_id'] == bid['owner_id']:
+                        return {"error": f"Lender is allowed to place only one Bid on each Offer"}
+
             return {"confirmed": "given bid can be placed"}
 
         except TypeError:
             return {"error": f"Bid request is invalid, 'NULL' is detected in one of the key fields"}
+
+    def validate_offer(self, offer: Offer, verified_offer_params: list):
+
+        # Rejecting invalid and malformed offer placement requests
+        if not isinstance(offer, dict) or 'type' not in offer.keys() or None in offer.values() \
+                or offer['type'] != statuses.Types.OFFER.value:
+            return {"error": "Invalid object type for this API method"}
+
+        for param in verified_offer_params:
+            if param not in offer.keys():
+                return {"error": "Required parameter is missing in provided offer"}
+
+        return {"confirmed": "given offer can be placed"}
 
 
 
