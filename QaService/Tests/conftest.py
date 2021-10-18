@@ -18,13 +18,12 @@ def set_matching_logic(request):
     :param request: matching logic ID, int
     :return: None
     """
-    # if request.param:
-    #     matching_logic = request.param[0]
-    #
-    # else:
-    #     matching_logic = 1
+    if hasattr(request, 'param'):
+        matching_logic = request.param[0]
 
-    matching_logic = request.param[0]
+    else:
+        matching_logic = 1
+
     current_matching_logic = reporter.fetch_config_from_db("matching_logic")
 
     if current_matching_logic != matching_logic:
@@ -54,7 +53,7 @@ def offer_placed(request):
 
     return offer_id
 
-@pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
+
 @pytest.fixture(scope='class')
 def match_ready(request, set_matching_logic):
     """
@@ -72,7 +71,7 @@ def match_ready(request, set_matching_logic):
     test_offer_interest = match_input['offer_interest']
     test_offer_owner_token = match_input['offer_owner_token']
 
-    test_bid_owner = match_input['bid_owner']
+    test_bid_owners_list = match_input['bid_owners_list']
     test_bid_interest = match_input['bid_interest']
 
     # Placing Offer
@@ -88,23 +87,32 @@ def match_ready(request, set_matching_logic):
     time.sleep(5)
 
     # Placing Bid that is expected to match with the Offer
+    bid_id = 0
 
     for i in range(0, 5):
         response = postman.gateway_requests. \
-            place_bid(test_bid_owner, test_bid_interest, offer_id, 0)
+            place_bid(test_bid_owners_list[i], test_bid_interest, offer_id, 0)
         logging.info(response)
 
-    assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
-    assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
-    assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
+        assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
+        assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
+        assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
+        if i == 0:
+            bid_id = response['bid_id']
 
     # Finding the created match by Offer ID
+    time.sleep(5)
     my_matches = postman.gateway_requests.get_matches_by_owner(test_offer_owner, test_offer_owner_token)
 
     result = [x for x in my_matches if x['offer_id'] == offer_id]
 
+    logging.info(f"Found the created match: {result}")
+
     if len(result) > 0:
         request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
+        request.cls.offer_id = offer_id
+        request.cls.bid_id = bid_id
+        request.cls.bid_owner_id = test_bid_owners_list[0]
 
     else:
         logging.error(f"Match creation failed - offer ID {offer_id}")
