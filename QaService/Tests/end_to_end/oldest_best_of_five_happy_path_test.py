@@ -38,10 +38,10 @@ test_bid_interest_4 = 0.037
 test_bid_interest_5 = 0.037
 
 
+@pytest.mark.incremental
 @pytest.mark.container
 @pytest.mark.end2end
-@pytest.mark.incremental
-class TestBestOfFive(object):
+class TestBestOfFive:
 
     offer_id = 0
     matching_bid_id = 0
@@ -87,6 +87,8 @@ class TestBestOfFive(object):
         logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
 
     def test_verify_no_match_yet(self):
+        print(f"Offer SQL : {reporter.get_offer_by_id(self.offer_id)}")
+
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
         assert offer_sql['status'] == Offer.OfferStatuses.OPEN.value, "Offer was matched before 3 bids were placed"
