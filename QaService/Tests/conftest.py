@@ -118,5 +118,18 @@ def match_ready(request, set_matching_logic):
         logging.error(f"Match creation failed - offer ID {offer_id}")
 
 
+# Support for @pytest.mark.incremental
+def pytest_runtest_makereport(item, call):
+    if "incremental" in item.keywords:
+        if call.excinfo is not None:
+            parent = item.parent
+            parent._previousfailed = item
+
+def pytest_runtest_setup(item):
+    previousfailed = getattr(item.parent, "_previousfailed", None)
+    if previousfailed is not None:
+        pytest.xfail(f"previous test step failed {previousfailed.name}, test flow is terminated")
+
+
 
 

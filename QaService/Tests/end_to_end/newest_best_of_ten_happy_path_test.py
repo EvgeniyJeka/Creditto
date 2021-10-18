@@ -47,10 +47,10 @@ test_bid_interest_9 = 0.038
 test_bid_interest_10 = 0.041
 
 
-@pytest.mark.incremental
 @pytest.mark.container
 @pytest.mark.end2end
-class TestBestOfTen(object):
+@pytest.mark.incremental
+class TestBestOfTen:
 
     offer_id = 0
     matching_bid_id = 0
