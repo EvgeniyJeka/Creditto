@@ -14,7 +14,7 @@ import uuid
 from credittomodels import protobuf_handler
 
 # 1. Add automated tests: match flow, API + SQL - D
-# 2. Add validation on Offer/Bid placement - respond only after confirmation  - P.D. (?)
+# 2. Add validation on Offer/Bid placement - respond only after confirmation  - D
 # 3. Start writing read.me file (will be also considered as a spec) - D
 # 4. Matching logic - move to separate files, update existing - D
 # 5. Matching logic - move config to SQL (needed for tests) - D
@@ -32,12 +32,13 @@ from credittomodels import protobuf_handler
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash) - D
 # 18. Solve the 'duplicates' problem (bug)  UUID - D
 # 19. Offer/Bid validation in SQL - consider to change the logic, since customer is notified that 
-# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway 
-# and consumed by the Matcher and it is in the pool and possibly can be matched.
+# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway
+# and consumed by the Matcher and it is in the pool and possibly can be matched - D
 # Perhaps a confirmation should be sent after the message was successfully produced to Kafka.
 # 20. Consider save logs to a file, file should be saved in container volumes
 # 21. Monthly payment rounding im Matcher - move the tail digits to config in SQL
-# 22. Add Gateway instance on port 80
+# 22. Add Gateway instance on port 80 (?)
+# 23. Consider to add a new API method to Gateway - 'get_match_by_offer(offer_id)'
 
 logging.basicConfig(level=logging.INFO)
 

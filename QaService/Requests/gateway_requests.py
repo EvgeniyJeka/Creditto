@@ -160,8 +160,6 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-
-
     def get_all_offers(self) -> json:
         """
         Sends HTTP GET request to Gateway in order to receive all existing offers from DB
@@ -190,6 +188,28 @@ class GatewayRequests(object):
         url = base_url + f'/get_all_my_bids'
 
         payload = GatewayRequestsBodies.get_bids_by_owner(owner_id, token)
+
+        try:
+            logging.info(url)
+            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+    def get_matches_by_owner(self, owner_id, token) -> json:
+        """
+        Sends HTTP POST request to Gateway in order to receive matches related to provided owner ID as JSON
+        The method can be used both by Borrowers and Lenders - owner ID is used to filter the relevant matches
+        :return: Response body as a json.
+        """
+
+        url = base_url + f'/get_all_my_matches'
+
+        payload = GatewayRequestsBodies.get_matches_by_owner(owner_id, token)
 
         try:
             logging.info(url)

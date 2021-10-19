@@ -64,3 +64,14 @@ class GatewayRequestsBodies:
         logging.info(json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4))
 
         return payload_composed
+
+    @staticmethod
+    def get_matches_by_owner(owner_id, token):
+        payload_composed = {
+            OWNER_ID: owner_id,
+            TOKEN: token
+        }
+
+        logging.info(json.dumps(payload_composed, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        return payload_composed

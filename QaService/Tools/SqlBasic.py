@@ -212,4 +212,8 @@ class SqlBasic(object):
         query = f"UPDATE `creditto`.`local_config` SET `value` = '{new_config}' WHERE (`id` = '{id}');"
         self.run_sql_query(query)
 
+    def get_bids_by_offer(self, offer_id):
+        query = f"select * from bids where target_offer_id = {offer_id}"
+        return self.pack_to_dict(query, 'bids')
+
 

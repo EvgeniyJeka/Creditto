@@ -50,7 +50,7 @@ test_bid_interest_10 = 0.041
 @pytest.mark.container
 @pytest.mark.end2end
 @pytest.mark.incremental
-class TestBestOfTen(object):
+class TestBestOfTen:
 
     offer_id = 0
     matching_bid_id = 0
@@ -78,6 +78,7 @@ class TestBestOfTen(object):
         logging.info(f"----------------------- Offer Placement - step passed ----------------------------------\n")
 
     def test_offer_in_sql(self):
+        time.sleep(4)
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
         assert offer_sql['id'] == self.offer_id, "Offer Placement error - placed offer wasn't saved to DB"
