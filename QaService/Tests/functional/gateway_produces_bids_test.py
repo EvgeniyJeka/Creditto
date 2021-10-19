@@ -71,7 +71,7 @@ class TestBidProduced(object):
 
         logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
 
-    def test_bid_in_kafka(self):
+    def test_bid_from_kafka(self):
         bids_from_kafka = kafka_integration.pull_produced_bids()
 
         # One Bid pulled from 'bids' Kafka topic

@@ -51,6 +51,15 @@ test_bid_interest_10 = 0.041
 @pytest.mark.end2end
 @pytest.mark.incremental
 class TestBestOfTen:
+    """
+        In those tests we verify that:
+        1. Full end-to-end flow : placed Offer is matched with the best Bid out of ten placed bids
+        2. Matching logic is configurable
+        3. Selected matching logic - the Bid with the best interest is selected out of 10 bids,
+        when the 10th bid is placed. If 2 or more bids have the same interest the newest bid is selected.
+        4. Offer status is updated accordingly in SQL DB
+        5. Offer 'final interest' (best bid interest) is updated accordingly in SQL DB
+    """
 
     offer_id = 0
     matching_bid_id = 0

@@ -42,6 +42,15 @@ test_bid_interest_5 = 0.037
 @pytest.mark.container
 @pytest.mark.end2end
 class TestBestOfFive:
+    """
+        In those tests we verify that:
+        1. Full end-to-end flow : placed Offer is matched with the best Bid out of five placed bids
+        2. Matching logic is configurable
+        3. Selected matching logic - the Bid with the best interest is selected out of 5 bids,
+        when the 5th bid is placed. If 2 or more bids have the same interest the oldest bid is selected.
+        4. Offer status is updated accordingly in SQL DB
+        5. Offer 'final interest' (best bid interest) is updated accordingly in SQL DB
+    """
 
     offer_id = 0
     matching_bid_id = 0
@@ -137,7 +146,6 @@ class TestBestOfFive:
 
         logging.info(f"----------------------- Verifying Match Data in SQL - step passed --------------------"
                      f"--------------\n")
-
 
     def test_get_offers_by_status(self):
         response = postman.gateway_requests.get_offers_by_status(Offer.OfferStatuses.MATCHED.value)
