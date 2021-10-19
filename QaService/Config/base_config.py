@@ -32,6 +32,13 @@ class BaseConfig(object):
         SQL_DB_NAME = 'creditto'
         WAIT_BEFORE_TIMEOUT = int(os.getenv('WAIT_BEFORE_TIMEOUT'))
 
+    BOOTSTRAP_SERVERS = parser.get('KAFKA', 'bootstrap_servers')
+    OFFERS_TOPIC = parser.get('KAFKA', 'offers_topic')
+    BIDS_TOPIC = parser.get('KAFKA', 'bids_topic')
+    MATCHES_TOPIC = parser.get('KAFKA', 'matches_topic')
+
+    PULLING_TIMEOUT = int(parser.get('KAFKA', 'pulling_timeout'))
+
 
 if __name__ == '__main__':
     bc = BaseConfig()
