@@ -1,11 +1,7 @@
-
-import pymysql
-from datetime import datetime
 import logging
 from credittomodels import statuses
 
 from .SqlBasic import SqlBasic
-from credittomodels import Offer
 from decimal import *
 
 
@@ -45,8 +41,6 @@ class Reporter(SqlBasic):
     def get_match_by_offer_id(self, offer_id: int):
         query = f'select * from matches where offer_id = {offer_id}'
         return self.pack_to_dict(query, "matches")
-
-
 
     def validate_bid(self, bid: dict):
         """

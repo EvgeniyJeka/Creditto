@@ -36,6 +36,12 @@ test_token = '1Aa@<>12'
 @pytest.mark.container
 @pytest.mark.functional
 class TestBidsCancelled(object):
+    """
+       In those tests we verify that:
+       1. When Offer is matched with one of the bids the status of that bid is changed to MATCHED
+       2. The status of all other bids on that offer is changed to CANCELLED 
+     
+    """
 
     match_input = {'offer_owner': test_offer_owner, 'offer_sum': test_sum, 'offer_duration': test_duration,
                    'offer_interest': test_offer_interest, 'bid_owners_list': test_bid_owners_list,
