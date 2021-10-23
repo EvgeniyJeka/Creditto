@@ -10,8 +10,8 @@ try:
 except ModuleNotFoundError:
     from ...Requests import postman
     from ...Tools import KafkaIntegration
-
-
+    
+    
 logging.basicConfig(level=logging.INFO)
 
 postman = postman.Postman()

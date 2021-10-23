@@ -1,7 +1,12 @@
 from kafka import KafkaConsumer
-from Config.base_config import BaseConfig
 import logging
 from credittomodels import protobuf_handler
+
+
+try:
+    from Config.base_config import BaseConfig
+except ModuleNotFoundError:
+    from ..Config.base_config import BaseConfig
 
 logging.basicConfig(level=logging.INFO)
 
