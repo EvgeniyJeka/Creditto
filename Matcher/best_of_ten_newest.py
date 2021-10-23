@@ -9,7 +9,7 @@ from credittomodels.utils import Calculator as Calculator
 class BestOfTenNewest:
 
     @staticmethod
-    def find_best_bid(bids_for_offer, offer: Offer):
+    def find_best_bid(bids_for_offer, offer: Offer, tail_digits: int):
 
         if len(bids_for_offer) < 10:
             logging.info(f"MATCHER: Not enough bids for offer {offer.id}, expecting for at least 10, no match")
@@ -35,7 +35,7 @@ class BestOfTenNewest:
         selected_bid = list_bids_best_interest[0]
 
         monthly_payment = Calculator.calculate_monthly_payment(Decimal(offer.sum), Decimal(best_interest_rate),
-                                                               Decimal(offer.duration), 4)
+                                                               Decimal(offer.duration), tail_digits)
 
         logging.info(f"MATCHER: MATCHED BID {selected_bid.id} WITH OFFER {offer.id}")
         created_match = Match.Match(offer.id, selected_bid.id, offer.owner_id, selected_bid.owner_id,
