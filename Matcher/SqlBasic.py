@@ -114,6 +114,8 @@ class SqlBasic(object):
 
             query = f'insert into local_config values(1, "matching_logic", 1, "selected matching algorithm")'
             cursor.execute(query)
+            query = f'insert into local_config values(2, "tail_digits", 4, "max tail digits allowed, rounding config")'
+            cursor.execute(query)
             logging.warning("Logs: SETTING THE DEFAULT CONFIG")
 
     def get_next_id(self, table_name):
@@ -138,7 +140,6 @@ class SqlBasic(object):
 
     def get_columns(cls, table):
         """
-        # Author: Evgeniy
         Returns a list of column names
         @param table: existing table, str
         @return: list of str
