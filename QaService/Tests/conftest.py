@@ -2,9 +2,17 @@ import time
 
 import pytest
 import logging
-from ..Tools import reporter
-from ..Tools import DockerIntegration
-from ..Requests import postman
+
+
+try:
+    from Requests import postman
+    from Tools import reporter
+    from Tools import DockerIntegration
+
+except ModuleNotFoundError:
+    from ..Requests import postman
+    from ..Tools import reporter
+    from ..Tools import DockerIntegration
 
 logging.basicConfig(level=logging.INFO)
 
@@ -58,12 +66,34 @@ def offer_placed(request):
 
 @pytest.fixture(scope='class')
 def restart_container(request):
+    """
+    This fixture can be used to restart a running Docker container
+
+    """
 
     container_to_restart = request.param[0]
 
     container = docker_tool.stop_container(container_to_restart)
     time.sleep(6)
     docker_tool.start_container(container)
+
+
+def container_restart(container_to_restart):
+    """
+    This method can be used to restart a running Docker container
+    :param container_to_restart: container name , str
+    :return: True on success, False on failure
+    """
+    try:
+        container = docker_tool.stop_container(container_to_restart)
+        time.sleep(6)
+        docker_tool.start_container(container)
+        return True
+
+    except Exception as e:
+        logging.error(f"Failed to restart container: {container_restart()} - {e}")
+        return False
+
 
 
 
