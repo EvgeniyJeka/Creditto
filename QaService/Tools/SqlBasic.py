@@ -1,3 +1,5 @@
+import time
+
 import pymysql
 import logging
 
@@ -13,6 +15,7 @@ class SqlBasic(object):
     usr = base_config.BaseConfig.SQL_USER
     pwd = base_config.BaseConfig.SQL_PASSWORD
     db_name = base_config.BaseConfig.SQL_DB_NAME
+    system_warmup_delay = base_config.BaseConfig.MYSQL_DB_WARMUP_DELAY
     cursor = None
 
     def __init__(self):
@@ -48,9 +51,33 @@ class SqlBasic(object):
 
             return cursor
 
-        # Wrong Credentials error
-        except pymysql.err.OperationalError as e:
-            print(f"Wrong Credentials or Host: {e}")
+        # Assuming MySQL DB isn't up, giving it more time to start
+        except pymysql.err.OperationalError:
+            logging.warning(f"SQL DB isn't up yet, giving it {self.system_warmup_delay} more seconds")
+            time.sleep(self.system_warmup_delay)
+
+            try:
+                conn = pymysql.connect(host=hst, user=usr, password=pwd, autocommit='True')
+                cursor = conn.cursor()
+
+                cursor.execute('show databases')
+                databases = [x[0] for x in cursor.fetchall()]
+
+                if self.db_name in databases:
+                    query = f"USE {self.db_name}"
+                    logging.info(f"Executing query |{query}|")
+                    cursor.execute(query)
+
+                else:
+                    query = f"CREATE DATABASE {self.db_name}"
+                    logging.info(f"Executing query | {query}|")
+                    cursor.execute(query)
+
+                return cursor
+
+            # Wrong Credentials error
+            except pymysql.err.OperationalError as e:
+                print(f"Wrong Credentials or Host: {e}")
 
         # Wrong DB name error
         except pymysql.err.InternalError:
@@ -77,6 +104,7 @@ class SqlBasic(object):
         If they aren't the method will create them
         :param cursor: sql cursor
         """
+
         cursor.execute('show tables')
         tups = cursor.fetchall()
 

@@ -39,7 +39,7 @@ from credittomodels import protobuf_handler
 # 21. Monthly payment rounding im Matcher - move the tail digits to config in SQL
 # 22. Add Gateway instance on port 80 (?)
 # 23. Consider to add a new API method to Gateway - 'get_match_by_offer(offer_id)'
-# 24. Test container - consider adding retries when SQL is unavailable (catch exception, retry x times before failing)
+# 24. Test container - consider adding retries when SQL is unavailable (catch exception, retry x times before failing) - D
 
 logging.basicConfig(level=logging.INFO)
 

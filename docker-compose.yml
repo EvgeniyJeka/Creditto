@@ -99,6 +99,7 @@ services:
       - SQL_USER=root
       - SQL_PASSWORD=123456
       - WAIT_BEFORE_TIMEOUT=15
+      - MYSQL_DB_WARMUP_DELAY=40
 
 
 
