@@ -107,11 +107,12 @@ class Matcher(object):
 
         # Fetching config from SQL
         matching_algorithm_config_sql = int(self.read_sql_recovery.fetch_config_from_db("matching_logic"))
+        tail_digits = int(self.read_sql_recovery.fetch_config_from_db("tail_digits"))
 
         # Using the selected matching algorithm
         matching_algorithm = available_matching_algorithms[matching_algorithm_config_sql - 1]
 
-        return matching_algorithm(bids_for_offer, offer)
+        return matching_algorithm(bids_for_offer, offer, tail_digits)
 
     def get_all_existing_offers_ids(self):
         """
