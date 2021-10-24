@@ -3,12 +3,14 @@ import time
 import pytest
 import logging
 from ..Tools import reporter
+from ..Tools import DockerIntegration
 from ..Requests import postman
 
 logging.basicConfig(level=logging.INFO)
 
 postman = postman.Postman()
 reporter = reporter.Reporter()
+docker_tool = DockerIntegration.DockerIntegration
 
 
 @pytest.fixture(scope='class')
@@ -52,6 +54,18 @@ def offer_placed(request):
     assert isinstance(response['offer_id'], int), "Offer Placement error - invalid offer ID in response"
 
     return offer_id
+
+
+@pytest.fixture(scope='class')
+def restart_container(request):
+
+    container_to_restart = request.param[0]
+
+    container = docker_tool.stop_container(container_to_restart)
+    time.sleep(6)
+    docker_tool.start_container(container)
+
+
 
 
 @pytest.fixture(scope='class')
