@@ -3,7 +3,6 @@ import logging
 from local_config import SqlConfig
 
 
-
 class SqlBasic(object):
     hst = SqlConfig.SQL_HOST.value
     usr = SqlConfig.SQL_USER.value
@@ -118,27 +117,7 @@ class SqlBasic(object):
             cursor.execute(query)
             logging.warning("Logs: SETTING THE DEFAULT CONFIG")
 
-    def get_next_id(self, table_name):
-        """
-        This method can be used to get the next valid number that can be used as ID for new record in given table
-        :param table_name: existing table, str
-        :param cursor: sql cursor
-        :return: int
-        """
-        try:
-            query = f"select id from {table_name} order by id desc;"
-
-            result = self.run_sql_query(query)[0][0]
-            return result + 1
-
-        except pymysql.err.ProgrammingError as e:
-            logging.error(f"Reporter: Table {table_name} doesn't exsits: {e}")
-
-        except IndexError as e:
-            logging.warning(f"Reporter: The table {table_name} is currently empty. Receiving first record")
-            return 1
-
-    def get_columns(cls, table):
+    def get_columns(self, table):
         """
         Returns a list of column names
         @param table: existing table, str
@@ -147,7 +126,7 @@ class SqlBasic(object):
         query = 'show columns from ''%s'';' % table
 
         try:
-            columns = cls.run_sql_query(query)
+            columns = self.run_sql_query(query)
             result = []
 
             for cl in columns:
