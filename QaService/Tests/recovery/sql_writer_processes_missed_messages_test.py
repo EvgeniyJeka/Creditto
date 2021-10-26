@@ -49,7 +49,7 @@ test_bid_interest_5 = 0.037
 class TestSqlWriterRecovery:
     """
         In those tests we verify that:
-        1. ..
+        1. SQL Writer consumes all unread messages from Kafka after restart and updates the SQL DB.
     """
 
     offer_id = 0

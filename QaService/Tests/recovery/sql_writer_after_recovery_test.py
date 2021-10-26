@@ -58,7 +58,7 @@ class TestSqlWriterRecovery:
     """
         In those tests we verify that:
         1. End-to-End flow can be successfully performed after SQL Writer docker container was restarted
-        2. Gateway container is expected to resume it's functionality and
+        2. SQL Writer container is expected to resume it's functionality and
         match offers with bids according to selected matching logic
     """
 
