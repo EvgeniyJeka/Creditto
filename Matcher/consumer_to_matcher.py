@@ -13,18 +13,6 @@ logging.basicConfig(level=logging.INFO)
 # Protobuf handler - used to serialize bids and offers to proto
 proto_handler = protobuf_handler.ProtoHandler
 
-# Create one 'matcher' instance
-# Create one 'producer_from_matcher' instance
-
-# Once new Offer is received:
-    #Call matcher.add_offer method
-
-#Once new Bid is received:
-    #Call matcher.add_bid method
-    # If response = True - see it as confirmation
-    # Else if response = Match object:
-        #call producer_from_matcher.send and send the received Match object to 'matches' Kafka topi c
-
 
 class ConsumerToMatcher(object):
 
@@ -39,6 +27,11 @@ class ConsumerToMatcher(object):
         self.consume_process()
 
     def start_consumer(self):
+        """
+        Creating Kafka client. Verifying all required topics exist, creating missing topics if required.
+        Starting consumer, subscribing to 'offers' and 'bids' topics
+        :return:
+        """
 
         # Creating Kafka topics or adding if the topic is missing
         admin_client = KafkaAdminClient(bootstrap_servers=KafkaConfig.BOOTSTRAP_SERVERS.value, client_id='test')
@@ -49,13 +42,18 @@ class ConsumerToMatcher(object):
                       if x not in existing_topics]
 
         admin_client.create_topics(new_topics=topic_list, validate_only=False)
-        print(f"Existing topics: {admin_client.list_topics()}")
+        logging.info(f"Existing topics: {admin_client.list_topics()}")
 
         # Initiating consumer
         self.consumer = KafkaConsumer('offers', 'bids', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
                                     auto_offset_reset='earliest', enable_auto_commit=True, group_id="matcher_consumer")
 
     def extract_message_type(self, kafka_message):
+        """
+        Extracting kafka message type from record headers.
+        :param kafka_message: consumed kafka record, serialized
+        :return: message type on success, False on failure (invalid message, no headers e.t.c.)
+        """
         if kafka_message.headers is None or len(kafka_message.headers) < 1:
             logging.warning("Matcher Consumer: Kafka message with no valid metadata, no message type in header")
             return False
@@ -69,6 +67,12 @@ class ConsumerToMatcher(object):
             return False
 
     def consume_process(self):
+        """
+        Iterating over consumed messages and handling them according to message type.
+        Skipping invalid messages.
+        Bids and Offers are deserialized and added to Matcher's Pool
+        :return:
+        """
         for msg in self.consumer:
             message_type = self.extract_message_type(msg)
             if not message_type:

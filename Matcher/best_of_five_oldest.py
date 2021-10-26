@@ -11,6 +11,15 @@ class BestOfFiveOldest:
 
     @staticmethod
     def find_best_bid(bids_for_offer, offer: Offer, tail_digits: int):
+        """
+         Applying the following matching logic - when the 5th bid is placed the bid with the lowest interest
+         is selected from the bids list. If there are several bids with identical interest the oldest
+         bid is selected.
+        :param bids_for_offer: list of Bids
+        :param offer: Offer instance
+        :param tail_digits: tail digits config, used for monthly payment calculation
+        :return: Match instance
+        """
 
         if len(bids_for_offer) < 5:
             logging.info(f"MATCHER: Not enough bids for offer {offer.id}, expecting for at least 5, no match")
@@ -22,7 +31,7 @@ class BestOfFiveOldest:
                      "best has the lowest interest rate, "
                      "the oldest bit is selected if there are 2 or more bids with the same rate")
 
-        print([x.bid_interest for x in bids_for_offer])
+        logging.info([x.bid_interest for x in bids_for_offer])
 
         # Sorting bids by interest rate
         bids_for_offer.sort(key=lambda x: Decimal(x.bid_interest))
