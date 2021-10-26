@@ -40,6 +40,16 @@ test_bid_interest_5 = 0.037
 @pytest.mark.negative
 @pytest.mark.incremental
 class TestBidPlacement(object):
+    """
+        In those tests we verify that:
+        1. Bid can't be placed on non-existing offer
+        2. Bid interest can't be greater then target Offer interest
+        3. Lender can place only ONE Bid on each Offer
+        4. Bids can't be placed on an Offer that is already matched
+
+        NOTE: Error message successful validation confirms that Gateway hasn't crashed and handled the invalid input
+        # as expected.
+        """
 
     offer_id = 0
     matching_bid_id = 0
@@ -100,7 +110,7 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- Lender Can Place One Bid On Each Offer - step passed "
                      f"----------------------------------\n")
 
-    def test_matched_bid_cant_be_matched(self):
+    def test_matched_offer_cant_be_matched(self):
 
         # Placing 5 bids so the offer will become matched
         for i in range(1, 5):

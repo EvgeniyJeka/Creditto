@@ -8,3 +8,4 @@ numpy_financial
 kafka-python
 google
 protobuf
+docker-py

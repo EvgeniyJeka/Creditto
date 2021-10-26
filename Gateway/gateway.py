@@ -8,7 +8,6 @@ from reporter import Reporter
 from credittomodels import Bid
 from credittomodels import Offer
 from producer_from_api import ProducerFromApi
-from credittomodels import statuses
 import uuid
 
 from credittomodels import protobuf_handler
@@ -23,7 +22,7 @@ from credittomodels import protobuf_handler
 # 8. Kafka messages - PROTOBUF  - D
 # 9. Add API methods -  offers_by_status, get_my_bids (by CID) - D
 # 10. Offer - add 'matching bid' to SQL, on match creation update offer status in SQL - D
-# 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer.
+# 11. Bid validation - add a new limitation: each lender can place only ONE bid on each offer - D
 # 12. Offer - add property 'final_interest', add in package and in DB as well - D
 # 13. Consider adding Expirator/TimeManager service (?)
 # 14. Test framework - request must be printed and/or logged - D
@@ -32,13 +31,14 @@ from credittomodels import protobuf_handler
 # 17. Negative tests needed - invalid data type in requests (service must NOT crash) - D
 # 18. Solve the 'duplicates' problem (bug)  UUID - D
 # 19. Offer/Bid validation in SQL - consider to change the logic, since customer is notified that 
-# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway
+# his bid/offer wasn't placed since it can't be found in SQL, but the message was produced by Gateway - D
 # and consumed by the Matcher and it is in the pool and possibly can be matched - D
 # Perhaps a confirmation should be sent after the message was successfully produced to Kafka.
 # 20. Consider save logs to a file, file should be saved in container volumes
-# 21. Monthly payment rounding im Matcher - move the tail digits to config in SQL
+# 21. Monthly payment rounding im Matcher - move the tail digits to config in SQL - D
 # 22. Add Gateway instance on port 80 (?)
 # 23. Consider to add a new API method to Gateway - 'get_match_by_offer(offer_id)'
+# 24. Test container - consider adding retries when SQL is unavailable (catch exception, retry x times before failing) - D
 
 logging.basicConfig(level=logging.INFO)
 

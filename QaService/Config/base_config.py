@@ -22,6 +22,7 @@ class BaseConfig(object):
         SQL_PASSWORD = parser.get('SQL_DB', 'password')
         SQL_DB_NAME = 'creditto'
         WAIT_BEFORE_TIMEOUT = int(parser.get('URL', 'WAIT_BEFORE_TIMEOUT'))
+        MYSQL_DB_WARMUP_DELAY = int(parser.get('SQL_DB', 'db_warmup_delay'))
 
     # Running in Docker container
     else:
@@ -31,6 +32,7 @@ class BaseConfig(object):
         SQL_PASSWORD = os.getenv('SQL_PASSWORD')
         SQL_DB_NAME = 'creditto'
         WAIT_BEFORE_TIMEOUT = int(os.getenv('WAIT_BEFORE_TIMEOUT'))
+        MYSQL_DB_WARMUP_DELAY = int(os.getenv('MYSQL_DB_WARMUP_DELAY'))
 
     BOOTSTRAP_SERVERS = parser.get('KAFKA', 'bootstrap_servers')
     OFFERS_TOPIC = parser.get('KAFKA', 'offers_topic')

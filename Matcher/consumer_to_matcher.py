@@ -1,11 +1,8 @@
 from kafka import KafkaConsumer
-import simplejson
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging
 
 from matcher import Matcher
-from credittomodels import Offer
-from credittomodels import Bid
 from credittomodels import statuses
 from local_config import KafkaConfig
 
