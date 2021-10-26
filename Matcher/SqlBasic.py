@@ -3,8 +3,8 @@ import logging
 from local_config import SqlConfig
 
 
-
 class SqlBasic(object):
+
     hst = SqlConfig.SQL_HOST.value
     usr = SqlConfig.SQL_USER.value
     pwd = SqlConfig.SQL_PASSWORD.value

@@ -17,6 +17,13 @@ class SqlRecoveryReader(SqlBasic):
         self.create_validate_tables(self.cursor)
 
     def recover_offers_bids_sql(self):
+        """
+         This method is used to fetch all offers and bids available for matching from MySQL.
+         It is used in Matcher recovery flow (when the service starts).
+         Returns a dict, where offer is a key and list of related bids is value.
+         This dict becomes the Matcher's Pool
+        :return: dict
+        """
         recovery_pool = {}
 
         # Getting all active offers from SQL DB
