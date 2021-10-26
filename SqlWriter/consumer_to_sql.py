@@ -30,6 +30,11 @@ class ConsumerToSql(object):
         self.consume_write()
 
     def start_consumer(self):
+        """
+       Creating Kafka client. Verifying all required topics exist, creating missing topics if required.
+       Starting consumer, subscribing to 'offers' and 'bids' topics
+       :return:
+       """
         # Creating Kafka topics or adding if the topic is missing
         admin_client = KafkaAdminClient(bootstrap_servers=KafkaConfig.BOOTSTRAP_SERVERS.value, client_id='test')
         existing_topics = admin_client.list_topics()
@@ -39,13 +44,19 @@ class ConsumerToSql(object):
                       if x not in existing_topics]
 
         admin_client.create_topics(new_topics=topic_list, validate_only=False)
-        print(f"Existing topics: {admin_client.list_topics()}")
+        logging.info(f"Existing topics: {admin_client.list_topics()}")
 
         # Initiating consumer
         self.consumer = KafkaConsumer('offers', 'bids', 'matches', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
                                       auto_offset_reset='earliest', enable_auto_commit=True, group_id="sql_consumer")
 
     def extract_message_type(self, kafka_message):
+        """
+        Extracting kafka message type from record headers.
+        :param kafka_message: consumed kafka record, serialized
+        :return: message type on success, False on failure (invalid message, no headers e.t.c.)
+        """
+
         if kafka_message.headers is None or len(kafka_message.headers) < 1:
             logging.warning("Matcher Consumer: Kafka message with no valid metadata, no message type in header")
             return False
@@ -58,19 +69,26 @@ class ConsumerToSql(object):
             logging.warning("Matcher Consumer: No message type in header")
             return False
 
-
     def consume_write(self):
+        """
+        Iterating over consumed messages and handling them according to message type.
+        Skipping invalid messages.
+        Bids, Offers and Matches are deserialized and saved to MySQL DB.
+        When new Match is received related Offer status and final_interest values are updated in SQL,
+        related bids status is updated in SQL - matched bid status is changed to MATCHED, while the status
+        of all other bids that target the same offer is changed to CANCELLED
+        :return:
+        """
+
         for msg in self.consumer:
 
-            print(f"Extracted message type: {self.extract_message_type(msg)}")
+            logging.info(f"Extracted message type: {self.extract_message_type(msg)}")
 
             message_type = self.extract_message_type(msg)
             if not message_type:
                 logging.warning("Matcher Consumer: Received a message with no valid type in headers, skipping.")
 
             message_content = msg.value
-            # object_content = simplejson.loads(simplejson.loads(message_content))
-            # print(object_content)
             logging.info(f"ConsumerToSql: Received message {message_content}")
 
             try:
@@ -102,11 +120,9 @@ class ConsumerToSql(object):
                     self.sql_writer.update_bid_status_sql(added_match.bid_id, statuses.BidStatuses.MATCHED.value)
                     self.sql_writer.cancel_remaining_bids_sql(added_match.offer_id, added_match.bid_id,)
 
-            # Change the exception logic or remove try/catch
-            except KeyError as e:
-                logging.critical(f"Consumer To SQL: INVALID kafka message received: {msg.value}")
+            except Exception as e:
+                logging.critical(f"Consumer To SQL: failed to save message to SQL: {msg.value}")
                 logging.critical(f"Consumer To SQL: {e}")
-
 
 
 if __name__ == "__main__":

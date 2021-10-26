@@ -138,7 +138,7 @@ class SqlBasic(object):
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
 
-    def pack_to_dict(cls, query, table):
+    def pack_to_dict(self, query, table):
         """
         This method can be used to extract data from SQL table and pack it to list of dicts
         @param query: query to execute
@@ -146,8 +146,8 @@ class SqlBasic(object):
         @return: list of dicts
         """
         try:
-            columns = cls.get_columns(table)
-            data = cls.run_sql_query(query)
+            columns = self.get_columns(table)
+            data = self.run_sql_query(query)
 
             if data is None:
                 logging.warning(f"Couldn't find the requested data by provided param")
