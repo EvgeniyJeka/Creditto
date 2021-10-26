@@ -20,6 +20,9 @@ postman = postman.Postman()
 reporter = reporter.Reporter()
 docker_tool = DockerIntegration.DockerIntegration
 
+container_downtime = 10
+container_deactivation_delay = 5
+
 
 @pytest.fixture(scope='class')
 def set_matching_logic(request):
@@ -74,7 +77,7 @@ def restart_container(request):
     container_to_restart = request.param[0]
 
     container = docker_tool.stop_container(container_to_restart)
-    time.sleep(6)
+    time.sleep(container_downtime)
     docker_tool.start_container(container)
 
 
@@ -91,11 +94,41 @@ def container_restart(container_to_restart):
         return True
 
     except Exception as e:
-        logging.error(f"Failed to restart container: {container_restart()} - {e}")
+        logging.error(f"Failed to restart container: {container_to_restart} - {e}")
         return False
 
 
+def container_stop(container_to_stop):
+    """
+    This method can be used to restart a running Docker container
+    :param container_to_stop: container name , str
+    :return: docker container instance, stopped container. False - on failure
+    """
+    try:
+        container = docker_tool.stop_container(container_to_stop)
+        time.sleep(container_deactivation_delay)
+        return container
 
+    except Exception as e:
+        logging.error(f"Failed to stop container: {container_to_stop} - {e}")
+        return False
+
+
+def container_start(container_to_start):
+    """
+    This method can be used to start stopped Docker container
+    :param container_to_start: docker container instance
+    :return: True on success, False on failure
+    """
+    try:
+        container = docker_tool.start_container(container_to_start)
+        time.sleep(container_deactivation_delay)
+        docker_tool.start_container(container)
+        return True
+
+    except Exception as e:
+        logging.error(f"Failed to start container: {container_to_start} - {e}")
+        return False
 
 
 @pytest.fixture(scope='class')

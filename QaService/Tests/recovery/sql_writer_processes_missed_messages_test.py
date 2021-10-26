@@ -3,7 +3,7 @@ from credittomodels import Offer
 import pytest
 import logging
 from decimal import Decimal
-from ..conftest import container_restart
+from ..conftest import container_stop, container_start
 
 
 try:
@@ -22,8 +22,8 @@ logging.basicConfig(level=logging.INFO)
 postman = postman.Postman()
 reporter = reporter.Reporter()
 
-# The time given for Matcher component to recover after container restart
-matcher_expected_recovery_time = 10
+# The time given for SQL Writer component to recover after container restart
+sql_writer_recovery_time = 10
 
 
 test_offer_owner_1 = 1024
@@ -46,11 +46,10 @@ test_bid_interest_5 = 0.037
 
 @pytest.mark.recovery
 @pytest.mark.incremental
-class TestMatcherRecovery:
+class TestSqlWriterRecovery:
     """
         In those tests we verify that:
-        1. End-to-End flow can be successfully performed after Matcher docker container was restarted during the flow
-        2. Recovery after restart: Matcher fetches all Offers in status OPEN and all Bids in status PLACED from SQL on start
+        1. ..
     """
 
     offer_id = 0
@@ -61,12 +60,14 @@ class TestMatcherRecovery:
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5]
 
+    sql_writer_container = None
+
     @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
     def test_placing_offer(self, set_matching_logic):
         response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
                                                         test_duration, test_offer_interest_low, 0)
 
-        TestMatcherRecovery.offer_id = response['offer_id']
+        TestSqlWriterRecovery.offer_id = response['offer_id']
         logging.info(f"Offer placement: response received {response}")
 
         assert 'offer_id' in response.keys(), "Offer Placement error - no OFFER ID in response"
@@ -108,13 +109,15 @@ class TestMatcherRecovery:
         logging.info(f"----------------------- No Match On Third Bid verification - step passed ----------"
                      f"------------------------\n")
 
-    def test_relevant_offers_bids_fetched_recovery(self):
-        logging.info("Matcher recovery: fetching all relevant bids and offers from SQL to Matcher's pool")
-        assert container_restart(DockerContainerNames.MATCHER.value)
+    def test_sql_writer_container_stopped(self):
+        logging.info("Stopping SQL Writer Docker Container")
+        TestSqlWriterRecovery.sql_writer_container = container_stop(DockerContainerNames.SQL_WRITER.value)
 
-        time.sleep(matcher_expected_recovery_time)
+        # Verifying the container was stopped
+        assert TestSqlWriterRecovery.sql_writer_container
+        time.sleep(sql_writer_recovery_time)
 
-        logging.info(f"----------------------- Restarting the Matcher docker container - step passed ----------"
+        logging.info(f"----------------------- Stopping SQL Writer docker container - step passed ----------"
                      f"------------------------\n")
 
     def test_placing_final_bids(self):
@@ -125,13 +128,22 @@ class TestMatcherRecovery:
 
             # The bid that is expected to create a match with the offer
             if i == 3:
-                TestMatcherRecovery.matching_bid_id = response['bid_id']
+                TestSqlWriterRecovery.matching_bid_id = response['bid_id']
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
             assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
             assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
 
         logging.info(f"----------------------- Final Bid Placement - step passed ----------------------------------\n")
+
+    def test_sql_writer_container_started(self):
+        logging.info("Starting SQL Writer Docker Container")
+        assert container_start(TestSqlWriterRecovery.sql_writer_container)
+
+        time.sleep(sql_writer_recovery_time)
+
+        logging.info(f"----------------------- Starting SQL Writer docker container - step passed ----------"
+                     f"------------------------\n")
 
     def test_updated_offer_after_match(self):
         time.sleep(5)
@@ -150,7 +162,7 @@ class TestMatcherRecovery:
         match_sql = reporter.get_match_by_offer_id(self.offer_id)[0]
         logging.info(match_sql)
 
-        assert match_sql['bid_id'] == TestMatcherRecovery.matching_bid_id
+        assert match_sql['bid_id'] == TestSqlWriterRecovery.matching_bid_id
         assert match_sql['bid_owner_id'] == test_bid_owner_4
         assert match_sql['final_interest'] == str(test_bid_interest_4)
 
@@ -166,7 +178,7 @@ class TestMatcherRecovery:
         assert isinstance(response[0], dict), "Invalid data type in API response"
 
         for offer in response:
-            if offer['id'] == TestMatcherRecovery.offer_id:
+            if offer['id'] == TestSqlWriterRecovery.offer_id:
                 assert offer['owner_id'] == test_offer_owner_1
                 assert Decimal(offer['sum']) == Decimal(test_sum)
                 assert offer['duration'] == test_duration
