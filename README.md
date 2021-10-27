@@ -98,6 +98,7 @@ ________
      g. get_my_matches: get all matches related to given customer - the former can be either lender or borrower
      
      Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
+     
      Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
  
 
