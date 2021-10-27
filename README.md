@@ -56,20 +56,20 @@ ________
 
 
 1. Kafka queue manager, topics:
- a. Offers
- 
- b. Bids
- 
- c. Matches
+    a. Offers
+
+    b. Bids
+
+    c. Matches
  
 2. MySQL DB, database name: "creditto", tables:
- a. offers
- 
- b. bids
- 
- c. matches
- 
- d. local_config
+    a. offers
+
+    b. bids
+
+    c. matches
+
+    d. local_config
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
 
