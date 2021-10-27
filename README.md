@@ -41,58 +41,14 @@ and their status is changed to CANCELLED.  Offer status is changed to MATCHED as
 
 
 
-
- 
-# 2 Models description:
-
-1. Offer:
-   owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
-   
-   sum: loan sum in USD
-   
-   duration: loan duration
-   
-   offered_interest: the max interest rate the borrower is willing to offer
-   
-   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
-   
-   status: current offer status (see statuses list below)
-   
-   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default (T.B.D.)
-
-3. Bid:
-   owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
-   
-   bid_interest: the interest asked by the lender
-   
-   status: current bid status (see statuses list below)
-   
-   target_offer: the offer that current bid seeks to match
-   
-   partial_only: an optional flag (T.B.D.)
-   
-   partial_sum: an option (T.B.D.)
-
-3. Match:
-   offer_id: matched offer ID
-   
-   bid_id: matching bid ID
-   
-   offer_owner_id: the ID of the borrower
-   
-   bid_owner_id: the ID of the lender
-   
-   match_time: indicated when the offer was matched 
-   
-   partial: an option (T.B.D.)
-   
-   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
-   
-   monthly_payment: calculation based on interest rate and loan duration (T.B.D.)
-    
- 
-# 3 System components
+# 2 System components
 Each component is a micro service. Components communicate with each other via Kafka topics. 
+
+Offer, Bid and Match models, tools needed for google protobuf serialization/deserialization and loan monthly
+payment calculation are taken from "credittomodels" python package:
+
+https://pypi.org/project/credittomodels/
+
 
 1. Kafka queue manager, topics:
  a. Offers
@@ -159,6 +115,60 @@ Each component is a micro service. Components communicate with each other via Ka
    
    Once the offer is matched with one of the bids it's status changes to MATCHED and it is no longer presented
    in 'available offers' list and no bids can be placed one it. Matching bid status is changed to MATCHED as well.
+
+
+
+
+ 
+# 3 Models description:
+
+1. Offer:
+   owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
+   
+   sum: loan sum in USD
+   
+   duration: loan duration
+   
+   offered_interest: the max interest rate the borrower is willing to offer
+   
+   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
+   
+   status: current offer status (see statuses list below)
+   
+   matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default 
+
+3. Bid:
+   owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
+   
+   bid_interest: the interest asked by the lender
+   
+   status: current bid status (see statuses list below)
+   
+   target_offer: the offer that current bid seeks to match
+   
+   partial_only: an optional flag (T.B.D.)
+   
+   partial_sum: an option (T.B.D.)
+
+3. Match:
+   offer_id: matched offer ID
+   
+   bid_id: matching bid ID
+   
+   offer_owner_id: the ID of the borrower
+   
+   bid_owner_id: the ID of the lender
+   
+   match_time: indicated when the offer was matched 
+   
+   partial: an option (T.B.D.)
+   
+   final_interest: the interest taken from the selected bid, the final interest that will be paid on the loan
+   
+   monthly_payment: calculation based on interest rate and loan duration 
+    
+ 
+
    
    
 # 4 Statuses
