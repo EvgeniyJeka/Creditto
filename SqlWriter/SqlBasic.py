@@ -3,7 +3,6 @@ import logging
 from local_config import SqlConfig
 
 
-
 class SqlBasic(object):
     hst = SqlConfig.SQL_HOST.value
     usr = SqlConfig.SQL_USER.value
@@ -46,11 +45,11 @@ class SqlBasic(object):
 
         # Wrong Credentials error
         except pymysql.err.OperationalError as e:
-            print(f"Wrong Credentials or Host: {e}")
+            logging.error(f"Wrong Credentials or Host: {e}")
 
         # Wrong DB name error
         except pymysql.err.InternalError:
-            print("Unknown Database")
+            logging.error("Unknown Database")
 
 
     def run_sql_query(self, query: str):
@@ -116,6 +115,7 @@ class SqlBasic(object):
             cursor.execute(query)
             query = f'insert into local_config values(2, "tail_digits", 4, "max tail digits allowed, rounding config")'
             cursor.execute(query)
+
             logging.warning("Logs: SETTING THE DEFAULT CONFIG")
 
     def get_next_id(self, table_name):
@@ -138,7 +138,7 @@ class SqlBasic(object):
             logging.warning(f"Reporter: The table {table_name} is currently empty. Receiving first record")
             return 1
 
-    def get_columns(cls, table):
+    def get_columns(self, table):
         """
         Returns a list of column names
         @param table: existing table, str
@@ -147,7 +147,7 @@ class SqlBasic(object):
         query = 'show columns from ''%s'';' % table
 
         try:
-            columns = cls.run_sql_query(query)
+            columns = self.run_sql_query(query)
             result = []
 
             for cl in columns:
@@ -159,7 +159,7 @@ class SqlBasic(object):
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
 
-    def pack_to_dict(cls, query, table):
+    def pack_to_dict(self, query, table):
         """
         This method can be used to extract data from SQL table and pack it to list of dicts
         @param query: query to execute
@@ -167,8 +167,8 @@ class SqlBasic(object):
         @return: list of dicts
         """
         try:
-            columns = cls.get_columns(table)
-            data = cls.run_sql_query(query)
+            columns = self.get_columns(table)
+            data = self.run_sql_query(query)
 
             if data is None:
                 logging.warning(f"Couldn't find the requested data by provided param")

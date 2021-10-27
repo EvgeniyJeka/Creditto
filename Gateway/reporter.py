@@ -13,6 +13,7 @@ from decimal import *
 fetch_from_sql_retries = 3
 fetch_from_sql_delay = 5
 
+
 class Reporter(SqlBasic):
 
     def __init__(self):
@@ -44,7 +45,6 @@ class Reporter(SqlBasic):
     def get_bid_data(self, bid_id: int) -> dict:
         query = f'select * from bids where id = {bid_id}'
         return self.pack_to_dict(query, "bids")
-
 
     def get_offers_by_status(self, status: int):
         """
@@ -102,6 +102,7 @@ class Reporter(SqlBasic):
         c. Offer interest rate > Bid interest rate
         d. Offer status is OPEN
         e. Lender hasn't placed yet any bids on targeted offer
+        :param verified_bid_params: list of str, params to verify
         :param bid: dict
         :return: JSON
         """
@@ -151,8 +152,15 @@ class Reporter(SqlBasic):
         except TypeError:
             return {"error": f"Bid request is invalid, 'NULL' is detected in one of the key fields"}
 
-    def validate_offer(self, offer: Offer, verified_offer_params: list):
-
+    def validate_offer(self, offer, verified_offer_params: list):
+        """
+        This method can be used to validate offer placement request.
+        The value of 'type' field is expected to be 'offer'.
+        The request body is expected to contain all mandatory params
+        :param offer: offer placement request content
+        :param verified_offer_params: list of str, mandatory params
+        :return: JSON (confirmation message or an error message)
+        """
         # Rejecting invalid and malformed offer placement requests
         if not isinstance(offer, dict) or 'type' not in offer.keys() or None in offer.values() \
                 or offer['type'] != statuses.Types.OFFER.value:
@@ -165,8 +173,4 @@ class Reporter(SqlBasic):
         return {"confirmed": "given offer can be placed"}
 
 
-
-if __name__ == '__main__':
-    rp = Reporter()
-    print(rp.get_offer_data(1))
 

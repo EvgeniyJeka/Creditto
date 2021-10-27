@@ -184,8 +184,18 @@ def get_my_bids():
     logging.info(f"Gateway: get all my bids, lender token validated: {token}")
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
+
 @app.route("/get_all_my_offers", methods=['POST'])
 def get_my_offers():
+    """
+    This API method can be used to get all offers placed by customer with provided customer ID.
+    :return: JSON
+    Body sample:
+    {
+    "owner_id":"1032",
+    "token": "a#rf$1vc"
+    }
+    """
 
     offers_request = request.get_json()
     processed_match_request = reporter. \
@@ -203,6 +213,15 @@ def get_my_offers():
 
 @app.route("/get_all_my_matches", methods=['POST'])
 def get_my_matches():
+    """
+    This API method can be used to get all matches related to given customer ID.
+    :return: JSON
+    Body sample:
+    {
+    "owner_id":"1032",
+    "token": "a#rf$1vc"
+    }
+    """
 
     matches_request = request.get_json()
     processed_match_request = reporter.\

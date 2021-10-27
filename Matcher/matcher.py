@@ -18,8 +18,11 @@ producer = ProducerFromMatcher()
 # Protobuf handler - used to serialize bids and offers to proto
 proto_handler = protobuf_handler.ProtoHandler
 
+
 class Matcher(object):
 
+    # Matcher's Pool, contains all active Offers and Bids (fetched from SQL on start)
+    # Each offer added to the Pool becomes a KEY, and list of bids that target that offer become VALUE
     pool = {}
 
     def __init__(self):
@@ -31,20 +34,30 @@ class Matcher(object):
         self.matched_offer = None
 
     def add_offer(self, offer: Offer):
+        """
+        Adding new offer to Matcher's Pool if it doesn't contain an offer with an identical ID
+        :param offer: Offer instance
+        :return: True
+        """
         logging.info("MATCHER: Adding a new OFFER to the matching pool")
 
         # T.B.D. - add handling for incoming offer with status CANCELLED (default status is OPEN)
         if offer.id not in self.get_all_existing_offers_ids():
             self.pool[offer] = []
 
-        print(self.pool)
+        logging.info(self.pool)
         return True
 
     def add_bid(self, bid: Bid):
+        """
+        Adding new Bid to Matcher's Pool if it doesn't contain a bid with an identical ID
+        Each time new Bid is added checks MATCH CONDITION for given offer.
+        If fulfilled -  Match message is produced to 'matches' topic, matched offer and all related bids
+        are removed from Matcher's Pool.
+        :param bid: Bid instance
+        :return:
+        """
         logging.info("MATCHER: Adding a new BID to the matching pool")
-
-        # Each time new Bid is added check MATCH CONDITION for given offer.
-        # If fulfilled - change Offer status, produce a Match to 'matches' topic, change all related bids status
 
         # Verifying target offer exists in the system
         if bid.target_offer_id not in self.get_all_existing_offers_ids():
