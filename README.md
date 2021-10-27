@@ -100,6 +100,8 @@ ________
      Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
      
      Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
+     
+     
  
 
 4. SQL Writer: the component responsible for updating the data in MySQL DB.
