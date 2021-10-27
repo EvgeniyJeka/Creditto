@@ -57,19 +57,26 @@ ________
 
 1. Kafka queue manager, topics:
  a. Offers
+ 
  b. Bids
+ 
  c. Matches
  
 2. MySQL DB, database name: "creditto", tables:
  a. offers
+ 
  b. bids
+ 
  c. matches
+ 
  d. local_config
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
 
      Receives: JSON from parsed POST and GET requests. 
+     
      Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
+     
      Access SQL DB to validate received data. 
      
      API methods:
