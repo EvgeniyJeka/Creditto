@@ -87,11 +87,15 @@ ________
      
      b. place_bid: add new bid to the system. Bid data ais validated
      
-     c. get_offer_status: get offer status by provided ID (T.B.D.)
+     c. get_offers_by_status: get all offers in given status 
      
-     d. get_bid_status: get bid status by provided ID (T.B.D.)
+     d. get_all_offers: get all existing offers disregarding of their status
      
-     e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
+     e. get_my_bids: get all bids placed by given customer (the former is identified by provided owner_id in request)
+     
+     f. get_my_offers: get all offers placed by given customer 
+     
+     g. get_my_matches: get all matches related to given customer - the former can be either lender or borrower
      
      Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
      Receiving data via API = > Parsing data => Validating data against SQL DB => Producing Kafka message
