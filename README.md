@@ -49,8 +49,9 @@ payment calculation are taken from "credittomodels" python package:
 
 https://pypi.org/project/credittomodels/
 
+System chart"
 
-<img src="https://github.com/EvgeniyJeka/Creditto/blob/readme_updating/creditto_flow_.jpg" alt="Screenshot" width="600" />
+<img src="https://github.com/EvgeniyJeka/Creditto/blob/readme_updating/creditto_flow_.jpg" alt="Screenshot" width="1200" />
 
 
 1. Kafka queue manager, topics:
