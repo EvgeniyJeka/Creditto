@@ -82,10 +82,15 @@ ________
      Gateway acesses SQL DB to validate received data. 
      
      API methods:
+     
      a. place_offer: add new offer to the system. Offer data is validated
+     
      b. place_bid: add new bid to the system. Bid data ais validated
+     
      c. get_offer_status: get offer status by provided ID (T.B.D.)
+     
      d. get_bid_status: get bid status by provided ID (T.B.D.)
+     
      e. get_available_offers: returns data on all offers in status OPEN (T.B.D.)
      
      Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
