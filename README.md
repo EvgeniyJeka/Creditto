@@ -56,6 +56,7 @@ ________
 
 
 1. Kafka queue manager, topics:
+    
     a. Offers
 
     b. Bids
@@ -63,6 +64,7 @@ ________
     c. Matches
  
 2. MySQL DB, database name: "creditto", tables:
+    
     a. offers
 
     b. bids
