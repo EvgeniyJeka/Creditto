@@ -77,9 +77,9 @@ ________
 
      Receives: JSON from parsed POST and GET requests. 
      
-     Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
+     Parses data sent in requests, validates it and produces Kafka messages to the relevant topics basing on extracted data.
      
-     Access SQL DB to validate received data. 
+     Gateway acesses SQL DB to validate received data. 
      
      API methods:
      a. place_offer: add new offer to the system. Offer data is validated
