@@ -5,21 +5,21 @@
 The purpose of the system is to mediate between customers that would like to borrow money, borrowers,
 and customers that would like to provide a loan, money lenders.
 
-A borrower that would like to get a loan posts a request for a loan via system API - such requests is
+A borrower that would like to get a loan posts a request for a loan via system API - such request is
 called 'an offer'.  
 
-Offer must contain all relevant data, including the max interest rate he is willing to pay (see models description below). 
-Each offer has a unique ID assigned by the system. That offer will be available to all potential money lenders via API.
+Offer must contain all relevant data, including the max interest rate the borrower is willing to pay (see models description below). 
+Each offer has a unique ID assigned by the system. Placed offer will be available to all potential money lenders via API.
 
 Money lenders are expected to chose an offer and propose loans that would match the offer conditions like sum, duration e.t.c.
 Loan proposal is called 'a bid'. Bid interest rate must be lower then offer interest rate, since the former is
-the max interest rate the borrower is willing to pay. Bids can be placed only on existing offers - 
+the max interest rate the borrower is willing to pay. Bids can be placed only on existing and active offers - 
 lender is to select an offer and to place a bid on it, offering the lowest interest he can so his bid will be selected
-to match with the targeted offer. 
+to match with the targeted offer. Bids can't be placed on 'matched' and 'cancelled' offers.
 
 Several bids can be placed on each offer - the best one will be selected and a match will be created.
-The offer and the bid status will be changed from 'active' to 'matched' (see statuses below),
-all other bids on that offer will become expire and their status will be changed to 'cancelled'.
+The offer and the bid statuses will be changed to 'matched' (see statuses below),
+all other bids on that offer will expire and their status will be changed to 'cancelled'.
 
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
@@ -49,22 +49,36 @@ payment calculation are taken from "credittomodels" python package:
 
 https://pypi.org/project/credittomodels/
 
+System chart:
+
+<img src="https://github.com/EvgeniyJeka/Creditto/blob/readme_updating/creditto_flow_.jpg" alt="Screenshot" width="1000" />
+________
+
 
 1. Kafka queue manager, topics:
- a. Offers
- b. Bids
- c. Matches
+    
+    a. Offers
+
+    b. Bids
+
+    c. Matches
  
 2. MySQL DB, database name: "creditto", tables:
- a. offers
- b. bids
- c. matches
- d. local_config
+    
+    a. offers
+
+    b. bids
+
+    c. matches
+
+    d. local_config
 
 3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
 
      Receives: JSON from parsed POST and GET requests. 
+     
      Parses data sent in requests and produces Kafka messages to the relevant topics basing on extracted data.
+     
      Access SQL DB to validate received data. 
      
      API methods:
