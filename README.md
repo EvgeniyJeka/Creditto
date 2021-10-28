@@ -111,27 +111,29 @@ ________
     
     a. Once new 'offer' message is received it's decoded.
     If Offer status is OPEN the retrieved offer is inserted to 'offers' SQL table.
-    Else - existing offer status is updated (T.B.D.)
+   
     
     b. Once new 'bid' message is received it's decoded.
     If Bid status is PLACED the retrieved bid is inserted to 'bids' SQL table.
-    Else - existing bid status is updated (T.B.D.)
+   
     
     c. Once new 'match' message is received it's decoded.
     The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
     are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
     
 5. Matcher: the component responsible for matching between offers and bids. All offers and bids, that are currently 
-   available for matching are kept in service cache, in a pool of offers and bids. 
+   available for matching are kept in service cache, in a pool of offers and bids, the Matcher Pool.
    When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
-   Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
-   Adds all received offers and bids to the pool kept in service cache.
+   Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic.
+   Adds all received offers and bids to the the Matcher Pool.
    
-   Consumed Offer is added to the pool. Consumed Bid is added to the pool as well and triggers matching check - 
-   the service checks if one of the Bids placed on that offer meets the match criteria. 
+   Consumed Offer is added to the pool.
+   Consumed Bid is added to the pool as well, 
+   and if the amount of bids placed on given offer is suffiecient it triggers a matching check, 
+   - the service checks if one of the Bids placed on that offer meets the match criteria. 
    
-   Matching algorithm ID is taken from service config file (will be moved to SQL - T.B.D.), the selected algorithm is applied
+   Matching algorithm ID is taken from 'local_config' SQL table, the selected algorithm is applied
    to determine if there is a match. 
    
    New Offer = > Added to the pool;     
