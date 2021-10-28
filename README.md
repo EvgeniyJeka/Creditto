@@ -256,10 +256,25 @@ ________
   
   Project config can be changed in 'local_config' SQL table.
   
+  
+  
   1. matching_logic : responsible for selecting Matching Logic. Change the value to '2' to make the Matcher to apply Matching Logic #2 (see description above).
   2. tail_digits: max allowed tail digits. Used to round calculation results, for ex. loan monthly payment. 
     
-   
+    
+  
+# 7 Future Development Options
+
+The project architecture allows to add additional functionalities.
+
+Currently there is no users database, so Gateway has no option to verify if current user is authorized to place an offer or a bid. 
+It is possilbe to add a table in SQL DB that would contain a list of users credentials, types ('lender' or 'borrower') and emails.
+It would allow to add an Authorization module to the Gateway component, and it would validate each offer or bid placement request. 
+
+Currently created matches aren't handled - they are only inserted to SQL DB. 
+It is an option to notify the lender and the borrower by sending an email - for that purpose another micro service can be added, it would consume matches from 'matches' Kafka topic, extract the lender and the borrower email address and send an email to both parties. 
+
+
                                                      
    
     
