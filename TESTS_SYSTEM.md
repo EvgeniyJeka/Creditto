@@ -39,7 +39,7 @@ There are several groups of tests defined in <b>pytest.ini</b>:
   
   - container: all tests that can run in docker container
   
-  -recovery: tests that verify services behaviour after docker container restart and recovery flow
+  - recovery: tests that verify services behaviour after docker container restart and recovery flow
 
 
 # 4 How To 
