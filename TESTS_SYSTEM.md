@@ -15,13 +15,24 @@ Expected OUTPUT is HTTP response, SQL table modification or a Kafka message prod
 
 Set of tools used for effective test implementation. 
 - Code responsible for work with MySQL, Kafka, and Docker can be found in 'Tools' folder under 'QaService'
-- Code responsible for HTTP requests sending can be found in 'Requests' folder
-- Config can be found in 'Config' folder
+- Code responsible for HTTP requests sending can be found in 'Requests' folder under 'QaService'
+- Config can be found in 'Config' folder under 'QaService'
+
+The framework uses PyTest tools - Pytest fixtures stored in <b>conftest.py</b> file
 
 The framework uses the package 'credittomodels', the same package used by 'Creditto' project.
 
 
-# 3 Test Types
+# 3 Test Groups
+
+There are several groups of tests defined in <b>pytest.ini</b>:
+    +sanity: sanity tests
+    +end2end: end to end tests, full flow
+    +functional: tests that verify a specific system functionality
+    +kafka: tests that verify Kafka messages content, while messages are consumed directly from Kafka
+    +negative: negative tests
+    +container: all tests that can run in docker container
+    +recovery: tests that verify services behaviour after docker container restart and recovery flow
 
 
 # 4 How To 
