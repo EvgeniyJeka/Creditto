@@ -267,11 +267,16 @@ ________
 
 The project architecture allows to add additional functionalities.
 
-Currently there is no users database, so Gateway has no option to verify if current user is authorized to place an offer or a bid. 
+-Currently the user (the lender and the borrower) have no option to cancel their order. It is possibly to add 'offer cancellation' functionality - 
+Gateway will process the request, validate that given offer can be cancelled and the user that have sent the request is the owner of the offer.
+After that 'offer cancellation' message will be produced to Kafka, consumed by Matcher (it will remove the offer and all related bids from Matcher Pool) 
+and by SQL Writer (it will modify the status of the offer and all related bids in SQL DB). Bid cancellation functionality also can be added. 
+
+-Currently there is no users database, so Gateway has no option to verify if current user is authorized to place an offer or a bid. 
 It is possilbe to add a table in SQL DB that would contain a list of users credentials, types ('lender' or 'borrower') and emails.
 It would allow to add an Authorization module to the Gateway component, and it would validate each offer or bid placement request. 
 
-Currently created matches aren't handled - they are only inserted to SQL DB. 
+-Currently created matches aren't handled - they are only inserted to SQL DB. 
 It is an option to notify the lender and the borrower by sending an email - for that purpose another micro service can be added, it would consume matches from 'matches' Kafka topic, extract the lender and the borrower email address and send an email to both parties. 
 
 
