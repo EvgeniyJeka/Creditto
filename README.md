@@ -150,7 +150,7 @@ ________
  
 # 3 Models description:
 
-1. Offer:
+1. <b>Offer</b>:
    owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
    
    sum: loan sum in USD
@@ -165,7 +165,7 @@ ________
    
    matching_bid: the ID of the bid that was matched with given offer, 'NULL' by default 
 
-3. Bid:
+3. <b>Bid</b>:
    owner_id: the ID of the lending customer in the system. Only authorized customers can place bids (T.B.D)
    
    bid_interest: the interest asked by the lender
@@ -178,7 +178,7 @@ ________
    
    partial_sum: an option (T.B.D.)
 
-3. Match:
+3. <b>Match</b>:
    offer_id: matched offer ID
    
    bid_id: matching bid ID
