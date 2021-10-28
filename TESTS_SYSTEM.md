@@ -13,6 +13,13 @@ Expected OUTPUT is HTTP response, SQL table modification or a Kafka message prod
 
 # 2 Tests Framework
 
+Set of tools used for effective test implementation. 
+- Code responsible for work with MySQL, Kafka, and Docker can be found in 'Tools' folder under 'QaService'
+- Code responsible for HTTP requests sending can be found in 'Requests' folder
+- Config can be found in 'Config' folder
+
+The framework uses the package 'credittomodels', the same package used by 'Creditto' project.
+
 
 # 3 Test Types
 
