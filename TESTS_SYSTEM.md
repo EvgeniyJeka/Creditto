@@ -41,5 +41,9 @@ There are several groups of tests defined in <b>pytest.ini</b>:
   
   - recovery: tests that verify services behaviour after docker container restart and recovery flow
 
+All tests, except for 'recovery' can run in Docker container. 
+A test can be part of several groups - for example, the 'container' group includes all tests that can run in docker container, all except for 'recovery'. 
+Each test is marked with a PyTest annotation ..
+
 
 # 4 How To 
