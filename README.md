@@ -274,7 +274,8 @@ The project architecture allows to add additional functionalities.
 -Currently the user (the lender and the borrower) have no option to cancel their order. It is possibly to add 'offer cancellation' functionality - 
 Gateway will process the request, validate that given offer can be cancelled and the user that have sent the request is the owner of the offer.
 After that 'offer cancellation' message will be produced to Kafka, consumed by Matcher (it will remove the offer and all related bids from Matcher Pool) 
-and by SQL Writer (it will modify the status of the offer and all related bids in SQL DB). Bid cancellation functionality also can be added. 
+and by SQL Writer (it will modify the status of the offer and all related bids in SQL DB). Bid cancellation functionality also can be added. It is also safe to assume,
+that an 'admin' user should be able to cancel, hide or remove a bid or an offer - the same logic can be applied to add that functionality.
 
 -Currently there is no users database, so Gateway has no option to verify if current user is authorized to place an offer or a bid. 
 It is possilbe to add a table in SQL DB that would contain a list of users credentials, types ('lender' or 'borrower') and emails.
