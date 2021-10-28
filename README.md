@@ -1,6 +1,6 @@
 # Creditto
 
-#1. General product description
+# 1 General product description
 
 The purpose of the system is to mediate between customers that would like to borrow money, borrowers,
 and customers that would like to provide a loan, money lenders.
@@ -244,8 +244,11 @@ ________
   # 6 Requirements:
   
   -Docker client
+  
   -Kafka docker image: wurstmeister/kafka:2.13-2.6.0 
+  
   -Zookeeper docker image: wurstmeister/zookeeper:3.4.6
+  
   -MySQL docker image: mysql:latest
   
   Clone the project and run 'docker-compose up -d' commant to build Gateway, MySQL, Matcher and tests container images and run the project. 
