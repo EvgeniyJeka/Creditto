@@ -221,22 +221,41 @@ ________
 
     <b>PLACED</b>: the bid was placed, waiting for matching algorithm to be applied
     
-    <b>MATCHED</b> : the bid was matched with the target offer
+    <b>MATCHED</b> : the bid was matched with the targeted offer
     
     Will be added in feature versions:
     
-    CANCELLED : the bid was cancelled since other bid was matched with the target offer
+    -CANCELLED : the bid was cancelled since other bid was matched with the target offer
     
-    REMOVED: the bid was removed by the admin (T.B.D.)
+    -REMOVED: the bid was removed by the admin (T.B.D.)
     
-    HIDDEN: the bid was temporary hidden by the admin.
+    -HIDDEN: the bid was temporary hidden by the admin (T.B.D.)
     
   
   # 5 Matching logic - available algorithms:
   
-    1. Bid with the lowest interest is selected when 5 bids are placed on one given offer. If there are several bids with equally low interest the OLDEST bid is selected.
+    1. Bid with the lowest interest is selected when 5 bids are placed on one given offer. 
+    If there are several bids with equally low interest the OLDEST bid is selected.
     
-    2. Bid with the lowest interest is selected when 10 bids are placed on one given offer. If there are several bids with equally low interest the NEWEST bid is selected.
+    2. Bid with the lowest interest is selected when 10 bids are placed on one given offer.
+    If there are several bids with equally low interest the NEWEST bid is selected.
+    
+    
+  # 6 Requirements:
+  
+  -Docker client
+  -Kafka docker image: wurstmeister/kafka:2.13-2.6.0 
+  -Zookeeper docker image: wurstmeister/zookeeper:3.4.6
+  -MySQL docker image: mysql:latest
+  
+  Clone the project and run 'docker-compose up -d' commant to build Gateway, MySQL, Matcher and tests container images and run the project. 
+  In current version Gateway listens to HTTP requests on port 5000 (see Postman collection attached). 
+  
+  Project config can be changed in 'local_config' SQL table.
+  
+  1. matching_logic : responsible for selecting Matching Logic. Change the value to '2' to make the Matcher to apply Matching Logic #2 (see description above).
+  2. tail_digits: max allowed tail digits. Used to round calculation results, for ex. loan monthly payment. 
+    
    
                                                      
    
