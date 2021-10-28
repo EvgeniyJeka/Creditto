@@ -73,7 +73,7 @@ ________
 
     d. local_config
 
-3. Gateway : API exposed to end customers. Responsible for verifying received data (against DB).
+3. <b>Gateway</b> : API exposed to end customers. Responsible for verifying received data (against DB).
 
      Receives: JSON from parsed POST and GET requests. 
      
@@ -104,7 +104,7 @@ ________
      
  
 
-4. SQL Writer: the component responsible for updating the data in MySQL DB.
+4. <b>SQL Writer</b>: the component responsible for updating the data in MySQL DB.
 
     Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
     Inserts and updated data in MySQL DB.
