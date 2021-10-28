@@ -252,7 +252,7 @@ ________
   -MySQL docker image: mysql:latest
   
   Clone the project and run 'docker-compose up -d' commant to build Gateway, MySQL, Matcher and tests container images and run the project. 
-  In current version Gateway listens to HTTP requests on port 5000 (see Postman collection attached). 
+  In current version Gateway listens to HTTP requests on port 5000 (see Postman collection in 'creditto_postman_collection' folder). 
   
   Project config can be changed in 'local_config' SQL table.
   
