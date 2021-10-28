@@ -79,6 +79,8 @@ ________
      
      Parses data sent in requests, validates it and produces Kafka messages to the relevant topics basing on extracted data.
      
+     Message content is serialized to Google Protobuf.
+     
      Gateway acesses SQL DB to validate received data. 
      
      API methods:
@@ -140,6 +142,8 @@ ________
    
    New Bid = > Added to the pool => Checking for a match = > 
    => In case of a match produce a 'match' message to "Matches" Kafka topic.
+   
+   Message content is serialized to Google Protobuf.
    
    Once the offer is matched with one of the bids it's status changes to MATCHED and it is no longer presented
    in 'available offers' list and no bids can be placed one it. Matching bid status is changed to MATCHED as well.
