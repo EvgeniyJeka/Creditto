@@ -207,7 +207,7 @@ ________
     
     <b>MATCHED</b>: the offer is matched
     
-    <u>Will be added in feature versions</u>:
+    <u>Will be added in feature versions</u> :
     
     PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
     
