@@ -121,7 +121,7 @@ ________
     The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
     are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
     
-5. Matcher: the component responsible for matching between offers and bids. All offers and bids, that are currently 
+5. <b>Matcher</b>: the component responsible for matching between offers and bids. All offers and bids, that are currently 
    available for matching are kept in service cache, in a pool of offers and bids, the Matcher Pool.
    When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
@@ -131,7 +131,7 @@ ________
    Consumed Offer is added to the pool.
    Consumed Bid is added to the pool as well, 
    and if the amount of bids placed on given offer is suffiecient it triggers a matching check, 
-   - the service checks if one of the Bids placed on that offer meets the match criteria. 
+   the service checks if one of the Bids placed on that offer meets the match criteria. 
    
    Matching algorithm ID is taken from 'local_config' SQL table, the selected algorithm is applied
    to determine if there is a match. 
