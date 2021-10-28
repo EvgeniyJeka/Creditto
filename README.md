@@ -207,21 +207,23 @@ ________
     
     <b>MATCHED</b>: the offer is matched
     
-    <u> Will be added in feature versions </u> :
+    Will be added in feature versions:
     
-    PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
+    -PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
     
-    CANCELLED: the offer was cancelled by the customer that has placed the offer (T.B.D.)
+    -CANCELLED: the offer was cancelled by the customer that has placed the offer (T.B.D.)
     
-    REMOVED: the offer was removed by the admin (T.B.D.)
+    -REMOVED: the offer was removed by the admin (T.B.D.)
     
-    HIDDEN: the offer was temporary hidden by the admin (T.B.D.)
+    -HIDDEN: the offer was temporary hidden by the admin (T.B.D.)
     
 2. Bid:
 
-    PLACED: the bid was placed, waiting for matching algorithm to be applied
+    <b>PLACED</b>: the bid was placed, waiting for matching algorithm to be applied
     
-    MATCHED : the bid was matched with the target offer
+    <b>MATCHED</b> : the bid was matched with the target offer
+    
+    Will be added in feature versions:
     
     CANCELLED : the bid was cancelled since other bid was matched with the target offer
     
