@@ -203,9 +203,11 @@ ________
 
 1. Offer:
 
-    OPEN: the offer is available for matching
+    <b>OPEN</b>: the offer is available for matching
     
-    MATCHED: the offer is matched
+    <b>MATCHED</b>: the offer is matched
+    
+    <u>Will be added in feature versions</u>:
     
     PARTIALLY_MATCHED: the offer is partially matched and available for matching (T.B.D.)
     
