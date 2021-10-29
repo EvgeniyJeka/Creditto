@@ -47,3 +47,31 @@ Each test is marked with a PyTest annotation, so the group of executed tests can
 
 
 # 4 How To 
+
+This section in docker-compose.yml file is responsible for QaService:
+
+sanity_tests_container:
+    image: sanity_tests_container:latest
+    command: ["pytest", "-v", "-m", "sanity"]
+    build: ./QaService
+    networks:
+      - creditto_main
+    environment:
+      - BASE_URL=http://creditto_creditto_gateway_1:5000
+      - SQL_HOST=cabin_db
+      - SQL_PORT=3306
+      - SQL_USER=root
+      - SQL_PASSWORD=123456
+      - WAIT_BEFORE_TIMEOUT=15
+      - MYSQL_DB_WARMUP_DELAY=40
+      
+  
+ It contains the following line: <b>command: ["pytest", "-v", "-m", "sanity"]</b>
+ 
+ This command is executed when docker container is started, it is used to run the selected test group.
+ In given configuration all tests marked with '@pytest.mark.sanity' annotation will be executed.
+ If you want to run another test group, replace the word 'sanity' with the selected test group name, for example:
+ 
+ <b>command: ["pytest", "-v", "-m", "end2end"]</b>
+ 
+ 
