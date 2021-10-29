@@ -27,23 +27,23 @@ The framework uses the package 'credittomodels', the same package used by 'Credi
 
 There are several groups of tests defined in <b>pytest.ini</b>:
 
-  - sanity: sanity tests
+  - sanity: sanity tests, verifying Bid and Offer placement, verifying other REST API methods
   
-  - end2end: end to end tests, full flow
+  - end2end: end to end tests, performing a full flow, verifying matching logic is applied correctly
   
-  - functional: tests that verify a specific system functionality
+  - functional: tests that verify a specific system functionality in each test 
   
   - kafka: tests that verify Kafka messages content, while messages are consumed directly from Kafka
   
-  - negative: negative tests
+  - negative: negative tests, verifying system behaviour on invalid input, verifying incoming HTTP requests are validated
   
   - container: all tests that can run in docker container
   
   - recovery: tests that verify services behaviour after docker container restart and recovery flow
 
-All tests, except for 'recovery' can run in Docker container. 
+All tests, except for 'recovery' can run in a Docker container. 
 A test can be part of several groups - for example, the 'container' group includes all tests that can run in docker container, all except for 'recovery'. 
-Each test is marked with a PyTest annotation ..
+Each test is marked with a PyTest annotation, so the group of executed tests can be selected on each test run.
 
 
 # 4 How To 
