@@ -83,7 +83,7 @@ This section in docker-compose.yml file is responsible for QaService:
  It contains the following line: <b>command: ["pytest", "-v", "-m", "sanity"]</b>
  
  This command is executed when docker container is started, it is used to run the selected test group.
- In given configuration all tests marked with '@pytest.mark.sanity' annotation will be executed.
+ In given configuration all tests marked with <b>@pytest.mark.sanity</b> annotation will be executed.
  If you want to run another test group, replace the word 'sanity' with the selected test group name, for example:
  
  <b>command: ["pytest", "-v", "-m", "end2end"]</b>
