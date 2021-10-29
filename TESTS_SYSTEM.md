@@ -51,7 +51,7 @@ Each test is marked with a PyTest annotation, so the group of executed tests can
 This section in docker-compose.yml file is responsible for QaService:
 
 
- sanity_tests_container:
+    sanity_tests_container:
  
     image: sanity_tests_container:latest
     
