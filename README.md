@@ -51,7 +51,7 @@ https://pypi.org/project/credittomodels/
 
 System chart:
 
-<img src="https://github.com/EvgeniyJeka/Creditto/blob/readme_updating/creditto_flow_.jpg" alt="Screenshot" width="1000" />
+<img src="https://github.com/EvgeniyJeka/Creditto/blob/main/creditto_flow_.jpg" alt="Screenshot" width="1000" />
 ________
 
 
