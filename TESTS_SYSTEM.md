@@ -9,7 +9,7 @@ each test generates an <b>INPUT</b> for Creditto project services and verifies t
 INPUT can be HTTP request or SQL DB table modification.
 Expected OUTPUT is HTTP response, SQL table modification or a Kafka message produced to one of the topics.
 
-<img src="https://github.com/EvgeniyJeka/Creditto/blob/readme_updating/black_box_testing.jpg" alt="Screenshot" width="1000" />
+<img src="https://github.com/EvgeniyJeka/Creditto/blob/main/black_box_testing.jpg" alt="Screenshot" width="1000" />
 
 # 2 Tests Framework
 
