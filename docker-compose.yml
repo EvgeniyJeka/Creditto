@@ -39,7 +39,7 @@ services:
   
       
   cabin_db:
-    image: mysql:latest
+    image: mysql:8.0.27
     volumes:
       - "./.mysql-data/db:/var/lib/mysql"
     restart: always
@@ -50,8 +50,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 123456
       MYSQL_DATABASE: sys
-      MYSQL_USER: root
-      MYSQL_PASSWORD: 123456      
 
       
   creditto_gateway:
@@ -88,7 +86,7 @@ services:
 
   sanity_tests_container:
     image: sanity_tests_container:latest
-    command: ["pytest", "-v", "-m", "container"]
+    command: ["pytest", "-v", "-m", "sanity"]
     build: ./QaService
     networks:
       - creditto_main
@@ -99,7 +97,7 @@ services:
       - SQL_USER=root
       - SQL_PASSWORD=123456
       - WAIT_BEFORE_TIMEOUT=15
-      - MYSQL_DB_WARMUP_DELAY=40
+      - MYSQL_DB_WARMUP_DELAY=60
 
 
 

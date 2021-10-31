@@ -1,8 +1,8 @@
-kafka-python
-pymysql
-cryptography
-simplejson
-credittomodels
-google
-protobuf
-numpy_financial
+kafka-python==2.0.2
+pymysql==1.0.2
+cryptography==35.0.0
+simplejson==3.17.5
+credittomodels==0.0.16
+google==3.0.0
+protobuf==3.19.1
+numpy_financial==1.0.0
