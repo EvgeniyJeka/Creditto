@@ -247,19 +247,14 @@ ________
     
   # 6 Requirements:
   
-  -Docker client
+  - Docker client
+  - Python v3.9 or above
   
-  -Kafka docker image: wurstmeister/kafka:2.13-2.6.0 
-  
-  -Zookeeper docker image: wurstmeister/zookeeper:3.4.6
-  
-  -MySQL docker image: mysql:latest
-  
-  Clone the project and run 'docker-compose up -d' commant to build Gateway, MySQL, Matcher and tests container images and run the project. 
+
+  Clone the project and run 'docker-compose up -d' command to build Gateway, MySQL, Matcher and tests container images and run the project. 
   In current version Gateway listens to HTTP requests on port 5000 (see Postman collection in 'creditto_postman_collection' folder). 
   
   Project config can be changed in 'local_config' SQL table.
-  
   
   
   1. matching_logic : responsible for selecting Matching Logic. Change the value to '2' to make the Matcher to apply Matching Logic #2 (see description above).
