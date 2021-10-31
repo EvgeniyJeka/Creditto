@@ -250,7 +250,6 @@ ________
   - Docker client
   - Python v3.9 or above
   
-
   Clone the project and run 'docker-compose up -d' command to build Gateway, MySQL, Matcher and tests container images and run the project. 
   In current version Gateway listens to HTTP requests on port 5000 (see Postman collection in 'creditto_postman_collection' folder). 
   
