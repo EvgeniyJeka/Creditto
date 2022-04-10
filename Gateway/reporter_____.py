@@ -18,13 +18,17 @@ class Reporter(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        #self.create_validate_tables(self.cursor)
+        self.create_validate_tables(self.cursor)
 
     def get_offer_data(self, offer_id: int) -> dict:
+        query = f'select * from offers where id = {offer_id}'
         return self.get_offer_data_alchemy(offer_id)
+        return self.pack_to_dict(query, "offers")
 
     def get_bids_by_offer(self, offer_id: int) -> list:
-        return self.get_bids_by_offer_alchemy(offer_id)
+        query = f'select * from bids where target_offer_id = {offer_id};'
+        #return self.get_bids_by_offer_alchemy(offer_id)
+        return self.pack_to_dict(query, 'bids')
 
     def verify_offer_by_id(self, offer_id):
         """
@@ -41,7 +45,9 @@ class Reporter(SqlBasic):
         return len(offer_data) > 0
 
     def get_bid_data(self, bid_id: int) -> dict:
-        return self.get_bid_data_alchemy(bid_id)
+        query = f'select * from bids where id = {bid_id}'
+        #return self.get_bid_data_alchemy(bid_id)
+        return self.pack_to_dict(query, "bids")
 
     def get_offers_by_status(self, status: int):
         """
@@ -52,16 +58,27 @@ class Reporter(SqlBasic):
         :param status: int
         :return: list of dicts
         """
-        return self.get_offers_by_status_alchemy(status)
+        #return self.get_offers_by_status_alchemy(status)
+        if status == -1:
+            query = 'select * from offers'
+        else:
+            query = f'select * from offers where status = {status}'
+        return self.pack_to_dict(query, "offers")
 
     def get_bids_by_lender(self, lender_id: int):
-        return self.get_bids_by_lender_alchemy(lender_id)
+        query = f'select * from bids where owner_id = {lender_id}'
+        #return self.get_bids_by_lender_alchemy(lender_id)
+        return self.pack_to_dict(query, "bids")
 
     def get_offers_by_borrower(self, borrower_id: int):
-        return self.get_offers_by_borrower_alchemy(borrower_id)
+        query = f'select * from offers where owner_id = {borrower_id};'
+        #return self.get_offers_by_borrower_alchemy(borrower_id)
+        return self.pack_to_dict(query, "offers")
 
     def get_matches_by_owner(self, owner_id: int):
-        return self.get_matches_by_owner_alchemy(owner_id)
+        query = f'select * from matches where offer_owner_id = {owner_id} or bid_owner_id = {owner_id};'
+        return self.pack_to_dict(query, "matches")
+
 
     def validate_personal_data_request(self, request_data, verified_fields):
         try:
@@ -165,8 +182,7 @@ class Reporter(SqlBasic):
 
 if __name__ == '__main__':
     rep = Reporter()
-    a = rep.get_offer_data(492829810550172999)
-    b = rep.get_matches_by_owner(1312)
+    a = rep.get_offer_data(752781996402836800)
     print(a)
 
 
