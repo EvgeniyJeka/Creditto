@@ -18,13 +18,6 @@ class Reporter(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        #self.create_validate_tables(self.cursor)
-
-    def get_offer_data(self, offer_id: int) -> dict:
-        return self.get_offer_data_alchemy(offer_id)
-
-    def get_bids_by_offer(self, offer_id: int) -> list:
-        return self.get_bids_by_offer_alchemy(offer_id)
 
     def verify_offer_by_id(self, offer_id):
         """
@@ -32,11 +25,11 @@ class Reporter(SqlBasic):
         :param offer_id: int
         :return: bool
         """
-        offer_data = self.get_offer_data(offer_id)
+        offer_data = self.get_offer_data_alchemy(offer_id)
         if offer_data == []:
             for i in range(0, fetch_from_sql_retries):
                 time.sleep(fetch_from_sql_delay)
-                offer_data = self.get_offer_data(offer_id)
+                offer_data = self.get_offer_data_alchemy(offer_id)
 
         return len(offer_data) > 0
 
@@ -109,8 +102,8 @@ class Reporter(SqlBasic):
                 if param not in bid.keys():
                     return {"error": "Required parameter is missing in provided bid"}
 
-            offer_in_sql = self.get_offer_data(bid['target_offer_id'])
-            existing_bids_on_offer = self.get_bids_by_offer(bid['target_offer_id'])
+            offer_in_sql = self.get_offer_data_alchemy(bid['target_offer_id'])
+            existing_bids_on_offer = self.get_bids_by_offer_alchemy(bid['target_offer_id'])
 
             # Returning error message if bid is placed on non-existing offer
             if offer_in_sql == []:
@@ -165,7 +158,7 @@ class Reporter(SqlBasic):
 
 if __name__ == '__main__':
     rep = Reporter()
-    a = rep.get_offer_data(492829810550172999)
+    a = rep.get_offer_data_alchemy(492829810550172999)
     b = rep.get_matches_by_owner(1312)
     print(a)
 
