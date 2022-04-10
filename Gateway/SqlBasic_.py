@@ -60,7 +60,7 @@ class SqlBasic(object):
             logging.critical("SQL DB - Failed to connect, reason is unclear")
             logging.critical(e)
 
-    def create_table_from_scratch(self, table_name, column_names):
+    def create_table_from_scratch(self, table_name, column_names, primary_key):
         """
         This method can be used to create a new SQL table from scratch.
         :param file_name: Table name, str
@@ -81,7 +81,7 @@ class SqlBasic(object):
             columns_list = [db.Column(x[0], x[1]) for x in column_names]
 
             # SQL Alchemy table instance is passed to the "fill_table" method
-            db.Table(table_name, metadata, *columns_list, PrimaryKeyConstraint('id'), extend_existing=True)
+            db.Table(table_name, metadata, *columns_list, PrimaryKeyConstraint(primary_key), extend_existing=True)
             metadata.create_all(self.engine)
 
             logging.info(f"SQL Module: Table {table_name} was created")
@@ -107,7 +107,36 @@ class SqlBasic(object):
                             ('final_interest', db.String(255)), ('allow_partial_fill', db.INT),
                             ('date_added', db.String(255)), ('status', db.INT))
 
-            self.create_table_from_scratch('offers', column_names)
+            self.create_table_from_scratch('offers', column_names, 'id')
+
+        # Creating the 'bids' table if not exists - column for each "Bid" object property.
+        if 'bids' not in tables:
+            logging.warning("Logs: 'bids' table is missing! Creating the 'bids' table")
+
+            column_names = (('id', db.BIGINT), ('owner_id', db.INT), ('bid_interest', db.String(255)),
+                            ('target_offer_id', db.BIGINT), ('partial_only', db.INT),
+                            ('date_added', db.String(255)), ('status', db.INT))
+
+            self.create_table_from_scratch('bids', column_names, 'id')
+
+        # Creating the 'offers' table if not exists - column for each "Offer" object property.
+        if 'matches' not in tables:
+            logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
+
+            column_names = (('id', db.BIGINT), ('offer_id', db.BIGINT), ('bid_id', db.BIGINT),
+                            ('offer_owner_id', db.INT), ('bid_owner_id', db.INT),
+                            ('match_time', db.String(255)), ('partial', db.INT),
+                            ('sum', db.String(255)), ('final_interest', db.String(255)),
+                            ('monthly_payment', db.String(255)))
+
+            self.create_table_from_scratch('matches', column_names, 'id')
+
+        #         query = "CREATE TABLE matches (id bigint, offer_id bigint, bid_id bigint, offer_owner_id int, bid_owner_id int, " \
+        #                 "match_time varchar(255), partial int, sum varchar(255), final_interest varchar(255), " \
+        #                 "monthly_payment varchar(255)," \
+        #                 " PRIMARY KEY (ID));"
+
+
 
 
 
