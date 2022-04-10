@@ -1,6 +1,6 @@
 import pymysql
 import logging
-from sqlalchemy import exc, PrimaryKeyConstraint
+from sqlalchemy import exc, PrimaryKeyConstraint, or_
 from sqlalchemy import create_engine
 from sqlalchemy_utils import database_exists, create_database
 
@@ -188,7 +188,7 @@ class SqlBasic(object):
 
         return result
 
-    def get_offer_data(self, offer_id: int):
+    def get_offer_data_alchemy(self, offer_id: int):
         try:
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -216,7 +216,7 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
-    def get_bids_by_offer(self, offer_id: int):
+    def get_bids_by_offer_alchemy(self, offer_id: int):
         try:
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -231,7 +231,7 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
 
-    def get_bid_data(self, bid_id: int):
+    def get_bid_data_alchemy(self, bid_id: int):
         try:
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -245,7 +245,7 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
-    def get_offers_by_status(self, status: int):
+    def get_offers_by_status_alchemy(self, status: int):
         """
          Fetches offers from SQL DB by provided status.
          Returns a list of dicts - each dict contains data on one offer.
@@ -259,6 +259,49 @@ class SqlBasic(object):
         else:
             data = self.get_offer_by_status_internal(status)
         return self.pack_to_dict(data, "offers")
+
+    def get_bids_by_lender_alchemy(self, lender_id: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.owner_id == lender_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return self.pack_to_dict(result, "bids")
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
+
+
+    def get_offers_by_borrower_alchemy(self, borrower_id: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.owner_id == borrower_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return self.pack_to_dict(result, "offers")
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+    def get_matches_by_owner_alchemy(self, owner_id: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return self.pack_to_dict(result, "matches")
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
 
     def pack_to_dict(self, data, table):
@@ -303,4 +346,4 @@ class SqlBasic(object):
 if __name__ == '__main__':
     print("Test")
     sql_basic = SqlBasic()
-    print(sql_basic.get_offers_by_status(-1))
+    print(sql_basic.get_matches_by_owner_alchemy(1312))
