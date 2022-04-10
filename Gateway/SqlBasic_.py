@@ -202,6 +202,64 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
+    def get_offer_by_status_internal(self, offer_status: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.status == offer_status)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+    def get_bids_by_offer(self, offer_id: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.target_offer_id == offer_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return self.pack_to_dict(result, "bids")
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
+
+
+    def get_bid_data(self, bid_id: int):
+        try:
+            metadata = db.MetaData()
+            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.id == bid_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return self.pack_to_dict(result, "bids")
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
+
+    def get_offers_by_status(self, status: int):
+        """
+         Fetches offers from SQL DB by provided status.
+         Returns a list of dicts - each dict contains data on one offer.
+         Returns an empty list if there are no offers in SQL DB with requested status.
+         Special case: status '-1' is received - all offers are returned in that case.
+        :param status: int
+        :return: list of dicts
+        """
+        if status == -1:
+            data = self.get_table_content("offers")
+        else:
+            data = self.get_offer_by_status_internal(status)
+        return self.pack_to_dict(data, "offers")
+
 
     def pack_to_dict(self, data, table):
         """
@@ -242,14 +300,7 @@ class SqlBasic(object):
 
 
 
-
-
-
-
-
-
-
 if __name__ == '__main__':
     print("Test")
     sql_basic = SqlBasic()
-    print(sql_basic.get_offer_data(752781996402836800))
+    print(sql_basic.get_offers_by_status(-1))

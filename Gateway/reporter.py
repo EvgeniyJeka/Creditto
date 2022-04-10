@@ -22,10 +22,12 @@ class Reporter(SqlBasic):
 
     def get_offer_data(self, offer_id: int) -> dict:
         query = f'select * from offers where id = {offer_id}'
+        #return self.get_offer_data(offer_id)
         return self.pack_to_dict(query, "offers")
 
     def get_bids_by_offer(self, offer_id: int) -> list:
         query = f'select * from bids where target_offer_id = {offer_id};'
+        #return self.get_bids_by_offer(offer_id)
         return self.pack_to_dict(query, 'bids')
 
     def verify_offer_by_id(self, offer_id):
@@ -44,6 +46,7 @@ class Reporter(SqlBasic):
 
     def get_bid_data(self, bid_id: int) -> dict:
         query = f'select * from bids where id = {bid_id}'
+        #return self.get_bid_data(bid_id)
         return self.pack_to_dict(query, "bids")
 
     def get_offers_by_status(self, status: int):
@@ -72,6 +75,7 @@ class Reporter(SqlBasic):
     def get_matches_by_owner(self, owner_id: int):
         query = f'select * from matches where offer_owner_id = {owner_id} or bid_owner_id = {owner_id};'
         return self.pack_to_dict(query, "matches")
+
 
     def validate_personal_data_request(self, request_data, verified_fields):
         try:
@@ -171,6 +175,12 @@ class Reporter(SqlBasic):
                 return {"error": "Required parameter is missing in provided offer"}
 
         return {"confirmed": "given offer can be placed"}
+
+
+if __name__ == '__main__':
+    rep = Reporter()
+    a = rep.get_offer_data(752781996402836800)
+    print(a)
 
 
 
