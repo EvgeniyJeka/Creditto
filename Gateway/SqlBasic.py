@@ -255,6 +255,8 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
+
+
     def get_offers_by_status_alchemy(self, status: int):
         """
          Fetches offers from SQL DB by provided status.
