@@ -81,11 +81,11 @@ class SqlBasic(object):
             columns_list = [db.Column(x[0], x[1]) for x in column_names]
 
             # SQL Alchemy table instance is passed to the "fill_table" method
-            db.Table(table_name, metadata, *columns_list, PrimaryKeyConstraint(primary_key), extend_existing=True)
+            created_table = db.Table(table_name, metadata, *columns_list, PrimaryKeyConstraint(primary_key), extend_existing=True)
             metadata.create_all(self.engine)
 
             logging.info(f"SQL Module: Table {table_name} was created")
-            return {"SQL Module": f"Table {table_name} was created"}
+            return created_table
 
         else:
             return {"error": f"Can't create a new table - table with name {table_name} already exists"}
@@ -119,7 +119,7 @@ class SqlBasic(object):
 
             self.create_table_from_scratch('bids', column_names, 'id')
 
-        # Creating the 'offers' table if not exists - column for each "Offer" object property.
+        # Creating the 'offers' table if not exists - column for each "Match" object property.
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'bids' table")
 
@@ -131,12 +131,39 @@ class SqlBasic(object):
 
             self.create_table_from_scratch('matches', column_names, 'id')
 
-        #         query = "CREATE TABLE matches (id bigint, offer_id bigint, bid_id bigint, offer_owner_id int, bid_owner_id int, " \
-        #                 "match_time varchar(255), partial int, sum varchar(255), final_interest varchar(255), " \
-        #                 "monthly_payment varchar(255)," \
-        #                 " PRIMARY KEY (ID));"
+        # Creating the 'local_config' table if not exists
+        if 'local_config' not in tables:
+            logging.warning("Logs: 'local_config' table is missing! Creating the 'local_config' table")
+
+            column_names = (('id', db.BIGINT), ('property', db.String(255)), ('value', db.String(255)),
+                            ('description', db.String(255)))
+
+            created_config_table = self.create_table_from_scratch('local_config', column_names, 'id')
+
+            updated_columns = [x[0] for x in column_names]
+            table_data = [[1, "matching_logic", 1, "selected matching algorithm"],
+                          [2, "tail_digits", 4, "max tail digits allowed, rounding config"]]
+
+            added_values = []
+
+            for row in table_data:
+                element = {}
+                for column_number in range(0, len(column_names)):
+                    element[updated_columns[column_number]] = row[column_number]
+
+                added_values.append(element)
+
+            query = created_config_table.insert().values([*added_values])
+            self.cursor.execute(query)
 
 
+
+            #         logging.warning("Logs: ADDING THE DEFAULT CONFIG")
+            #
+            #         query = f'insert into local_config values(1, "matching_logic", 1, "selected matching algorithm")'
+            #         cursor.execute(query)
+            #         query = f'insert into local_config values(2, "tail_digits", 4, "max tail digits allowed, rounding config")'
+            #         cursor.execute(query)
 
 
 
