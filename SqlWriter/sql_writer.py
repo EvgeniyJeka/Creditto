@@ -4,6 +4,8 @@ from credittomodels import Bid
 from SqlBasic import SqlBasic
 from credittomodels import statuses
 
+# Refactor all methods - use SQL Alchemy to perform all SQL operations
+
 
 class SqlWriter(SqlBasic):
 

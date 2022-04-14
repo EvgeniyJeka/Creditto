@@ -1,7 +1,7 @@
 import logging
 from sqlalchemy import exc, or_
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 from local_config import SqlConfig
 import sqlalchemy as db
@@ -205,7 +205,6 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
 
-
     def get_offers_by_status_alchemy(self, status: int):
         """
          Fetches offers from SQL DB by provided status.
@@ -271,6 +270,53 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
 
+    def fetch_config_from_db(self, config_param):
+        """
+        This method can be used to fetch local config params from SQL DB table 'local_config'
+        :param config_param: requested config property, string
+        :return: current config (value), string
+        """
+        try:
+            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+
+            metadata = db.MetaData()
+            table_ = db.Table("local_config", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.property == config_param)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return int(self.pack_to_dict(result, "local_config")[0]['value'])
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+
+    def get_next_id(self, table_name):
+        """
+        This method can be used to get the next valid number that can be used as ID for new record in given table
+        :param table_name: existing table, str
+        :param cursor: sql cursor
+        :return: int
+        """
+        try:
+            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+
+            metadata = db.MetaData()
+            table_ = db.Table(table_name, metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_])
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            result.sort(key=lambda x: x[0], reverse=True)
+
+            return result[0][0] + 1
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+
     def pack_to_dict(self, data, table):
         """
         This method can be used to extract data from SQL table and pack it to list of dicts
@@ -309,10 +355,3 @@ class SqlBasic(object):
 
 
 
-
-if __name__ == '__main__':
-    print("Test")
-    sql_basic = SqlBasic()
-    a = sql_basic.get_offer_data_alchemy(1070113941042776110)[0]
-
-    print(a)
