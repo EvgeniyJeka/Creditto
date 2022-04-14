@@ -1,13 +1,12 @@
-import pymysql
 import logging
-from sqlalchemy import exc, PrimaryKeyConstraint, or_
+from sqlalchemy import exc, or_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 from local_config import SqlConfig
 import sqlalchemy as db
-
-from objects_mapped import OfferMapped, BidMapped, MatchesMapped, LocalConfigMapped, Base
+from credittomodels import objects_mapped
+import sqlalchemy
 
 
 class SqlBasic(object):
@@ -25,7 +24,6 @@ class SqlBasic(object):
         self.session = Session()
         self.create_validate_tables()
 
-
     # Connect to DB
     def connect_me(self, hst, usr, pwd, db_name):
         """
@@ -38,7 +36,7 @@ class SqlBasic(object):
         :param db_name: DB name
         :return: SqlAlchemy connection (cursor)
         """
-        import sqlalchemy
+
         try:
 
             url = f'mysql+pymysql://{usr}:{pwd}@{hst}:3306/{db_name}'
@@ -66,35 +64,6 @@ class SqlBasic(object):
             logging.critical("SQL DB - Failed to connect, reason is unclear")
             logging.critical(e)
 
-    # def create_table_from_scratch(self, table_name, column_names, primary_key):
-    #     """
-    #     This method can be used to create a new SQL table from scratch.
-    #     :param file_name: Table name, str
-    #     :param column_names: Table columns list
-    #     :param table_data: table data, list - each element will become a record in the table
-    #     :return: dict (confirmation message or error message)
-    #     """
-    #
-    #     logging.info(f"SQL Module: Creating a new table from scratch -  '{table_name}'")
-    #     tables = self.engine.table_names()
-    #
-    #     # Creating new table to store the file content if not exist.
-    #     if table_name not in tables:
-    #         logging.info(f"{table_name} table is missing! Creating the {table_name} table")
-    #         metadata = db.MetaData()
-    #
-    #         # Creating table - column names are provided in a tuple
-    #         columns_list = [db.Column(x[0], x[1]) for x in column_names]
-    #
-    #         # SQL Alchemy table instance is passed to the "fill_table" method
-    #         created_table = db.Table(table_name, metadata, *columns_list, PrimaryKeyConstraint(primary_key), extend_existing=True)
-    #         metadata.create_all(self.engine)
-    #
-    #         logging.info(f"SQL Module: Table {table_name} was created")
-    #         return created_table
-    #
-    #     else:
-    #         return {"error": f"Can't create a new table - table with name {table_name} already exists"}
 
     def create_validate_tables(self):
         """
@@ -107,30 +76,30 @@ class SqlBasic(object):
         # Creating the 'offers' table if not exists - column for each "Offer" object property.
         if 'offers' not in tables:
             logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
-            self.offers_table = OfferMapped()
-            Base.metadata.create_all(self.engine)
+            self.offers_table = objects_mapped.OfferMapped()
+            objects_mapped.Base.metadata.create_all(self.engine)
 
         # Creating the 'bids' table if not exists - column for each "Bid" object property.
         if 'bids' not in tables:
             logging.warning("Logs: 'bids' table is missing! Creating the 'bids' table")
-            self.bids_table = BidMapped()
-            Base.metadata.create_all(self.engine)
+            self.bids_table = objects_mapped.BidMapped()
+            objects_mapped.Base.metadata.create_all(self.engine)
 
         # Creating the 'offers' table if not exists - column for each "Match" object property.
         if 'matches' not in tables:
             logging.warning("Logs: 'matches' table is missing! Creating the 'matches' table")
-            self.matches_table = MatchesMapped()
+            self.matches_table = objects_mapped.MatchesMapped()
 
         # Creating the 'local_config' table if not exists
         if 'local_config' not in tables:
             logging.warning("Logs: 'local_config' table is missing! Creating the 'local_config' table")
-            self.local_config_table = LocalConfigMapped()
-            Base.metadata.create_all(self.engine)
+            self.local_config_table = objects_mapped.LocalConfigMapped()
+            objects_mapped.Base.metadata.create_all(self.engine)
 
             # Inserting a record
-            configuration = [LocalConfigMapped(id=1, property="matching_logic",
+            configuration = [objects_mapped.LocalConfigMapped(id=1, property="matching_logic",
                                                value=1, description="selected matching algorithm"),
-                             LocalConfigMapped(id=2, property="tail_digits",
+                             objects_mapped.LocalConfigMapped(id=2, property="tail_digits",
                                                value=4, description="max tail digits allowed, rounding config")]
 
             self.session.add_all(configuration)
@@ -219,7 +188,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
-
     def get_bid_data_alchemy(self, bid_id: int):
         try:
             self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
@@ -269,7 +237,6 @@ class SqlBasic(object):
 
         except Exception as e:
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
-
 
     def get_offers_by_borrower_alchemy(self, borrower_id: int):
         try:
@@ -346,4 +313,6 @@ class SqlBasic(object):
 if __name__ == '__main__':
     print("Test")
     sql_basic = SqlBasic()
-    print(sql_basic.get_matches_by_owner_alchemy(1312))
+    a = sql_basic.get_offer_data_alchemy(1070113941042776110)[0]
+
+    print(a)

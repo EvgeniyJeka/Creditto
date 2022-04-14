@@ -1,11 +1,8 @@
 import time
 
-import pymysql
-from datetime import datetime
 import logging
 from credittomodels import statuses
 
-from credittomodels import Offer
 from SqlBasic import SqlBasic
 from decimal import *
 
