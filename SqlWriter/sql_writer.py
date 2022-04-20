@@ -12,7 +12,6 @@ class SqlWriter(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        #self.create_validate_tables(self.cursor)
 
     def insert_offer(self, offer: Offer):
         """
@@ -58,6 +57,7 @@ class SqlWriter(SqlBasic):
                                                       bid_owner_id=match.bid_owner_id,
                                                       match_time=match.match_time,
                                                       partial=match.partial,
+                                                      sum=match.sum,
                                                       final_interest=match.final_interest,
                                                       monthly_payment=match.monthly_payment)
 
