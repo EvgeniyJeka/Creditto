@@ -120,7 +120,7 @@ class TestGatewayRecovery:
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
         assert offer_sql['status'] == Offer.OfferStatuses.OPEN.value, "Offer was matched before 3 bids were placed"
-        assert offer_sql['final_interest'] == '-1.0'
+        assert offer_sql['final_interest'] == '-1'
 
         logging.info(f"----------------------- No Match On Fifth Bid verification - step passed ----------"
                      f"------------------------\n")
