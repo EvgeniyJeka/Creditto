@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import exc, or_
+from sqlalchemy import exc, or_, and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
@@ -42,7 +42,7 @@ class SqlBasic(object):
             url = f'mysql+pymysql://{usr}:{pwd}@{hst}:3306/{db_name}'
 
             # Create an engine object.
-            engine = create_engine(url, echo=True)
+            engine = create_engine(url, echo=True, isolation_level="READ UNCOMMITTED")
 
             # Create database if it does not exist.
             if not database_exists(engine.url):
@@ -63,7 +63,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.critical("SQL DB - Failed to connect, reason is unclear")
             logging.critical(e)
-
 
     def create_validate_tables(self):
         """
@@ -98,13 +97,13 @@ class SqlBasic(object):
 
             # Inserting a record
             configuration = [objects_mapped.LocalConfigMapped(id=1, property="matching_logic",
-                                               value=1, description="selected matching algorithm"),
+                                                              value=1, description="selected matching algorithm"),
                              objects_mapped.LocalConfigMapped(id=2, property="tail_digits",
-                                               value=4, description="max tail digits allowed, rounding config")]
+                                                              value=4,
+                                                              description="max tail digits allowed, rounding config")]
 
             self.session.add_all(configuration)
             self.session.commit()
-
 
     def get_columns(self, table):
         """
@@ -122,14 +121,12 @@ class SqlBasic(object):
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
 
-
     def get_table_content(self, table):
         """
         Get table content from DB
         :param table: table name, String
         :return: tuple
         """
-        self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
         metadata = db.MetaData()
         table_ = db.Table(table, metadata, autoload=True, autoload_with=self.engine)
@@ -142,7 +139,6 @@ class SqlBasic(object):
 
     def get_offer_data_alchemy(self, offer_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -158,7 +154,6 @@ class SqlBasic(object):
 
     def get_offer_by_status_internal(self, offer_status: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -174,7 +169,6 @@ class SqlBasic(object):
 
     def get_bids_by_offer_alchemy(self, offer_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -190,7 +184,6 @@ class SqlBasic(object):
 
     def get_bid_data_alchemy(self, bid_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -203,7 +196,6 @@ class SqlBasic(object):
 
         except Exception as e:
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
-
 
     def get_offers_by_status_alchemy(self, status: int):
         """
@@ -223,7 +215,6 @@ class SqlBasic(object):
 
     def get_bids_by_lender_alchemy(self, lender_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -239,7 +230,6 @@ class SqlBasic(object):
 
     def get_offers_by_borrower_alchemy(self, borrower_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -255,12 +245,12 @@ class SqlBasic(object):
 
     def get_matches_by_owner_alchemy(self, owner_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
+            query = db.select([table_]).where(
+                or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -269,6 +259,37 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
+    def get_relevant_offers(self):
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(
+                or_(table_.columns.status == 1, table_.columns.status == 3))
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+    def get_relevant_bids(self, target_offer_id):
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(
+                and_(table_.columns.status == 1, table_.columns.target_offer_id == target_offer_id))
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def fetch_config_from_db(self, config_param):
         """
@@ -277,7 +298,6 @@ class SqlBasic(object):
         :return: current config (value), string
         """
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table("local_config", metadata, autoload=True, autoload_with=self.engine)
@@ -291,7 +311,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
-
     def get_next_id(self, table_name):
         """
         This method can be used to get the next valid number that can be used as ID for new record in given table
@@ -300,7 +319,6 @@ class SqlBasic(object):
         :return: int
         """
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
 
             metadata = db.MetaData()
             table_ = db.Table(table_name, metadata, autoload=True, autoload_with=self.engine)
@@ -309,15 +327,12 @@ class SqlBasic(object):
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
-            if result:
-                result.sort(key=lambda x: x[0], reverse=True)
-                return result[0][0] + 1
-            else:
-                return 1
+            result.sort(key=lambda x: x[0], reverse=True)
+
+            return result[0][0] + 1
 
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
-
 
     def pack_to_dict(self, data, table):
         """

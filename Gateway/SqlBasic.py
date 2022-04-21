@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import exc, or_
+from sqlalchemy import exc, or_, and_
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
@@ -129,8 +129,6 @@ class SqlBasic(object):
         :param table: table name, String
         :return: tuple
         """
-        # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-        #self.cursor = self.engine.connect()
 
         metadata = db.MetaData()
         table_ = db.Table(table, metadata, autoload=True, autoload_with=self.engine)
@@ -143,8 +141,6 @@ class SqlBasic(object):
 
     def get_offer_data_alchemy(self, offer_id: int):
         try:
-            #self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -160,8 +156,6 @@ class SqlBasic(object):
 
     def get_offer_by_status_internal(self, offer_status: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -177,8 +171,6 @@ class SqlBasic(object):
 
     def get_bids_by_offer_alchemy(self, offer_id: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -194,8 +186,6 @@ class SqlBasic(object):
 
     def get_bid_data_alchemy(self, bid_id: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -228,8 +218,6 @@ class SqlBasic(object):
 
     def get_bids_by_lender_alchemy(self, lender_id: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -245,8 +233,6 @@ class SqlBasic(object):
 
     def get_offers_by_borrower_alchemy(self, borrower_id: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -262,8 +248,6 @@ class SqlBasic(object):
 
     def get_matches_by_owner_alchemy(self, owner_id: int):
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
@@ -277,6 +261,37 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
+    def get_relevant_offers(self):
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(
+                or_(table_.columns.status == 1, table_.columns.status == 3))
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
+    def get_relevant_bids(self, target_offer_id):
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(
+                and_(table_.columns.status == 1, table_.columns.target_offer_id == target_offer_id))
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def fetch_config_from_db(self, config_param):
         """
@@ -285,8 +300,6 @@ class SqlBasic(object):
         :return: current config (value), string
         """
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("local_config", metadata, autoload=True, autoload_with=self.engine)
@@ -300,7 +313,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
-
     def get_next_id(self, table_name):
         """
         This method can be used to get the next valid number that can be used as ID for new record in given table
@@ -309,8 +321,6 @@ class SqlBasic(object):
         :return: int
         """
         try:
-            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
-            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table(table_name, metadata, autoload=True, autoload_with=self.engine)
@@ -325,7 +335,6 @@ class SqlBasic(object):
 
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
-
 
     def pack_to_dict(self, data, table):
         """
