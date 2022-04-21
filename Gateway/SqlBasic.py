@@ -42,7 +42,7 @@ class SqlBasic(object):
             url = f'mysql+pymysql://{usr}:{pwd}@{hst}:3306/{db_name}'
 
             # Create an engine object.
-            engine = create_engine(url, echo=True)
+            engine = create_engine(url, echo=True, isolation_level="READ UNCOMMITTED")
 
             # Create database if it does not exist.
             if not database_exists(engine.url):
@@ -129,7 +129,8 @@ class SqlBasic(object):
         :param table: table name, String
         :return: tuple
         """
-        self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+        # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+        #self.cursor = self.engine.connect()
 
         metadata = db.MetaData()
         table_ = db.Table(table, metadata, autoload=True, autoload_with=self.engine)
@@ -142,7 +143,8 @@ class SqlBasic(object):
 
     def get_offer_data_alchemy(self, offer_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -158,7 +160,8 @@ class SqlBasic(object):
 
     def get_offer_by_status_internal(self, offer_status: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -174,7 +177,8 @@ class SqlBasic(object):
 
     def get_bids_by_offer_alchemy(self, offer_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -190,7 +194,8 @@ class SqlBasic(object):
 
     def get_bid_data_alchemy(self, bid_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -223,7 +228,8 @@ class SqlBasic(object):
 
     def get_bids_by_lender_alchemy(self, lender_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
@@ -239,7 +245,8 @@ class SqlBasic(object):
 
     def get_offers_by_borrower_alchemy(self, borrower_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
@@ -255,7 +262,8 @@ class SqlBasic(object):
 
     def get_matches_by_owner_alchemy(self, owner_id: int):
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
@@ -277,7 +285,8 @@ class SqlBasic(object):
         :return: current config (value), string
         """
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table("local_config", metadata, autoload=True, autoload_with=self.engine)
@@ -300,7 +309,8 @@ class SqlBasic(object):
         :return: int
         """
         try:
-            self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            # self.cursor, self.engine = self.connect_me(self.hst, self.usr, self.pwd, self.db_name)
+            #self.cursor = self.engine.connect()
 
             metadata = db.MetaData()
             table_ = db.Table(table_name, metadata, autoload=True, autoload_with=self.engine)
