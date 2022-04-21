@@ -14,7 +14,7 @@ class SqlRecoveryReader(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        self.create_validate_tables(self.cursor)
+
 
     def recover_offers_bids_sql(self):
         """
@@ -26,9 +26,12 @@ class SqlRecoveryReader(SqlBasic):
         """
         recovery_pool = {}
 
-        # Getting all active offers from SQL DB
-        query = "select * from offers where status in (1,3);"
-        relevant_offers_db = self.run_sql_query(query)
+        # # Getting all active offers from SQL DB
+        # query = "select * from offers where status in (1,3);"
+        #
+        # #relevant_offers_db = self.run_sql_query(query)
+
+        relevant_offers_db = self.get_relevant_offers()
 
         # Converting offer tuple extracted from SQL DB to Offer object
         for db_offer in relevant_offers_db:
@@ -40,11 +43,15 @@ class SqlRecoveryReader(SqlBasic):
             # Adding the recovered Offer as a key to the recovery pool
             recovery_pool[recovered_offer] = []
 
+
+
         logging.info(f"SqlRecoveryReader: Recovery pool - all offers recovered: {recovery_pool}")
 
         for offer in recovery_pool.keys():
-            query = f"select * from bids where status in (1) and target_offer_id = {offer.id};"
-            recovered_bids_db = self.run_sql_query(query)
+            # query = f"select * from bids where status in (1) and target_offer_id = {offer.id};"
+            # recovered_bids_db = self.run_sql_query(query)
+
+            recovered_bids_db = self.get_relevant_bids(offer.id)
 
             if len(recovered_bids_db) > 0:
                 for recovered_bid in recovered_bids_db:
