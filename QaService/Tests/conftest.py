@@ -180,7 +180,9 @@ def match_ready(request, set_matching_logic):
     # Finding the created match by Offer ID
     time.sleep(5)
     my_matches = postman.gateway_requests.get_matches_by_owner(test_offer_owner, test_offer_owner_token)
+    logging.warning(f"Matches received: {my_matches}")
 
+    logging.warning(f"Looking for offer ID {offer_id}")
     result = [x for x in my_matches if x['offer_id'] == offer_id]
 
     logging.info(f"Found the created match: {result}")

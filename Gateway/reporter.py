@@ -1,11 +1,8 @@
 import time
 
-import pymysql
-from datetime import datetime
 import logging
 from credittomodels import statuses
 
-from credittomodels import Offer
 from SqlBasic import SqlBasic
 from decimal import *
 
@@ -18,15 +15,6 @@ class Reporter(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        self.create_validate_tables(self.cursor)
-
-    def get_offer_data(self, offer_id: int) -> dict:
-        query = f'select * from offers where id = {offer_id}'
-        return self.pack_to_dict(query, "offers")
-
-    def get_bids_by_offer(self, offer_id: int) -> list:
-        query = f'select * from bids where target_offer_id = {offer_id};'
-        return self.pack_to_dict(query, 'bids')
 
     def verify_offer_by_id(self, offer_id):
         """
@@ -34,17 +22,16 @@ class Reporter(SqlBasic):
         :param offer_id: int
         :return: bool
         """
-        offer_data = self.get_offer_data(offer_id)
+        offer_data = self.get_offer_data_alchemy(offer_id)
         if offer_data == []:
             for i in range(0, fetch_from_sql_retries):
                 time.sleep(fetch_from_sql_delay)
-                offer_data = self.get_offer_data(offer_id)
+                offer_data = self.get_offer_data_alchemy(offer_id)
 
         return len(offer_data) > 0
 
     def get_bid_data(self, bid_id: int) -> dict:
-        query = f'select * from bids where id = {bid_id}'
-        return self.pack_to_dict(query, "bids")
+        return self.get_bid_data_alchemy(bid_id)
 
     def get_offers_by_status(self, status: int):
         """
@@ -55,23 +42,16 @@ class Reporter(SqlBasic):
         :param status: int
         :return: list of dicts
         """
-        if status == -1:
-            query = 'select * from offers'
-        else:
-            query = f'select * from offers where status = {status}'
-        return self.pack_to_dict(query, "offers")
+        return self.get_offers_by_status_alchemy(status)
 
     def get_bids_by_lender(self, lender_id: int):
-        query = f'select * from bids where owner_id = {lender_id}'
-        return self.pack_to_dict(query, "bids")
+        return self.get_bids_by_lender_alchemy(lender_id)
 
     def get_offers_by_borrower(self, borrower_id: int):
-        query = f'select * from offers where owner_id = {borrower_id};'
-        return self.pack_to_dict(query, "offers")
+        return self.get_offers_by_borrower_alchemy(borrower_id)
 
     def get_matches_by_owner(self, owner_id: int):
-        query = f'select * from matches where offer_owner_id = {owner_id} or bid_owner_id = {owner_id};'
-        return self.pack_to_dict(query, "matches")
+        return self.get_matches_by_owner_alchemy(owner_id)
 
     def validate_personal_data_request(self, request_data, verified_fields):
         try:
@@ -119,8 +99,8 @@ class Reporter(SqlBasic):
                 if param not in bid.keys():
                     return {"error": "Required parameter is missing in provided bid"}
 
-            offer_in_sql = self.get_offer_data(bid['target_offer_id'])
-            existing_bids_on_offer = self.get_bids_by_offer(bid['target_offer_id'])
+            offer_in_sql = self.get_offer_data_alchemy(bid['target_offer_id'])
+            existing_bids_on_offer = self.get_bids_by_offer_alchemy(bid['target_offer_id'])
 
             # Returning error message if bid is placed on non-existing offer
             if offer_in_sql == []:
@@ -171,6 +151,13 @@ class Reporter(SqlBasic):
                 return {"error": "Required parameter is missing in provided offer"}
 
         return {"confirmed": "given offer can be placed"}
+
+
+if __name__ == '__main__':
+    rep = Reporter()
+    a = rep.get_offer_data_alchemy(492829810550172999)
+    b = rep.get_matches_by_owner(1312)
+    print(a)
 
 
 
