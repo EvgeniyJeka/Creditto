@@ -51,7 +51,6 @@ class SqlBasic(object):
         except pymysql.err.InternalError:
             print("Unknown Database")
 
-
     def run_sql_query(self, query: str):
         try:
             self.cursor.execute(query)
