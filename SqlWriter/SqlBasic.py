@@ -64,6 +64,7 @@ class SqlBasic(object):
             logging.critical("SQL DB - Failed to connect, reason is unclear")
             logging.critical(e)
 
+
     def create_validate_tables(self):
         """
         This method can be used to validate, that all needed table are exist.
@@ -97,13 +98,13 @@ class SqlBasic(object):
 
             # Inserting a record
             configuration = [objects_mapped.LocalConfigMapped(id=1, property="matching_logic",
-                                                              value=1, description="selected matching algorithm"),
+                                               value=1, description="selected matching algorithm"),
                              objects_mapped.LocalConfigMapped(id=2, property="tail_digits",
-                                                              value=4,
-                                                              description="max tail digits allowed, rounding config")]
+                                               value=4, description="max tail digits allowed, rounding config")]
 
             self.session.add_all(configuration)
             self.session.commit()
+
 
     def get_columns(self, table):
         """
@@ -120,6 +121,7 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
+
 
     def get_table_content(self, table):
         """
@@ -138,6 +140,11 @@ class SqlBasic(object):
         return result
 
     def get_offer_data_alchemy(self, offer_id: int):
+        """
+        This method can be used to extract data on a selected offer from SQL DB
+        :param offer_id: int
+        :return: dict
+        """
         try:
 
             metadata = db.MetaData()
@@ -153,6 +160,11 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def get_offer_by_status_internal(self, offer_status: int):
+        """
+        Returns offer status from SQL DB by offer ID, internal usage only
+        :param offer_status: int
+        :return: tuple
+        """
         try:
 
             metadata = db.MetaData()
@@ -168,6 +180,11 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def get_bids_by_offer_alchemy(self, offer_id: int):
+        """
+        Returns bids by offer ID - all bids are placed on given offer
+        :param offer_id: int
+        :return: dict
+        """
         try:
 
             metadata = db.MetaData()
@@ -183,6 +200,11 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
     def get_bid_data_alchemy(self, bid_id: int):
+        """
+        Returns data on the selected bid
+        :param bid_id: int
+        :return: dict
+        """
         try:
 
             metadata = db.MetaData()
@@ -214,6 +236,11 @@ class SqlBasic(object):
         return self.pack_to_dict(data, "offers")
 
     def get_bids_by_lender_alchemy(self, lender_id: int):
+        """
+        Returns all bids placed by the provided lender
+        :param lender_id: int
+        :return: dict
+        """
         try:
 
             metadata = db.MetaData()
@@ -229,6 +256,11 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get bids data from SQL - {e}")
 
     def get_offers_by_borrower_alchemy(self, borrower_id: int):
+        """
+        Returns all offers placed by the given borrower
+        :param borrower_id:
+        :return:
+        """
         try:
 
             metadata = db.MetaData()
@@ -244,13 +276,17 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def get_matches_by_owner_alchemy(self, owner_id: int):
+        """
+        Returns matches by owner ID - the owner can be lender OR borrower
+        :param owner_id: int
+        :return: dict
+        """
         try:
 
             metadata = db.MetaData()
             table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(
-                or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
+            query = db.select([table_]).where(or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -260,6 +296,10 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def get_relevant_offers(self):
+        """
+        Returns all offers in status OPEN and PARTIALLY_MATCHED from SQL DB
+        :return: list of tuples
+        """
         try:
 
             metadata = db.MetaData()
@@ -276,6 +316,11 @@ class SqlBasic(object):
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
     def get_relevant_bids(self, target_offer_id):
+        """
+        Returns all bids in status OPEN placed on given offer
+        :param target_offer_id: int
+        :return: list of tuples
+        """
         try:
 
             metadata = db.MetaData()
