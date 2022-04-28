@@ -10,6 +10,7 @@ from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 import uuid
 
+from authorization import Authorization
 from credittomodels import protobuf_handler
 
 # 1. Add automated tests: match flow, API + SQL - D
@@ -51,6 +52,8 @@ producer = ProducerFromApi()
 
 # Initiating Reporter - needed for contact with SQL DB
 reporter = Reporter()
+
+authorization = Authorization()
 
 # Protobuf handler - used to serialize bids and offers to proto
 proto_handler = protobuf_handler.ProtoHandler
