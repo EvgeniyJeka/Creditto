@@ -40,6 +40,7 @@ from credittomodels import protobuf_handler
 # 22. Add Gateway instance on port 80 (?)
 # 23. Consider to add a new API method to Gateway - 'get_match_by_offer(offer_id)'
 # 24. Test container - consider adding retries when SQL is unavailable (catch exception, retry x times before failing) - D
+# 25. Authorization module - D
 
 logging.basicConfig(level=logging.INFO)
 

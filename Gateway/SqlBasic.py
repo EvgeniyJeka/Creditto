@@ -145,7 +145,7 @@ class SqlBasic(object):
                                                         token_creation_time="",
                                                         role_id=2),
                              objects_mapped.UsersMapped(id='505',
-                                                        username='David Ben Gution',
+                                                        username='David Ben Gurion',
                                                         password=utils.Calculator.hash_string("Rabbit"),
                                                         jwt_token="",
                                                         key="",
@@ -266,7 +266,6 @@ class SqlBasic(object):
             logging.critical(f"Authorization: Failed to insert the JWT token to SQL DB: {e}")
             return {"error": "Token Termination failed"}
 
-
     def get_password_by_username(self, username):
         metadata = db.MetaData()
         table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
@@ -313,7 +312,6 @@ class SqlBasic(object):
         fetched_data = ResultProxy.fetchall()
 
         return fetched_data[0]
-
 
     def get_columns(self, table):
         """
