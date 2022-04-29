@@ -10,7 +10,6 @@ from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 import uuid
 
-from authorization import Authorization
 from credittomodels import protobuf_handler
 
 # 1. Add automated tests: match flow, API + SQL - D
@@ -53,10 +52,69 @@ producer = ProducerFromApi()
 # Initiating Reporter - needed for contact with SQL DB
 reporter = Reporter()
 
-authorization = Authorization()
-
 # Protobuf handler - used to serialize bids and offers to proto
 proto_handler = protobuf_handler.ProtoHandler
+
+
+@app.route('/sign_in', methods=['POST'])
+def sign_in():
+    try:
+        # Headers parsing
+        username = request.headers.get('username')
+        password = request.headers.get('password')
+
+        if not (username and password):
+            logging.warning("Credentials missing in request headers")
+            return {"Authorization": "Credentials missing in request headers"}
+
+        logging.info(f"Authorization: Sign In request received, username {username} password {password}")
+
+        produced_token = reporter.generate_token(username, password)
+
+        if 'JWT' in produced_token.keys():
+            return {"Token": produced_token['JWT']}
+
+        elif 'error' in produced_token.keys():
+            return {"Error": produced_token['error']}
+
+    except (KeyError, TypeError) as e:
+        logging.error(f"Sign In method called - credentials weren't provided: {e}")
+        return {"Error": "Authorization: please provide valid credentials in request"}
+
+@app.route('/sign_out', methods=['POST'])
+def sign_out():
+    try:
+        # Headers parsing
+        token = request.headers.get('jwt')
+
+        if not token:
+            logging.warning("Credentials missing in request headers")
+            return {"Authorization": "Credentials missing in request headers"}
+
+        logging.info(f"Authorization: Sign Out request received, JWT in request: {token}")
+
+        sign_out_performed = reporter.sign_out(token)
+
+        if 'error' not in sign_out_performed.keys():
+            return {"Authorization": "Sign out confirmed", "Token": token}
+
+        return sign_out_performed
+
+    except (KeyError, TypeError) as e:
+        logging.error(f"Sign Out method called - invalid request: {e}")
+        return {"Error": "Authorization: please provide valid credentials in request"}
+
+
+@app.route("/get_jwt_ttl/<jwt>", methods=['GET'])
+def get_token_ttl(jwt):
+    logging.info(f"Authorization: request for {jwt} token TTL received")
+
+    token_ttl_checked = reporter.jwt_token_ttl_remains(jwt)
+
+    if isinstance(token_ttl_checked, dict) and 'error' in token_ttl_checked.keys():
+        return {"Error": token_ttl_checked['error']}
+
+    return {f"JWT": f"{jwt}", "TTL": token_ttl_checked}
 
 
 @app.route("/place_offer", methods=['POST'])
@@ -67,7 +125,6 @@ def place_offer():
     Expecting for a POST request with JSON body, example:
     {
     "type":"offer",
-    "owner_id":1200,
     "sum":110000,
     "duration":12,
     "offered_interest":0.09,
@@ -76,6 +133,31 @@ def place_offer():
     """
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
+    action_id = 2 # Place Offer
+
+    auth_token = request.headers.get('jwt')
+
+    # start
+    if not auth_token:
+        logging.warning("JWT is missing in request headers")
+        return {"Authorization": "JWT is missing in request headers"}
+
+    logging.info(f"Authorization: User {auth_token} tries to perform action {action_id}, "
+                 f"addressing the Authorization module")
+
+    if auth_token == "":
+        return {"error": f"Wrong credentials"}
+
+    permissions_verification_result = reporter.verify_token(auth_token, action_id)
+
+    if 'error' in permissions_verification_result.keys():
+        return {"error": permissions_verification_result['error']}
+
+    # end
+    #
+    # Move that segment to 'reporter.verify_token(auth_token, action_id)'
+
+    offer['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
@@ -113,7 +195,6 @@ def place_bid():
     Expecting for a POST request with JSON body, example:
     {
     "type":"bid",
-    "owner_id":"2032",
     "bid_interest":0.061,
     "target_offer_id":2,
     "partial_only":0
@@ -121,6 +202,32 @@ def place_bid():
     """
     bid = request.get_json()
     logging.info(f"Gateway: Bid received {bid}")
+
+    action_id = 1  # Place Bid
+
+    auth_token = request.headers.get('jwt')
+
+    # start
+    if not auth_token:
+        logging.warning("JWT is missing in request headers")
+        return {"Authorization": "JWT is missing in request headers"}
+
+    logging.info(f"Authorization: User {auth_token} tries to perform action {action_id}, "
+                 f"addressing the Authorization module")
+
+    if auth_token == "":
+        return {"error": f"Wrong credentials"}
+
+    permissions_verification_result = reporter.verify_token(auth_token, action_id)
+
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
+
+    # end
+    #
+    # Move that segment to 'reporter.verify_token(auth_token, action_id)'
+
+    bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 

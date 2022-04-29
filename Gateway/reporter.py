@@ -3,8 +3,19 @@ import time
 import logging
 from credittomodels import statuses
 
+import jwt
+import time
+import logging
+from decimal import Decimal
+
+logging.basicConfig(level=logging.INFO)
+
+from constants import *
+import hashlib
+import configparser
+import random
+
 from SqlBasic import SqlBasic
-from decimal import *
 
 # Move to config or to global env. vars
 fetch_from_sql_retries = 3
@@ -15,6 +26,7 @@ class Reporter(SqlBasic):
 
     def __init__(self):
         super().__init__()
+        self.token_ttl = 2000
 
     def verify_offer_by_id(self, offer_id):
         """
@@ -152,12 +164,126 @@ class Reporter(SqlBasic):
 
         return {"confirmed": "given offer can be placed"}
 
+    def hash_string(self, input_: str):
+        plaintext = input_.encode()
 
-if __name__ == '__main__':
-    rep = Reporter()
-    a = rep.get_offer_data_alchemy(492829810550172999)
-    b = rep.get_matches_by_owner(1312)
-    print(a)
+        # call the sha256(...) function returns a hash object
+        d = hashlib.sha256(plaintext)
 
+        # generate human readable hash of "hello" string
+        hash = d.hexdigest()
+        return hash
+
+    def sign_out(self, token):
+        # Check for provided token in SQL DB
+        if not self.get_all_tokens().__contains__(token):
+            return {"error": f"Wrong credentials"}
+
+        return self.terminate_token(token)
+
+    def key_gen(self):
+        return "key" + str(random.randint(1000, 10000))
+
+    def generate_token(self, username: str, password: str):
+        """
+        This method is used to generate a JWT basing on provided credentials. JWT is generated after creds are verified
+        :param username: str
+        :param password: str
+        :return: JWT on success
+        """
+
+        key = self.key_gen()  # The key will be generated on random basis and saved to DB
+
+        # Check if given username exists in SQL DB, if it doesn't - return an error
+        if not self.get_users().__contains__(username):
+            return {"error": f"Wrong credentials"}
+
+        password_hash = self.get_password_by_username(username)
+
+        if self.hash_string(password) == password_hash:
+            encoded_jwt = jwt.encode({"user": username, "password": password}, key, algorithm="HS256")
+            token_creation_time = time.time()
+
+            # Save the created JWT, KEY and token creation time to SQL
+            if not self.save_jwt_key_time(username, encoded_jwt, key, token_creation_time):
+                return {"error": "Token creation failed due to system issues"}
+
+            return {"JWT": encoded_jwt}
+
+        else:
+            return {"error": "Wrong credentials"}
+
+    def verify_token(self, token: str, action_id: int):
+        """
+        This method is used to verify JWT (without decoding it). Also verifies that given user has permissions
+        required to perform the requested action
+        :param token: str
+        :param action_id: int
+        :return: dict (confirmation on success)
+        """
+
+        # Check for provided token in SQL DB
+        if not self.get_all_tokens().__contains__(token):
+            return {"error": f"Wrong credentials"}
+
+        _, token_creation_time = self.get_data_by_token(token)
+
+        # Verify against SQL if the token is valid (not expired)
+        #                                   - fetch the creation time and subtract it from the current time
+        if not time.time() - token_creation_time < self.token_ttl:
+            logging.error(f"Token TTL: {self.token_ttl}, current age: {time.time() - token_creation_time}")
+            return {"error": "Token has expired"}
+
+        # Bring the action types of all actions that current user is allowed to perform from SQL.
+        # If the action types list contains the provided action type - return a confirmation.
+        # Otherwise - return an error message.
+        if int(action_id) not in self.get_allowed_actions_by_token(token):
+            return {"error": "Forbidden action"}
+
+        return {"Confirmed": "Permissions verified"}
+
+    def decode_token(self, token):
+        """
+        This method can be used to decode a JWT if the former is saved in SQL DB
+        :param token: valid JWT
+        :return: dict, decoded JWT
+        """
+        # Check for provided token in SQL DB
+        if not self.get_all_tokens().__contains__(token):
+            return {"error": f"Unlisted token"}
+
+        secret_key, _ = self.get_data_by_token(token)
+
+        try:
+            return jwt.decode(token, secret_key, algorithms="HS256")
+
+        except jwt.exceptions.InvalidSignatureError:
+            logging.error(f"Authorization: Invalid JWT received {token}")
+            return {"error": "Invalid token provided"}
+
+    def jwt_token_ttl_remains(self, token):
+        creation_time = self.get_token_creation_time(token)
+
+        if float(creation_time) > 0:
+            logging.info(f"Authorization: token {token} creation time: {creation_time}")
+            ttl = self.token_ttl - (time.time() - float(creation_time))
+            if ttl > 0:
+                return ttl
+            return 0
+        return {"error": "Non existing JWT"}
+
+    def get_user_data_by_jwt(self, jwt):
+        result = self.get_user_by_token(jwt)
+        if not result:
+            return False
+        return self.get_user_by_token(jwt)
+
+
+# if __name__ == '__main__':
+#     rep = Reporter()
+#     a = rep.get_offer_data_alchemy(492829810550172999)
+#     b = rep.get_matches_by_owner(1312)
+#     print(a)
+#
 
 
