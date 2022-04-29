@@ -252,59 +252,43 @@ def get_my_bids():
         return {"Error": permissions_verification_result['error']}
 
     lender_id = reporter.get_user_data_by_jwt(auth_token)[0]
-
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
 
-@app.route("/get_all_my_offers", methods=['POST'])
+@app.route("/get_all_my_offers", methods=['GET'])
 def get_my_offers():
     """
-    This API method can be used to get all offers placed by customer with provided customer ID.
+    This API method can be used to get all offers placed by customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
     """
 
-    offers_request = request.get_json()
-    processed_match_request = reporter. \
-        validate_personal_data_request(offers_request, ConfigParams.verified_personal_data_request_params.value)
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my offers, borrower token validated: {auth_token}")
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_OFFERS)
 
-    borrower_id = offers_request['owner_id']
-    token = offers_request['token']
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    logging.info(f"Gateway: get all my offers, borrower token validated: {token}")
+    borrower_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_offers_by_borrower(borrower_id))
 
 
-@app.route("/get_all_my_matches", methods=['POST'])
+@app.route("/get_all_my_matches", methods=['GET'])
 def get_my_matches():
     """
-    This API method can be used to get all matches related to given customer ID.
+    This API method can be used to get all matches related to given customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
     """
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my matches, customer's token validated: {auth_token}")
 
-    matches_request = request.get_json()
-    processed_match_request = reporter.\
-        validate_personal_data_request(matches_request, ConfigParams.verified_personal_data_request_params.value)
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_MATCHES)
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    owner_id = matches_request['owner_id']
-    token = matches_request['token']
-
-    logging.info(f"Gateway: get all my matches, customer's token validated: {token}")
+    owner_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_matches_by_owner(owner_id))
 
 
