@@ -7,3 +7,5 @@ USERS_TABLE_NAME = 'users'
 ROLES_TABLE_NAME = 'roles'
 ACTIONS_TABLE_NAME = 'actions'
 ACTIONS_BY_ROLES_TABLE_NAME = 'actions_by_roles'
+PLACE_OFFER = 2
+PLACE_BID = 1

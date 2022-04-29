@@ -9,6 +9,7 @@ from credittomodels import Bid
 from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 import uuid
+from constants import *
 
 from credittomodels import protobuf_handler
 
@@ -81,6 +82,7 @@ def sign_in():
         logging.error(f"Sign In method called - credentials weren't provided: {e}")
         return {"Error": "Authorization: please provide valid credentials in request"}
 
+
 @app.route('/sign_out', methods=['GET'])
 def sign_out():
     try:
@@ -133,8 +135,6 @@ def place_offer():
     """
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
-    action_id = 2 # Place Offer
-
     auth_token = request.headers.get('jwt')
 
     # start
@@ -142,13 +142,13 @@ def place_offer():
         logging.warning("JWT is missing in request headers")
         return {"Authorization": "JWT is missing in request headers"}
 
-    logging.info(f"Authorization: User {auth_token} tries to perform action {action_id}, "
+    logging.info(f"Authorization: User {auth_token} tries to perform action {PLACE_OFFER}, "
                  f"addressing the Authorization module")
 
     if auth_token == "":
         return {"error": f"Wrong credentials"}
 
-    permissions_verification_result = reporter.verify_token(auth_token, action_id)
+    permissions_verification_result = reporter.verify_token(auth_token, PLACE_OFFER)
 
     if 'error' in permissions_verification_result.keys():
         return {"error": permissions_verification_result['error']}
@@ -202,9 +202,6 @@ def place_bid():
     """
     bid = request.get_json()
     logging.info(f"Gateway: Bid received {bid}")
-
-    action_id = 1  # Place Bid
-
     auth_token = request.headers.get('jwt')
 
     # start
@@ -212,13 +209,13 @@ def place_bid():
         logging.warning("JWT is missing in request headers")
         return {"Authorization": "JWT is missing in request headers"}
 
-    logging.info(f"Authorization: User {auth_token} tries to perform action {action_id}, "
+    logging.info(f"Authorization: User {auth_token} tries to perform action {PLACE_BID}, "
                  f"addressing the Authorization module")
 
     if auth_token == "":
         return {"error": f"Wrong credentials"}
 
-    permissions_verification_result = reporter.verify_token(auth_token, action_id)
+    permissions_verification_result = reporter.verify_token(auth_token, PLACE_BID)
 
     if 'error' in permissions_verification_result.keys():
         return {"Error": permissions_verification_result['error']}
