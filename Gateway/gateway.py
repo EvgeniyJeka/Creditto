@@ -56,7 +56,7 @@ reporter = Reporter()
 proto_handler = protobuf_handler.ProtoHandler
 
 
-@app.route('/sign_in', methods=['POST'])
+@app.route('/sign_in', methods=['GET'])
 def sign_in():
     try:
         # Headers parsing
@@ -81,7 +81,7 @@ def sign_in():
         logging.error(f"Sign In method called - credentials weren't provided: {e}")
         return {"Error": "Authorization: please provide valid credentials in request"}
 
-@app.route('/sign_out', methods=['POST'])
+@app.route('/sign_out', methods=['GET'])
 def sign_out():
     try:
         # Headers parsing
