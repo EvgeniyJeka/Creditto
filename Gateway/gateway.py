@@ -137,25 +137,10 @@ def place_offer():
     logging.info(f"Gateway: Offer received: {offer}")
     auth_token = request.headers.get('jwt')
 
-    # start
-    if not auth_token:
-        logging.warning("JWT is missing in request headers")
-        return {"Authorization": "JWT is missing in request headers"}
-
-    logging.info(f"Authorization: User {auth_token} tries to perform action {PLACE_OFFER}, "
-                 f"addressing the Authorization module")
-
-    if auth_token == "":
-        return {"error": f"Wrong credentials"}
-
     permissions_verification_result = reporter.verify_token(auth_token, PLACE_OFFER)
 
     if 'error' in permissions_verification_result.keys():
         return {"error": permissions_verification_result['error']}
-
-    # end
-    #
-    # Move that segment to 'reporter.verify_token(auth_token, action_id)'
 
     offer['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
 
@@ -168,7 +153,6 @@ def place_offer():
         logging.warning(f"Offer {next_id} has failed validation and was rejected")
         return response
 
-    # In future versions it is possible that the offer will be converted to Google Proto message
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
@@ -204,25 +188,10 @@ def place_bid():
     logging.info(f"Gateway: Bid received {bid}")
     auth_token = request.headers.get('jwt')
 
-    # start
-    if not auth_token:
-        logging.warning("JWT is missing in request headers")
-        return {"Authorization": "JWT is missing in request headers"}
-
-    logging.info(f"Authorization: User {auth_token} tries to perform action {PLACE_BID}, "
-                 f"addressing the Authorization module")
-
-    if auth_token == "":
-        return {"error": f"Wrong credentials"}
-
     permissions_verification_result = reporter.verify_token(auth_token, PLACE_BID)
 
     if 'error' in permissions_verification_result.keys():
         return {"Error": permissions_verification_result['error']}
-
-    # end
-    #
-    # Move that segment to 'reporter.verify_token(auth_token, action_id)'
 
     bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
 

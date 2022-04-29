@@ -222,6 +222,16 @@ class Reporter(SqlBasic):
         :return: dict (confirmation on success)
         """
 
+        logging.info(f"Authorization: User {token} tries to perform action {action_id}, "
+                     f"addressing the Authorization module")
+
+        if not token:
+            logging.warning("JWT is missing in request headers")
+            return {"error": "JWT is missing in request headers"}
+
+        if token == "":
+            return {"error": f"Wrong credentials"}
+
         # Check for provided token in SQL DB
         if not self.get_all_tokens().__contains__(token):
             return {"error": f"Wrong credentials"}
