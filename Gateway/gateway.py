@@ -236,28 +236,23 @@ def get_all_offers():
     return simplejson.dumps(reporter.get_offers_by_status(-1))
 
 
-@app.route("/get_all_my_bids", methods=['POST'])
+@app.route("/get_all_my_bids", methods=['GET'])
 def get_my_bids():
     """
-    This API method can be used to get all bids placed by customer with provided customer ID.
+    This API method can be used to get all bids placed by customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
+
     """
-    bids_request = request.get_json()
-    processed_match_request = reporter. \
-        validate_personal_data_request(bids_request, ConfigParams.verified_personal_data_request_params.value)
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my bids, lender token validated: {auth_token}")
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_BIDS)
 
-    lender_id = bids_request['owner_id']
-    token = bids_request['token']
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    logging.info(f"Gateway: get all my bids, lender token validated: {token}")
+    lender_id = reporter.get_user_data_by_jwt(auth_token)[0]
+
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
 
