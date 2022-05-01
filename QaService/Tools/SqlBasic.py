@@ -400,6 +400,26 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
+    def get_users_by_role(self, role_id: int):
+        """
+        Returns all users in given role
+        :param role_id: int
+        :return: list of tuples
+        """
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("users", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.role_id == role_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
     def pack_to_dict(self, data, table):
         """
         This method can be used to extract data from SQL table and pack it to list of dicts
@@ -447,3 +467,7 @@ class SqlBasic(object):
     def get_bids_by_offer(self, offer_id):
         return self.get_bids_by_offer_alchemy(offer_id)
 
+
+# if __name__ == '__main__':
+#     sq_mn = SqlBasic()
+#     print(sq_mn.get_users_by_role(2))
