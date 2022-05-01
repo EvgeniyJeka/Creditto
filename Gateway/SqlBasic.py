@@ -151,6 +151,62 @@ class SqlBasic(object):
                                                         key="",
                                                         token_creation_time="",
                                                         role_id=3),
+                             objects_mapped.UsersMapped(id='104',
+                                                        username='Joseph Biggs',
+                                                        password=utils.Calculator.hash_string("Bank"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='105',
+                                                        username='Mara Karadja',
+                                                        password=utils.Calculator.hash_string("Fist"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='106',
+                                                        username='Lena Goldan',
+                                                        password=utils.Calculator.hash_string("Nice"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='107',
+                                                        username='Katya Rast',
+                                                        password=utils.Calculator.hash_string("Elite"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='108',
+                                                        username='Paul Atreides',
+                                                        password=utils.Calculator.hash_string("Spice"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='109',
+                                                        username='Leto Atreides',
+                                                        password=utils.Calculator.hash_string("Kiev"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='110',
+                                                        username='Baba Yaga',
+                                                        password=utils.Calculator.hash_string("Hero"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2),
+                             objects_mapped.UsersMapped(id='111',
+                                                        username='Mike Smith',
+                                                        password=utils.Calculator.hash_string("Mars"),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=2)
                              ]
 
             self.session.add_all(default_users)
@@ -328,7 +384,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
-
 
     def get_table_content(self, table):
         """
@@ -586,6 +641,26 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
 
+    def get_users_by_role(self, role_id: int):
+        """
+        Returns all users in given role
+        :param role_id: int
+        :return: list of tuples
+        """
+        try:
+
+            metadata = db.MetaData()
+            table_ = db.Table("users", metadata, autoload=True, autoload_with=self.engine)
+
+            query = db.select([table_]).where(table_.columns.role_id == role_id)
+            ResultProxy = self.cursor.execute(query)
+            result = ResultProxy.fetchall()
+
+            return result
+
+        except Exception as e:
+            logging.error(f"SQL Module: Failed to get offer data from SQL - {e}")
+
     def pack_to_dict(self, data, table):
         """
         This method can be used to extract data from SQL table and pack it to list of dicts
@@ -623,4 +698,6 @@ class SqlBasic(object):
             raise e
 
 
-
+# if __name__ == '__main__':
+#     sq_mn = SqlBasic()
+#     print(sq_mn.get_users_by_role(2))

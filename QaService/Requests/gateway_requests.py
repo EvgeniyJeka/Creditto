@@ -11,9 +11,7 @@ except ModuleNotFoundError:
     from ..Config.base_config import BaseConfig
 
 
-
 base_url = BaseConfig.BASE_URL
-
 
 
 class GatewayRequests(object):
@@ -222,10 +220,32 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
+    def sign_in_user(self, user_name, user_password) -> json:
+        """
+        Sends HTTP POST request to Gateway for sign in
+        :return:  JWT token is expected
+        """
 
-# if __name__ == '__main__':
-#     gr = GatewayRequests()
-#     # print(gr.place_offer("1021", 100000, 12, 0.08, 0 ))
-#     # print(gr.place_bid("223", 0.07, 6, 0))
-#     # print(gr.get_offers_by_status(1))
-#     print(gr.get_bids_by_owner(223, "ghyf"))
+        url = base_url + '/sign_in'
+        headers = {'username': user_name, 'password': user_password}
+
+        try:
+            logging.info(url)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            raise e
+
+
+if __name__ == '__main__':
+    gr = GatewayRequests()
+    print(gr.sign_in_user('Joe Anderson', 'Truth'))
+

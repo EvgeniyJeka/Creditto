@@ -3,6 +3,7 @@ import time
 import pytest
 import logging
 
+from credittomodels import User
 
 try:
     from Requests import postman
@@ -197,6 +198,20 @@ def match_ready(request, set_matching_logic):
         logging.error(f"Match creation failed - offer ID {offer_id}")
 
 
+def test_users_passwords():
+    return {'Greg Bradly': "Pigs", 'Joe Anderson': "Truth",
+            'Andrew Levi': "Pass", 'Mary Poppins': "Journey",
+            'David Ben Gurion': "Rabbit", 'Joseph Biggs': "Bank",
+            'Mara Karadja': "Fist", 'Lena Goldan': "Nice", 'Katya Rast': "Elite",
+            'Paul Atreides': "Spice", 'Leto Atreides': "Kiev", 'Baba Yaga': "Hero", 'Mike Smith': "Mars"}
+
+def sign_in_user(user: User):
+    password = test_users_passwords()[user.user_name]
+    response = postman.gateway_requests.sign_in_user(user.user_name, password)
+    user.jwt_token = response['Token']
+    return user
+
+
 # Support for @pytest.mark.incremental
 def pytest_runtest_makereport(item, call):
     if "incremental" in item.keywords:
@@ -212,3 +227,7 @@ def pytest_runtest_setup(item):
 
 
 
+# if __name__ == '__main__':
+#     ussr = User.User(202, 'Joe Anderson', 'cc3a062a97bf2935e0e12e1aee3bed944a81e1f4e4ca21eaa03b07be38628686', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiSm9lIEFuZGVyc29uIiwicGFzc3dvcmQiOiJUcnV0aCJ9.I4wjJ4COVHjXaJuqCWUOA87kvRtm6vWIYRngxpoVAbo', 'key4790', '1651420544.7691257', 2)
+#     rt = sign_in_user(ussr)
+#     print(rt.user_name)

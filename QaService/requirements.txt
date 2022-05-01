@@ -3,7 +3,7 @@ pytest==6.2.5
 requests==2.26.0
 PyMySQL==1.0.2
 cryptography==35.0.0
-credittomodels==0.0.16
+credittomodels==0.0.19
 numpy_financial==1.0.0
 kafka-python==2.0.2
 google==3.0.0
