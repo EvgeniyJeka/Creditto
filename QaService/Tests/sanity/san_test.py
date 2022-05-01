@@ -1,6 +1,17 @@
 from Tests.conftest import sign_in_user, test_users_passwords
 from credittomodels import User
 
+try:
+    from Requests import postman
+    from Tools import reporter
+
+except ModuleNotFoundError:
+    from ...Requests import postman
+    from ...Tools import reporter
+
+postman = postman.Postman()
+reporter = reporter.Reporter()
+
 
 class TestBidSanity(object):
 
@@ -13,3 +24,10 @@ class TestBidSanity(object):
         rt = sign_in_user(ussr)
         print(rt.user_name)
         print(rt.jwt_token)
+
+    def test_get_lenders(self):
+        lenders_raw = reporter.get_users_by_role(2)
+
+        for lender in lenders_raw:
+            uss = User.User(*lender)
+            print(uss.user_name)
