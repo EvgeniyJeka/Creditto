@@ -1,5 +1,8 @@
+import pytest
+
 from Tests.conftest import sign_in_user, test_users_passwords
 from credittomodels import User
+
 
 try:
     from Requests import postman
@@ -30,4 +33,15 @@ class TestBidSanity(object):
 
         for lender in lenders_raw:
             uss = User.User(*lender)
-            print(uss.user_name)
+            uss.password = test_users_passwords()[uss.user_name]
+
+            uss_signed_in = sign_in_user(uss)
+            print(f"Name: {uss_signed_in.user_name}, token: {uss_signed_in.jwt_token}")
+
+
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_get_borrowers(self, get_authorized_borrowers):
+        for user in get_authorized_borrowers:
+            print(f"Username: {user.user_name}, token: {user.jwt_token}")
+
+

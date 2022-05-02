@@ -45,6 +45,23 @@ def set_matching_logic(request):
 
 
 @pytest.fixture(scope='class')
+def get_authorized_borrowers(request):
+
+    result = []
+    borrowers_amount = request.param[0]
+
+    borrowers_raw = reporter.get_users_by_role(1)
+
+    for borrower in borrowers_raw[0:borrowers_amount]:
+        user_borrower = User.User(*borrower)
+        user_borrower.password = test_users_passwords()[user_borrower.user_name]
+
+        result.append(sign_in_user(user_borrower))
+
+    return result
+
+
+@pytest.fixture(scope='class')
 def offer_placed(request):
     """
     This fixture can be used to place an offer with provided params

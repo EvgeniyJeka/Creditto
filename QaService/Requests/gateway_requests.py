@@ -16,7 +16,7 @@ base_url = BaseConfig.BASE_URL
 
 class GatewayRequests(object):
 
-    def place_offer(self, owner_id, _sum, duration_months, offered_interest, allow_partial_fill) -> json:
+    def place_offer(self, owner_id, _sum, duration_months, offered_interest, allow_partial_fill, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Offer
         :return: Response body as a json.
@@ -26,10 +26,14 @@ class GatewayRequests(object):
 
         payload = GatewayRequestsBodies.place_offer_request_body(owner_id, _sum, duration_months, offered_interest,
                                                                  allow_partial_fill)
+        if jwt:
+            headers = {"jwt":jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -42,7 +46,7 @@ class GatewayRequests(object):
             logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
             raise e
 
-    def place_bid(self, owner_id, bid_interest, target_offer_id, partial_only) -> json:
+    def place_bid(self, owner_id, bid_interest, target_offer_id, partial_only, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Bid
         :return: Response body as a json.
@@ -52,9 +56,14 @@ class GatewayRequests(object):
 
         payload = GatewayRequestsBodies.place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only)
 
+        if jwt:
+            headers = {"jwt":jwt}
+        else:
+            headers = {}
+
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body

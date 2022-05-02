@@ -37,13 +37,18 @@ class TestOffersProduced(object):
     """
 
     offer_id = 0
+    borrower_user_id = 0
 
     @pytest.mark.parametrize('set_matching_logic', [[2]], indirect=True)
-    def test_placing_offer(self, set_matching_logic):
-        response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
-                                                        test_duration, test_offer_interest_low, 0)
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic, get_authorized_borrowers):
+        borrower = get_authorized_borrowers[0]
+
+        response = postman.gateway_requests.place_offer(borrower.user_id, test_sum,
+                                                        test_duration, test_offer_interest_low, 0, borrower.jwt_token)
 
         TestOffersProduced.offer_id = response['offer_id']
+        TestOffersProduced.borrower_user_id = borrower.user_id
         logging.info(f"Offer placement: response received {response}")
 
         assert 'offer_id' in response.keys(), "Offer Placement error - no OFFER ID in response"
@@ -60,7 +65,7 @@ class TestOffersProduced(object):
             logging.info(f"Consumed and deserialized bid: {extracted_offer}")
 
             assert extracted_offer.id == TestOffersProduced.offer_id
-            assert extracted_offer.owner_id == test_offer_owner_1
+            assert extracted_offer.owner_id == TestOffersProduced.borrower_user_id
             assert str(extracted_offer.offered_interest) == str(test_offer_interest_low)
             assert extracted_offer.sum == test_sum
             assert extracted_offer.status == Offer.OfferStatuses.OPEN.value
@@ -76,7 +81,7 @@ class TestOffersProduced(object):
                 if extracted_offer.id == TestOffersProduced.offer_id:
                     found_offer_flag = True
 
-                    assert extracted_offer.owner_id == test_offer_owner_1
+                    assert extracted_offer.owner_id == TestOffersProduced.borrower_user_id
                     assert str(extracted_offer.offered_interest) == str(test_offer_interest_low)
                     assert extracted_offer.sum == test_sum
                     assert extracted_offer.status == Offer.OfferStatuses.OPEN.value
