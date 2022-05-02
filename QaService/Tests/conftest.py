@@ -62,6 +62,23 @@ def get_authorized_borrowers(request):
 
 
 @pytest.fixture(scope='class')
+def get_authorized_lenders(request):
+
+    result = []
+    lenders_amount = request.param[0]
+
+    lenders_raw = reporter.get_users_by_role(2)
+
+    for lender in lenders_raw[0:lenders_amount]:
+        user_lender = User.User(*lender)
+        user_lender.password = test_users_passwords()[user_lender.user_name]
+
+        result.append(sign_in_user(user_lender))
+
+    return result
+
+
+@pytest.fixture(scope='class')
 def offer_placed(request):
     """
     This fixture can be used to place an offer with provided params

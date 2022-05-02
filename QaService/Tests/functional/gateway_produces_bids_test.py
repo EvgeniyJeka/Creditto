@@ -17,16 +17,10 @@ logging.basicConfig(level=logging.INFO)
 postman = postman.Postman()
 kafka_integration = KafkaIntegration.KafkaIntegration()
 
-
-test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_sum = 20000
 test_duration = 24
-
-test_bid_owner_10 = 883
 test_bid_interest_10 = 0.041
-
-test_token = '1Aa@<>12'
 
 
 @pytest.mark.container
@@ -43,13 +37,19 @@ class TestBidProduced(object):
 
     offer_id = 0
     bid_id = 0
+    borrower_user_id = 0
+    lender_user_id = 0
     
     @pytest.mark.parametrize('set_matching_logic', [[2]], indirect=True)
-    def test_placing_offer(self, set_matching_logic):
-        response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
-                                                        test_duration, test_offer_interest_low, 0)
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic, get_authorized_borrowers):
+        borrower = get_authorized_borrowers[0]
+
+        response = postman.gateway_requests.place_offer(borrower.user_id, test_sum,
+                                                        test_duration, test_offer_interest_low, 0, borrower.jwt_token)
 
         TestBidProduced.offer_id = response['offer_id']
+        TestBidProduced.borrower_user_id = borrower.user_id
         logging.info(f"Offer placement: response received {response}")
 
         assert 'offer_id' in response.keys(), "Offer Placement error - no OFFER ID in response"
@@ -57,13 +57,16 @@ class TestBidProduced(object):
 
         logging.info(f"----------------------- Offer Placement - step passed ----------------------------------\n")
 
-    def test_placing_bid(self):
+    @pytest.mark.parametrize('get_authorized_lenders', [[1]], indirect=True)
+    def test_placing_bid(self, get_authorized_lenders):
+        lender = get_authorized_lenders[0]
 
         response = postman.gateway_requests.\
-            place_bid(test_bid_owner_10, test_bid_interest_10, self.offer_id, 0)
+            place_bid(lender.user_id, test_bid_interest_10, self.offer_id, 0, lender.jwt_token)
         logging.info(response)
 
         TestBidProduced.bid_id = response['bid_id']
+        TestBidProduced.lender_user_id = lender.user_id
 
         assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
         assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
@@ -80,7 +83,7 @@ class TestBidProduced(object):
             logging.info(f"Consumed and deserialized bid: {extracted_bid}")
 
             assert extracted_bid.id == TestBidProduced.bid_id
-            assert extracted_bid.owner_id == test_bid_owner_10
+            assert extracted_bid.owner_id == TestBidProduced.lender_user_id
             assert str(extracted_bid.bid_interest) == str(test_bid_interest_10)
             assert extracted_bid.target_offer_id == TestBidProduced.offer_id
             assert extracted_bid.status == Bid.BidStatuses.PLACED.value
@@ -93,7 +96,7 @@ class TestBidProduced(object):
             for extracted_bid in bids_from_kafka:
                 if extracted_bid.id == TestBidProduced.bid_id:
                     found_bid_flag = True
-                    assert extracted_bid.owner_id == test_bid_owner_10
+                    assert extracted_bid.owner_id == TestBidProduced.lender_user_id
                     assert str(extracted_bid.bid_interest) == str(test_bid_interest_10)
                     assert extracted_bid.target_offer_id == TestBidProduced.offer_id
                     assert extracted_bid.status == Bid.BidStatuses.PLACED.value

@@ -57,7 +57,7 @@ class GatewayRequests(object):
         payload = GatewayRequestsBodies.place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only)
 
         if jwt:
-            headers = {"jwt":jwt}
+            headers = {"jwt": jwt}
         else:
             headers = {}
 
