@@ -15,13 +15,10 @@ logging.basicConfig(level=logging.INFO)
 postman = postman.Postman()
 kafka_integration = KafkaIntegration.KafkaIntegration()
 
-test_offer_owner_1 = 1024
+
 test_offer_interest_low = 0.05
 test_sum = 20000
 test_duration = 24
-
-
-test_token = '1Aa@<>12'
 
 
 @pytest.mark.container

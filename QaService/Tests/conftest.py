@@ -78,6 +78,34 @@ def get_authorized_lenders(request):
     return result
 
 
+def get_authorized_borrowers_internal(borrowers_amount):
+
+    result = []
+    borrowers_raw = reporter.get_users_by_role(1)
+
+    for borrower in borrowers_raw[0:borrowers_amount]:
+        user_borrower = User.User(*borrower)
+        user_borrower.password = test_users_passwords()[user_borrower.user_name]
+
+        result.append(sign_in_user(user_borrower))
+
+    return result
+
+
+def get_authorized_lenders_internal(lenders_amount):
+
+    result = []
+    lenders_raw = reporter.get_users_by_role(2)
+
+    for lender in lenders_raw[0:lenders_amount]:
+        user_lender = User.User(*lender)
+        user_lender.password = test_users_passwords()[user_lender.user_name]
+
+        result.append(sign_in_user(user_lender))
+
+    return result
+
+
 @pytest.fixture(scope='class')
 def offer_placed(request):
     """
@@ -174,21 +202,21 @@ def match_ready(request, set_matching_logic):
     :param request: dict with offer and bid params
     :return: None (match ID is attached to Test Class body)
     """
+    borrower = get_authorized_borrowers_internal(1)[0]
+    lenders = get_authorized_lenders_internal(5)
+
     match_input = request.param[0]
 
-    test_offer_owner = match_input['offer_owner']
+    #test_offer_owner = match_input['offer_owner']
     test_sum = match_input['offer_sum']
     test_duration = match_input['offer_duration']
 
     test_offer_interest = match_input['offer_interest']
-    test_offer_owner_token = match_input['offer_owner_token']
-
-    test_bid_owners_list = match_input['bid_owners_list']
     test_bid_interest = match_input['bid_interest']
 
     # Placing Offer
-    response = postman.gateway_requests.place_offer(test_offer_owner, test_sum,
-                                                    test_duration, test_offer_interest, 0)
+    response = postman.gateway_requests.place_offer(borrower.user_id, test_sum,
+                                                    test_duration, test_offer_interest, 0, borrower.jwt_token)
 
     offer_id = response['offer_id']
     logging.info(f"Offer placement: response received {response}")
@@ -203,7 +231,7 @@ def match_ready(request, set_matching_logic):
 
     for i in range(0, 5):
         response = postman.gateway_requests. \
-            place_bid(test_bid_owners_list[i], test_bid_interest, offer_id, 0)
+            place_bid(lenders[i].user_id, test_bid_interest, offer_id, 0, lenders[i].jwt_token)
         logging.info(response)
 
         assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -212,24 +240,24 @@ def match_ready(request, set_matching_logic):
         if i == 0:
             bid_id = response['bid_id']
 
-    # Finding the created match by Offer ID
-    time.sleep(5)
-    my_matches = postman.gateway_requests.get_matches_by_owner(test_offer_owner, test_offer_owner_token)
-    logging.warning(f"Matches received: {my_matches}")
-
-    logging.warning(f"Looking for offer ID {offer_id}")
-    result = [x for x in my_matches if x['offer_id'] == offer_id]
-
-    logging.info(f"Found the created match: {result}")
-
-    if len(result) > 0:
-        request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
-        request.cls.offer_id = offer_id
-        request.cls.bid_id = bid_id
-        request.cls.bid_owner_id = test_bid_owners_list[0]
-
-    else:
-        logging.error(f"Match creation failed - offer ID {offer_id}")
+    # # Finding the created match by Offer ID
+    # time.sleep(5)
+    # my_matches = postman.gateway_requests.get_matches_by_owner(borrower.user_id, test_offer_owner_token)
+    # logging.warning(f"Matches received: {my_matches}")
+    #
+    # logging.warning(f"Looking for offer ID {offer_id}")
+    # result = [x for x in my_matches if x['offer_id'] == offer_id]
+    #
+    # logging.info(f"Found the created match: {result}")
+    #
+    # if len(result) > 0:
+    #     request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
+    #     request.cls.offer_id = offer_id
+    #     request.cls.bid_id = bid_id
+    #     request.cls.bid_owner_id = get_authorized_lenders[0]
+    #
+    # else:
+    #     logging.error(f"Match creation failed - offer ID {offer_id}")
 
 
 def test_users_passwords():
@@ -238,6 +266,7 @@ def test_users_passwords():
             'David Ben Gurion': "Rabbit", 'Joseph Biggs': "Bank",
             'Mara Karadja': "Fist", 'Lena Goldan': "Nice", 'Katya Rast': "Elite",
             'Paul Atreides': "Spice", 'Leto Atreides': "Kiev", 'Baba Yaga': "Hero", 'Mike Smith': "Mars"}
+
 
 def sign_in_user(user: User):
     password = test_users_passwords()[user.user_name]
