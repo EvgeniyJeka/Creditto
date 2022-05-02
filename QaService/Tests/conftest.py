@@ -207,7 +207,6 @@ def match_ready(request, set_matching_logic):
 
     match_input = request.param[0]
 
-    #test_offer_owner = match_input['offer_owner']
     test_sum = match_input['offer_sum']
     test_duration = match_input['offer_duration']
 
@@ -240,24 +239,24 @@ def match_ready(request, set_matching_logic):
         if i == 0:
             bid_id = response['bid_id']
 
-    # # Finding the created match by Offer ID
-    # time.sleep(5)
-    # my_matches = postman.gateway_requests.get_matches_by_owner(borrower.user_id, test_offer_owner_token)
-    # logging.warning(f"Matches received: {my_matches}")
-    #
-    # logging.warning(f"Looking for offer ID {offer_id}")
-    # result = [x for x in my_matches if x['offer_id'] == offer_id]
-    #
-    # logging.info(f"Found the created match: {result}")
-    #
-    # if len(result) > 0:
-    #     request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
-    #     request.cls.offer_id = offer_id
-    #     request.cls.bid_id = bid_id
-    #     request.cls.bid_owner_id = get_authorized_lenders[0]
-    #
-    # else:
-    #     logging.error(f"Match creation failed - offer ID {offer_id}")
+    # Finding the created match by Offer ID
+    time.sleep(5)
+    my_matches = postman.gateway_requests.get_matches_by_owner(borrower.jwt_token)
+    logging.warning(f"Matches received: {my_matches}")
+
+    logging.warning(f"Looking for offer ID {offer_id}")
+    result = [x for x in my_matches if x['offer_id'] == offer_id]
+
+    logging.info(f"Found the created match: {result}")
+
+    if len(result) > 0:
+        request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
+        request.cls.offer_id = offer_id
+        request.cls.bid_id = bid_id
+        #request.cls.bid_owner_id = get_authorized_lenders[0]
+
+    else:
+        logging.error(f"Match creation failed - offer ID {offer_id}")
 
 
 def test_users_passwords():

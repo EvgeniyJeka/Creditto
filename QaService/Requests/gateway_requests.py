@@ -207,7 +207,7 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_matches_by_owner(self, owner_id, token) -> json:
+    def get_matches_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive matches related to provided owner ID as JSON
         The method can be used both by Borrowers and Lenders - owner ID is used to filter the relevant matches
@@ -216,11 +216,14 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_matches'
 
-        payload = GatewayRequestsBodies.get_matches_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -228,6 +231,7 @@ class GatewayRequests(object):
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
+
 
     def sign_in_user(self, user_name, user_password) -> json:
         """
@@ -256,5 +260,6 @@ class GatewayRequests(object):
 
 if __name__ == '__main__':
     gr = GatewayRequests()
-    print(gr.sign_in_user('Joe Anderson', 'Truth'))
+    k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
+    print(gr.get_matches_by_owner(k))
 
