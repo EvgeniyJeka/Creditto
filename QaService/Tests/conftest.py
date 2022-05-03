@@ -113,13 +113,13 @@ def offer_placed(request):
     :param request: offer params
     :return: placed offer ID, int
     """
-    test_offer_owner = request.param[0]
-    test_sum = request.param[1]
-    test_duration = request.param[2]
-    test_offer_interest = request.param[3]
+    test_offer_owner = get_authorized_borrowers_internal(1)[0]
+    test_sum = request.param[0]
+    test_duration = request.param[1]
+    test_offer_interest = request.param[2]
 
     response = postman.gateway_requests.place_offer(test_offer_owner, test_sum,
-                                                    test_duration, test_offer_interest, 0)
+                                                    test_duration, test_offer_interest, 0, test_offer_owner.jwt_token)
 
     offer_id = response['offer_id']
     logging.info(f"Offer placement: response received {response}")
