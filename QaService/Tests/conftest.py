@@ -118,7 +118,7 @@ def offer_placed(request):
     test_duration = request.param[1]
     test_offer_interest = request.param[2]
 
-    response = postman.gateway_requests.place_offer(test_offer_owner, test_sum,
+    response = postman.gateway_requests.place_offer(test_offer_owner.user_id, test_sum,
                                                     test_duration, test_offer_interest, 0, test_offer_owner.jwt_token)
 
     offer_id = response['offer_id']

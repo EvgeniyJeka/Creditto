@@ -18,16 +18,9 @@ postman = postman.Postman()
 reporter = reporter.Reporter()
 
 
-test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_sum = 20000
 test_duration = 24
-
-test_bid_owner_1 = 393
-test_bid_owner_2 = 582
-test_bid_owner_3 = 781
-test_bid_owner_4 = 343
-test_bid_owner_5 = 216
 
 test_bid_interest_1 = 0.046
 test_bid_interest_2 = 0.045
@@ -54,6 +47,7 @@ class TestBidPlacement(object):
     offer_id = 0
     matching_bid_id = 0
     lender = None
+    borrower = None
 
     #bid_owners = [test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
 
@@ -61,13 +55,13 @@ class TestBidPlacement(object):
                          test_bid_interest_4, test_bid_interest_5]
 
     @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
-    @pytest.mark.parametrize('offer_placed', [[test_sum, test_duration, test_offer_interest_low]],
-                             indirect=True)
-    def test_no_bid_on_non_existing_offer(self, set_matching_logic, offer_placed):
-        TestBidPlacement.offer_id = offer_placed
+    @pytest.mark.parametrize('get_authorized_lenders', [[1]], indirect=True)
+    def test_no_bid_on_non_existing_offer(self, set_matching_logic, get_authorized_lenders):
+        TestBidPlacement.lender = get_authorized_lenders[0]
 
         response = postman.gateway_requests. \
-            place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id + 1, 0)
+            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
+                      self.offer_id + 1, 0, TestBidPlacement.lender.jwt_token)
 
         assert 'bid_id' not in response.keys()
         assert 'result' not in response.keys()
@@ -77,13 +71,15 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- Invalid offer ID in BID - step passed "
                      f"----------------------------------\n")
 
-    @pytest.mark.parametrize('get_authorized_lenders', [[1]], indirect=True)
-    def test_no_bid_interest_above_suggested(self, get_authorized_lenders):
-        TestBidPlacement.lender = get_authorized_lenders[0]
+    @pytest.mark.parametrize('offer_placed', [[test_sum, test_duration, test_offer_interest_low]],
+                             indirect=True)
+    def test_no_bid_interest_above_suggested(self, offer_placed):
+
+        TestBidPlacement.offer_id = offer_placed
 
         response = postman.gateway_requests. \
             place_bid(TestBidPlacement.lender.user_id, test_offer_interest_low * 2,
-                      self.offer_id, 0, TestBidPlacement.lender.jwt_token)
+                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender.jwt_token)
 
         assert 'bid_id' not in response.keys()
         assert 'result' not in response.keys()
@@ -93,27 +89,29 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- BID Interest Greater Then Offer Interest - step passed "
                      f"----------------------------------\n")
 
-    # def test_lender_can_place_one_bid_on_offer(self):
-    #     response = postman.gateway_requests. \
-    #         place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id, 0)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
-    #     assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
-    #     assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
-    #
-    #     response = postman.gateway_requests. \
-    #         place_bid(self.bid_owners[0], self.bid_interest_list[0], self.offer_id, 0)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == f'Lender is allowed to place only one Bid on each Offer'
-    #
-    #     logging.info(f"----------------------- Lender Can Place One Bid On Each Offer - step passed "
-    #                  f"----------------------------------\n")
-    #
+    def test_lender_can_place_one_bid_on_offer(self):
+        response = postman.gateway_requests. \
+            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
+                      TestBidPlacement.offer_id, 0,  TestBidPlacement.lender.jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
+        assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
+        assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
+
+        response = postman.gateway_requests. \
+            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
+                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender.jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == f'Lender is allowed to place only one Bid on each Offer'
+
+        logging.info(f"----------------------- Lender Can Place One Bid On Each Offer - step passed "
+                     f"----------------------------------\n")
+
     # def test_matched_offer_cant_be_matched(self):
     #
     #     # Placing 5 bids so the offer will become matched
