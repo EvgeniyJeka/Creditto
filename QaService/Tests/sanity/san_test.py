@@ -38,6 +38,9 @@ class TestBidSanity(object):
             uss_signed_in = sign_in_user(uss)
             print(f"Name: {uss_signed_in.user_name}, token: {uss_signed_in.jwt_token}")
 
+            tail_digits = reporter.fetch_config_from_db('tail_digits')
+            print(f"TAIL DIGITS: {tail_digits}")
+
 
     @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
     def test_get_borrowers(self, get_authorized_borrowers):

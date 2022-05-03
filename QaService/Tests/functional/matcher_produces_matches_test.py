@@ -5,21 +5,20 @@ from decimal import Decimal
 try:
     from Requests import postman
     from Tools import KafkaIntegration
+    from Tools import reporter
 
 except ModuleNotFoundError:
     from ...Requests import postman
     from ...Tools import KafkaIntegration
+    from ...Tools import reporter
 
 from credittomodels.utils import Calculator as Calculator
 
 logging.basicConfig(level=logging.INFO)
 
 postman = postman.Postman()
+reporter = reporter.Reporter()
 kafka_integration = KafkaIntegration.KafkaIntegration()
-
-# Move config to SQL
-TAIL_DIGITS = 4
-
 
 test_offer_interest = 0.06
 
@@ -41,14 +40,14 @@ class TestMatchProduced(object):
     match_input = {'offer_sum': test_sum, 'offer_duration': test_duration,
                    'offer_interest': test_offer_interest,
                    'bid_interest': test_bid_interest}
-    
 
     @pytest.mark.parametrize('match_ready', [[match_input]], indirect=True)
     def test_match_from_kafka(self, match_ready):
 
+        TAIL_DIGITS = int(reporter.fetch_config_from_db('tail_digits'))
+
         monthly_payment = Calculator.calculate_monthly_payment(Decimal(test_sum), Decimal(test_bid_interest),
                                                                Decimal(test_duration), TAIL_DIGITS)
-
 
         matches_from_kafka = kafka_integration.pull_produced_matches()
 
