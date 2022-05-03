@@ -46,7 +46,6 @@ class TestBidSanity(object):
 
 
 
-
     test_offer_interest = 0.06
     test_sum = 5000
     test_duration = 13

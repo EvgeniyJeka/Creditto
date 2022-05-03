@@ -69,6 +69,7 @@ services:
     build: ./SqlWriter
     restart: always
     depends_on:
+      - creditto_gateway
       - cabin_db
       - kafka
     networks:
@@ -79,6 +80,7 @@ services:
     build: ./Matcher
     restart: always
     depends_on:
+      - creditto_gateway
       - cabin_db
       - kafka
     networks:
@@ -88,6 +90,10 @@ services:
     image: sanity_tests_container:latest
     command: ["pytest", "-v", "-m", "container"]
     build: ./QaService
+    depends_on:
+      - creditto_gateway
+      - cabin_db
+      - kafka
     networks:
       - creditto_main
     environment:

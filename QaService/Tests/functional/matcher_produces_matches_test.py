@@ -20,22 +20,12 @@ kafka_integration = KafkaIntegration.KafkaIntegration()
 # Move config to SQL
 TAIL_DIGITS = 4
 
-test_offer_owner = 1312
+
 test_offer_interest = 0.06
 
 test_sum = 5000
 test_duration = 13
-
-test_bid_owner_1 = 911
-test_bid_owner_2 = 582
-test_bid_owner_3 = 781
-test_bid_owner_4 = 343
-test_bid_owner_5 = 216
-
-test_bid_owners_list = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
 test_bid_interest = 0.056
-
-test_token = '1Aa@<>12'
 
 
 @pytest.mark.container
@@ -48,9 +38,10 @@ class TestMatchProduced(object):
        3. Produced message content is verified against the expected match params (basing on placed offer and bid data)
     """
 
-    match_input = {'offer_owner': test_offer_owner, 'offer_sum': test_sum, 'offer_duration': test_duration,
-                   'offer_interest': test_offer_interest, 'bid_owners_list': test_bid_owners_list,
-                   'bid_interest': test_bid_interest, 'offer_owner_token': test_token}
+    match_input = {'offer_sum': test_sum, 'offer_duration': test_duration,
+                   'offer_interest': test_offer_interest,
+                   'bid_interest': test_bid_interest}
+    
 
     @pytest.mark.parametrize('match_ready', [[match_input]], indirect=True)
     def test_match_from_kafka(self, match_ready):
@@ -68,9 +59,9 @@ class TestMatchProduced(object):
 
             assert extracted_match.offer_id == self.offer_id
             assert extracted_match.bid_id == self.bid_id
-            assert extracted_match.offer_owner_id == test_offer_owner
+            assert extracted_match.offer_owner_id == self.offer_owner_id
 
-            assert extracted_match.bid_owner_id == test_bid_owner_1
+            assert extracted_match.bid_owner_id == self.bid_owner_id
             assert Decimal(extracted_match.sum) == Decimal(test_sum)
             assert extracted_match.final_interest == test_bid_interest
 
@@ -86,9 +77,9 @@ class TestMatchProduced(object):
 
                     assert extracted_match.offer_id == self.offer_id
                     assert extracted_match.bid_id == self.bid_id
-                    assert extracted_match.offer_owner_id == test_offer_owner
+                    assert extracted_match.offer_owner_id == self.offer_owner_id
 
-                    assert extracted_match.bid_owner_id == test_bid_owner_1
+                    assert extracted_match.bid_owner_id == self.bid_owner_id
                     assert Decimal(extracted_match.sum) == Decimal(test_sum)
                     assert extracted_match.final_interest == test_bid_interest
 

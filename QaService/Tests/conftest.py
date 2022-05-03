@@ -202,9 +202,11 @@ def match_ready(request, set_matching_logic):
     :param request: dict with offer and bid params
     :return: None (match ID is attached to Test Class body)
     """
+    # Using 1 authorized borrower to place an Offer and 5 authorized lenders to place Bids
     borrower = get_authorized_borrowers_internal(1)[0]
     lenders = get_authorized_lenders_internal(5)
 
+    # Parsing params that were passed to the fixture, using them to define the requested match params
     match_input = request.param[0]
 
     test_sum = match_input['offer_sum']
@@ -225,7 +227,7 @@ def match_ready(request, set_matching_logic):
 
     time.sleep(5)
 
-    # Placing Bid that is expected to match with the Offer
+    # Placing Bid that is expected to match with the Offer (and other bids)
     bid_id = 0
 
     for i in range(0, 5):
@@ -249,11 +251,13 @@ def match_ready(request, set_matching_logic):
 
     logging.info(f"Found the created match: {result}")
 
+    # Passing match params to the test instance body
     if len(result) > 0:
         request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
         request.cls.offer_id = offer_id
         request.cls.bid_id = bid_id
-        #request.cls.bid_owner_id = get_authorized_lenders[0]
+        request.cls.bid_owner_id = lenders[0].user_id
+        request.cls.offer_owner_id = borrower.user_id
 
     else:
         logging.error(f"Match creation failed - offer ID {offer_id}")
