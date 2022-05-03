@@ -54,16 +54,20 @@ class TestBestOfFive:
 
     offer_id = 0
     matching_bid_id = 0
-
-    bid_owners = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
+    lenders = None
+    borrower = None
 
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5]
 
     @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
-    def test_placing_offer(self, set_matching_logic):
-        response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
-                                                        test_duration, test_offer_interest_low, 0)
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic, get_authorized_borrowers):
+
+        TestBestOfFive.borrower = get_authorized_borrowers[0]
+        response = postman.gateway_requests.place_offer(TestBestOfFive.borrower.user_id, test_sum,
+                                                        test_duration, test_offer_interest_low, 0,
+                                                        TestBestOfFive.borrower.jwt_token)
 
         TestBestOfFive.offer_id = response['offer_id']
         logging.info(f"Offer placement: response received {response}")
@@ -83,11 +87,15 @@ class TestBestOfFive:
 
         logging.info(f"----------------------- Offer ID validation in SQL - step passed ------------------------------\n")
 
-    def test_placing_first_bids(self):
+    @pytest.mark.parametrize('get_authorized_lenders', [[5]], indirect=True)
+    def test_placing_first_bids(self, get_authorized_lenders):
+
+        TestBestOfFive.lenders = get_authorized_lenders
 
         for i in range(0, 3):
             response = postman.gateway_requests.\
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+                place_bid(TestBestOfFive.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestBestOfFive.lenders[i].jwt_token)
             logging.info(response)
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -97,7 +105,7 @@ class TestBestOfFive:
         logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
 
     def test_verify_no_match_yet(self):
-        print(f"Offer SQL : {reporter.get_offer_by_id(self.offer_id)}")
+        logging.info(f"Offer SQL : {reporter.get_offer_by_id(self.offer_id)}")
 
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
@@ -110,7 +118,8 @@ class TestBestOfFive:
     def test_placing_final_bids(self):
         for i in range(3, 5):
             response = postman.gateway_requests. \
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+                place_bid(TestBestOfFive.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestBestOfFive.lenders[i].jwt_token)
             logging.info(response)
 
             # The bid that is expected to create a match with the offer
@@ -141,7 +150,7 @@ class TestBestOfFive:
         logging.info(match_sql)
 
         assert match_sql['bid_id'] == TestBestOfFive.matching_bid_id
-        assert match_sql['bid_owner_id'] == test_bid_owner_4
+        assert match_sql['bid_owner_id'] == TestBestOfFive.lenders[3].user_id
         assert match_sql['final_interest'] == str(test_bid_interest_4)
 
         logging.info(f"----------------------- Verifying Match Data in SQL - step passed --------------------"
@@ -157,7 +166,7 @@ class TestBestOfFive:
 
         for offer in response:
             if offer['id'] == TestBestOfFive.offer_id:
-                assert offer['owner_id'] == test_offer_owner_1
+                assert offer['owner_id'] == TestBestOfFive.borrower.user_id
                 assert Decimal(offer['sum']) == Decimal(test_sum)
                 assert offer['duration'] == test_duration
                 assert offer['offered_interest'] == str(test_offer_interest_low)
