@@ -49,19 +49,17 @@ class TestBidPlacement(object):
     lender = None
     borrower = None
 
-    #bid_owners = [test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
-
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5]
 
     @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
-    @pytest.mark.parametrize('get_authorized_lenders', [[1]], indirect=True)
+    @pytest.mark.parametrize('get_authorized_lenders', [[5]], indirect=True)
     def test_no_bid_on_non_existing_offer(self, set_matching_logic, get_authorized_lenders):
-        TestBidPlacement.lender = get_authorized_lenders[0]
+        TestBidPlacement.lender = get_authorized_lenders
 
         response = postman.gateway_requests. \
-            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
-                      self.offer_id + 1, 0, TestBidPlacement.lender.jwt_token)
+            place_bid(TestBidPlacement.lender[0].user_id, self.bid_interest_list[0],
+                      self.offer_id + 1, 0, TestBidPlacement.lender[0].jwt_token)
 
         assert 'bid_id' not in response.keys()
         assert 'result' not in response.keys()
@@ -78,8 +76,8 @@ class TestBidPlacement(object):
         TestBidPlacement.offer_id = offer_placed
 
         response = postman.gateway_requests. \
-            place_bid(TestBidPlacement.lender.user_id, test_offer_interest_low * 2,
-                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender.jwt_token)
+            place_bid(TestBidPlacement.lender[0].user_id, test_offer_interest_low * 2,
+                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender[0].jwt_token)
 
         assert 'bid_id' not in response.keys()
         assert 'result' not in response.keys()
@@ -91,8 +89,8 @@ class TestBidPlacement(object):
 
     def test_lender_can_place_one_bid_on_offer(self):
         response = postman.gateway_requests. \
-            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
-                      TestBidPlacement.offer_id, 0,  TestBidPlacement.lender.jwt_token)
+            place_bid(TestBidPlacement.lender[0].user_id, self.bid_interest_list[0],
+                      TestBidPlacement.offer_id, 0,  TestBidPlacement.lender[0].jwt_token)
         logging.info(response)
 
         assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -100,8 +98,8 @@ class TestBidPlacement(object):
         assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
 
         response = postman.gateway_requests. \
-            place_bid(TestBidPlacement.lender.user_id, self.bid_interest_list[0],
-                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender.jwt_token)
+            place_bid(TestBidPlacement.lender[0].user_id, self.bid_interest_list[0],
+                      TestBidPlacement.offer_id, 0, TestBidPlacement.lender[0].jwt_token)
         logging.info(response)
 
         assert 'bid_id' not in response.keys()
@@ -112,24 +110,26 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- Lender Can Place One Bid On Each Offer - step passed "
                      f"----------------------------------\n")
 
-    # def test_matched_offer_cant_be_matched(self):
-    #
-    #     # Placing 5 bids so the offer will become matched
-    #     for i in range(1, 5):
-    #         response = postman.gateway_requests. \
-    #             place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
-    #         logging.info(response)
-    #
-    #     time.sleep(5)
-    #
-    #     response = postman.gateway_requests. \
-    #         place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == f"Bids can't be placed on offers in status {Offer.OfferStatuses.MATCHED.value}"
-    #
-    #     logging.info(f"----------------------- BID Can't Be Placed On Matched Offer' - step passed "
-    #                  f"----------------------------------\n")
+    def test_matched_offer_cant_be_matched(self):
+
+        # Placing 5 bids so the offer will become matched
+        for i in range(1, 5):
+            response = postman.gateway_requests. \
+                place_bid(TestBidPlacement.lender[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestBidPlacement.lender[i].jwt_token)
+            logging.info(response)
+
+        time.sleep(5)
+
+        response = postman.gateway_requests. \
+            place_bid(TestBidPlacement.lender[i].user_id, self.bid_interest_list[i],
+                      self.offer_id, 0, TestBidPlacement.lender[i].jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == f"Bids can't be placed on offers in status {Offer.OfferStatuses.MATCHED.value}"
+
+        logging.info(f"----------------------- BID Can't Be Placed On Matched Offer' - step passed "
+                     f"----------------------------------\n")
