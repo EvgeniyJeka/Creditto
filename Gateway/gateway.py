@@ -143,7 +143,12 @@ def place_offer():
     if 'error' in permissions_verification_result.keys():
         return {"error": permissions_verification_result['error']}
 
-    offer['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+    try:
+        offer['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+
+    except TypeError as e:
+        logging.error(f"Failed to get user by user ID - {e}")
+        return {"error": "Invalid object type for this API method"}
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
@@ -194,7 +199,12 @@ def place_bid():
     if 'error' in permissions_verification_result.keys():
         return {"Error": permissions_verification_result['error']}
 
-    bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+    try:
+        bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+
+    except TypeError as e:
+        logging.error(f"Failed to get user by user ID - {e}")
+        return {"error": "Invalid object type for this API method"}
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 

@@ -69,6 +69,7 @@ class TestBidPlacement(object):
         }
 
         logging.info(json.dumps(bid_body_no_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
+
         response = postman.gateway_requests.place_bid_custom_body(bid_body_no_interest,
                                                                   TestBidPlacement.lender[0].jwt_token)
         logging.info(response)
@@ -128,42 +129,46 @@ class TestBidPlacement(object):
         logging.info(f"-----------------------' Invalid Bid NULL in Interest field can't be placed ' - step passed "
                      f"----------------------------------\n")
 
-    # def test_invalid_data_types(self):
-    #     bid_invalid_data_types = {
-    #         TYPE: 22,
-    #         OWNER_ID: str(self.bid_owners[0]),
-    #         BID_INTEREST: str(self.bid_interest_list[0]),
-    #         TARGET_OFFER_ID: str(self.offer_id),
-    #         PARTIAL_ONLY: '0'
-    #     }
-    #
-    #     logging.info(json.dumps(bid_invalid_data_types, default=lambda o: vars(o), sort_keys=True, indent=4))
-    #
-    #     response = postman.gateway_requests.place_bid_custom_body(bid_invalid_data_types)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == "Invalid object type for this API method"
-    #
-    #     logging.info(f"----------------------- 'Invalid data types in request - Bid can't be placed ' - step passed "
-    #                  f"----------------------------------\n")
-    #
-    # def test_non_json_body(self):
-    #     logging.info("bad_request_body_string")
-    #
-    #     response = postman.gateway_requests.place_bid_custom_body("bad_request_body_string")
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == "Invalid object type for this API method"
-    #
-    #     logging.info(f"----------------------- 'Non-JSON body in request - Bid can't be placed ' - step passed"
-    #                  f"----------------------------------\n")
-    #
+    def test_invalid_data_types(self):
+
+        # Trying to place a bid with invalid data types
+        bid_invalid_data_types = {
+            TYPE: 22,
+            OWNER_ID: str(TestBidPlacement.lender[0].user_id),
+            BID_INTEREST: str(self.bid_interest_list[0]),
+            TARGET_OFFER_ID: str(self.offer_id),
+            PARTIAL_ONLY: '0'
+        }
+
+        logging.info(json.dumps(bid_invalid_data_types, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_invalid_data_types,
+                                                                  TestBidPlacement.lender[0].jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == "Invalid object type for this API method"
+
+        logging.info(f"----------------------- 'Invalid data types in request - Bid can't be placed ' - step passed "
+                     f"----------------------------------\n")
+
+    def test_non_json_body(self):
+        logging.info("bad_request_body_string")
+
+        response = postman.gateway_requests.place_bid_custom_body("bad_request_body_string",
+                                                                  TestBidPlacement.lender[0].jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == "Invalid object type for this API method"
+
+        logging.info(f"----------------------- 'Non-JSON body in request - Bid can't be placed ' - step passed"
+                     f"----------------------------------\n")
+
     # def test_wrong_type_for_bid_request(self):
     #     bid_body_null_in_bid_interest = {
     #         TYPE: "offer",
