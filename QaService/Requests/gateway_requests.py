@@ -77,7 +77,7 @@ class GatewayRequests(object):
             raise e
         
         
-    def place_bid_custom_body(self, bid_body : json) -> json:
+    def place_bid_custom_body(self, bid_body : json, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Bid - receives Bid body as an arg
         :return: Response body as a json.
@@ -86,10 +86,15 @@ class GatewayRequests(object):
         url = base_url + '/place_bid'
 
         payload = bid_body
+        
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -102,7 +107,7 @@ class GatewayRequests(object):
             logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
             raise e
 
-    def place_offer_custom_body(self, offer_body: json) -> json:
+    def place_offer_custom_body(self, offer_body: json, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Offer - receives Offer body as an arg
         :return: Response body as a json.
@@ -111,10 +116,15 @@ class GatewayRequests(object):
         url = base_url + '/place_offer'
 
         payload = offer_body
+        
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -232,7 +242,6 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-
     def sign_in_user(self, user_name, user_password) -> json:
         """
         Sends HTTP POST request to Gateway for sign in
@@ -258,8 +267,8 @@ class GatewayRequests(object):
             raise e
 
 
-if __name__ == '__main__':
-    gr = GatewayRequests()
-    k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
-    print(gr.get_matches_by_owner(k))
+# if __name__ == '__main__':
+#     gr = GatewayRequests()
+#     k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
+#     print(gr.get_matches_by_owner(k))
 
