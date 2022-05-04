@@ -156,7 +156,7 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_offers_by_owner(self, owner_id, token) -> json:
+    def get_offers_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive offers placed by given borrower as JSON
         :return: Response body as a json.
@@ -164,11 +164,14 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_offers'
 
-        payload = GatewayRequestsBodies.get_offers_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -176,6 +179,7 @@ class GatewayRequests(object):
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
+
 
     def get_all_offers(self) -> json:
         """
