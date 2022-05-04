@@ -42,34 +42,33 @@ class TestOfferPlacement(object):
     # as expected.
     """
 
-    def test_missing_owner_id_field(self):
-
-        offer_body_no_owner = {
-            TYPE: "offer",
-            SUM: test_sum,
-            DURATION: test_duration,
-            OFFERED_INTEREST: test_offer_interest_hight,
-            ALLOW_PARTIAL_FILL: 0
-        }
-
-        logging.info(json.dumps(offer_body_no_owner, default=lambda o: vars(o), sort_keys=True, indent=4))
-
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_owner)
-        logging.info(response)
-
-        assert 'offer_id' not in response.keys()
-        assert 'result' not in response.keys()
-        assert 'error' in response.keys()
-        assert response['error'] == 'Required parameter is missing in provided offer'
-
-        logging.info(f"----------------------- 'Invalid Offer without Owner ID can't be placed ' - step passed "
-                     f"----------------------------------\n")
+    # def test_missing_owner_id_field(self):
+    # 
+    #     offer_body_no_owner = {
+    #         TYPE: "offer",
+    #         SUM: test_sum,
+    #         DURATION: test_duration,
+    #         OFFERED_INTEREST: test_offer_interest_hight,
+    #         ALLOW_PARTIAL_FILL: 0
+    #     }
+    # 
+    #     logging.info(json.dumps(offer_body_no_owner, default=lambda o: vars(o), sort_keys=True, indent=4))
+    # 
+    #     response = postman.gateway_requests.place_offer_custom_body(offer_body_no_owner)
+    #     logging.info(response)
+    # 
+    #     assert 'offer_id' not in response.keys()
+    #     assert 'result' not in response.keys()
+    #     assert 'error' in response.keys()
+    #     assert response['error'] == 'Required parameter is missing in provided offer'
+    # 
+    #     logging.info(f"----------------------- 'Invalid Offer without Owner ID can't be placed ' - step passed "
+    #                  f"----------------------------------\n")
 
     def test_missing_sum_field(self):
 
         offer_body_no_sum = {
             TYPE: "offer",
-            OWNER_ID: test_offer_owner_1,
             DURATION: test_duration,
             OFFERED_INTEREST: test_offer_interest_hight,
             ALLOW_PARTIAL_FILL: 0

@@ -161,6 +161,7 @@ class TestBidPlacement(object):
                                                                   TestBidPlacement.lender[0].jwt_token)
         logging.info(response)
 
+        # Trying to place a bid with a string as body (instead of JSON)
         assert 'bid_id' not in response.keys()
         assert 'result' not in response.keys()
         assert 'error' in response.keys()
@@ -169,45 +170,49 @@ class TestBidPlacement(object):
         logging.info(f"----------------------- 'Non-JSON body in request - Bid can't be placed ' - step passed"
                      f"----------------------------------\n")
 
-    # def test_wrong_type_for_bid_request(self):
-    #     bid_body_null_in_bid_interest = {
-    #         TYPE: "offer",
-    #         OWNER_ID: self.bid_owners[0],
-    #         BID_INTEREST: self.bid_interest_list[0],
-    #         TARGET_OFFER_ID: self.offer_id,
-    #         PARTIAL_ONLY: 0
-    #     }
-    #
-    #     logging.info(json.dumps(bid_body_null_in_bid_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
-    #
-    #     response = postman.gateway_requests.place_bid_custom_body(bid_body_null_in_bid_interest)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == 'Invalid object type for this API method'
-    #
-    #     logging.info(f"----------------------- 'Incorrect type for Bid - Bid can't be placed ' - step passed"
-    #                  f"----------------------------------\n")
-    #
-    # def test_no_type_in_bid_reqest(self):
-    #     bid_body_null_in_bid_interest = {
-    #         OWNER_ID: self.bid_owners[0],
-    #         BID_INTEREST: self.bid_interest_list[0],
-    #         TARGET_OFFER_ID: self.offer_id,
-    #         PARTIAL_ONLY: 0
-    #     }
-    #
-    #     logging.info(json.dumps(bid_body_null_in_bid_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
-    #
-    #     response = postman.gateway_requests.place_bid_custom_body(bid_body_null_in_bid_interest)
-    #     logging.info(response)
-    #
-    #     assert 'bid_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == 'Invalid object type for this API method'
-    #
-    #     logging.info(f"----------------------- 'Incorrect type for Bid - Bid can't be placed ' - step passed"
-    #                  f"----------------------------------\n")
+    def test_wrong_type_for_bid_request(self):
+
+        # Trying to place a bid an incorrect type
+        bid_body_null_in_bid_interest = {
+            TYPE: "offer",
+            BID_INTEREST: self.bid_interest_list[0],
+            TARGET_OFFER_ID: self.offer_id,
+            PARTIAL_ONLY: 0
+        }
+
+        logging.info(json.dumps(bid_body_null_in_bid_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_null_in_bid_interest,
+                                                                  TestBidPlacement.lender[0].jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == 'Invalid object type for this API method'
+
+        logging.info(f"----------------------- 'Incorrect type for Bid - Bid can't be placed ' - step passed"
+                     f"----------------------------------\n")
+
+    def test_no_type_in_bid_request(self):
+
+        # Trying to place a bid without the TYPE field
+        bid_body_null_in_bid_interest = {
+            BID_INTEREST: self.bid_interest_list[0],
+            TARGET_OFFER_ID: self.offer_id,
+            PARTIAL_ONLY: 0
+        }
+
+        logging.info(json.dumps(bid_body_null_in_bid_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
+
+        response = postman.gateway_requests.place_bid_custom_body(bid_body_null_in_bid_interest,
+                                                                  TestBidPlacement.lender[0].jwt_token)
+        logging.info(response)
+
+        assert 'bid_id' not in response.keys()
+        assert 'result' not in response.keys()
+        assert 'error' in response.keys()
+        assert response['error'] == 'Invalid object type for this API method'
+
+        logging.info(f"----------------------- 'Incorrect type for Bid - Bid can't be placed ' - step passed"
+                     f"----------------------------------\n")
