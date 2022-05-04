@@ -18,7 +18,6 @@ logging.basicConfig(level=logging.INFO)
 postman = postman.Postman()
 reporter = reporter.Reporter()
 
-test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_offer_interest_hight = 0.09
 test_sum = 50000
@@ -41,32 +40,13 @@ class TestOfferPlacement(object):
     NOTE: Error message successful validation confirms that Gateway hasn't crashed and handled the invalid input
     # as expected.
     """
+    borrower = None
 
-    # def test_missing_owner_id_field(self):
-    # 
-    #     offer_body_no_owner = {
-    #         TYPE: "offer",
-    #         SUM: test_sum,
-    #         DURATION: test_duration,
-    #         OFFERED_INTEREST: test_offer_interest_hight,
-    #         ALLOW_PARTIAL_FILL: 0
-    #     }
-    # 
-    #     logging.info(json.dumps(offer_body_no_owner, default=lambda o: vars(o), sort_keys=True, indent=4))
-    # 
-    #     response = postman.gateway_requests.place_offer_custom_body(offer_body_no_owner)
-    #     logging.info(response)
-    # 
-    #     assert 'offer_id' not in response.keys()
-    #     assert 'result' not in response.keys()
-    #     assert 'error' in response.keys()
-    #     assert response['error'] == 'Required parameter is missing in provided offer'
-    # 
-    #     logging.info(f"----------------------- 'Invalid Offer without Owner ID can't be placed ' - step passed "
-    #                  f"----------------------------------\n")
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_missing_sum_field(self, get_authorized_borrowers):
+        TestOfferPlacement.borrower = get_authorized_borrowers[0]
 
-    def test_missing_sum_field(self):
-
+        # Trying to place an offer without the SUM field
         offer_body_no_sum = {
             TYPE: "offer",
             DURATION: test_duration,
@@ -76,7 +56,8 @@ class TestOfferPlacement(object):
 
         logging.info(json.dumps(offer_body_no_sum, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_sum)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_sum,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -89,17 +70,18 @@ class TestOfferPlacement(object):
 
     def test_missing_duration_field(self):
 
+        # Trying to place an offer without the DURATION field
         offer_body_no_duration = {
             TYPE: "offer",
             SUM: test_sum,
-            OWNER_ID: test_offer_owner_1,
             OFFERED_INTEREST: test_offer_interest_hight,
             ALLOW_PARTIAL_FILL: 0
         }
 
         logging.info(json.dumps(offer_body_no_duration, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_duration)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_duration,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -112,17 +94,18 @@ class TestOfferPlacement(object):
 
     def test_missing_offered_interest_field(self):
 
+        # Trying to place an offer without the INTEREST field
         offer_body_no_interest = {
             TYPE: "offer",
             SUM: test_sum,
-            OWNER_ID: test_offer_owner_1,
             DURATION: test_duration,
             ALLOW_PARTIAL_FILL: 0
         }
 
         logging.info(json.dumps(offer_body_no_interest, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_interest)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_no_interest,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -135,10 +118,10 @@ class TestOfferPlacement(object):
 
     def test_null_values(self):
 
+        # Trying to place an offer with NULLS
         offer_body_null_values = {
             TYPE: "offer",
             SUM: None,
-            OWNER_ID: None,
             DURATION: None,
             OFFERED_INTEREST: None,
             ALLOW_PARTIAL_FILL: None
@@ -146,7 +129,8 @@ class TestOfferPlacement(object):
 
         logging.info(json.dumps(offer_body_null_values, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_null_values)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_null_values,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -158,10 +142,11 @@ class TestOfferPlacement(object):
                      f"----------------------------------\n")
 
     def test_invalid_data_types(self):
+
+        # Trying to place an offer with invalid data types
         offer_body_invalid_types = {
             TYPE: 33,
             SUM: str(test_sum),
-            OWNER_ID: str(test_offer_owner_1),
             DURATION: str(test_duration),
             OFFERED_INTEREST: [test_offer_interest_hight, test_offer_interest_low],
             ALLOW_PARTIAL_FILL: '0'
@@ -169,7 +154,8 @@ class TestOfferPlacement(object):
 
         logging.info(json.dumps(offer_body_invalid_types, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_invalid_types)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_invalid_types,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -182,9 +168,9 @@ class TestOfferPlacement(object):
 
     def test_missing_type(self):
 
+        # Trying to place an offer without TYPE
         offer_body_type_missing = {
             SUM: test_sum,
-            OWNER_ID: test_offer_owner_1,
             DURATION: test_duration,
             OFFERED_INTEREST: test_offer_interest_hight,
             ALLOW_PARTIAL_FILL: 0
@@ -192,7 +178,8 @@ class TestOfferPlacement(object):
 
         logging.info(json.dumps(offer_body_type_missing, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_type_missing)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_type_missing,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -204,9 +191,10 @@ class TestOfferPlacement(object):
                      f"----------------------------------\n")
 
     def non_json_body(self):
-        logging.info("bad_request_body_string")
 
-        response = postman.gateway_requests.place_offer_custom_body("bad_request_body_string")
+        # Trying to place an offer with a string as body (instead of JSON)
+        response = postman.gateway_requests.place_offer_custom_body("bad_request_body_string",
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()
@@ -219,10 +207,10 @@ class TestOfferPlacement(object):
 
     def test_incorrect_type(self):
 
+        # Trying to place an offer with an incorrect TYPE
         offer_body_type_missing = {
             TYPE: "bid",
             SUM: test_sum,
-            OWNER_ID: test_offer_owner_1,
             DURATION: test_duration,
             OFFERED_INTEREST: test_offer_interest_hight,
             ALLOW_PARTIAL_FILL: 0
@@ -230,7 +218,8 @@ class TestOfferPlacement(object):
 
         logging.info(json.dumps(offer_body_type_missing, default=lambda o: vars(o), sort_keys=True, indent=4))
 
-        response = postman.gateway_requests.place_offer_custom_body(offer_body_type_missing)
+        response = postman.gateway_requests.place_offer_custom_body(offer_body_type_missing,
+                                                                    TestOfferPlacement.borrower.jwt_token)
         logging.info(response)
 
         assert 'offer_id' not in response.keys()

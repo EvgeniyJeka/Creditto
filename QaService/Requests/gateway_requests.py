@@ -196,7 +196,7 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_bids_by_owner(self, owner_id, token) -> json:
+    def get_bids_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive bids placed by given lender as JSON
         :return: Response body as a json.
@@ -204,11 +204,14 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_bids'
 
-        payload = GatewayRequestsBodies.get_bids_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -267,8 +270,8 @@ class GatewayRequests(object):
             raise e
 
 
-# if __name__ == '__main__':
-#     gr = GatewayRequests()
-#     k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
-#     print(gr.get_matches_by_owner(k))
+if __name__ == '__main__':
+    gr = GatewayRequests()
+    k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
+    print(gr.get_matches_by_owner(k))
 
