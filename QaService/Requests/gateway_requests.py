@@ -73,7 +73,7 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} place_bid failed with error: {e}")
             raise e
         
         
@@ -104,7 +104,7 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} place_bid failed with error: {e}")
             raise e
 
     def place_offer_custom_body(self, offer_body: json, jwt=None) -> json:
@@ -156,6 +156,10 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_offers_by_status failed with error: {e}")
+            raise e
+
     def get_offers_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive offers placed by given borrower as JSON
@@ -180,6 +184,9 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_offers_by_owner failed with error: {e}")
+            raise e
 
     def get_all_offers(self) -> json:
         """
@@ -198,6 +205,10 @@ class GatewayRequests(object):
 
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_all_offers failed with error: {e}")
             raise e
 
     def get_bids_by_owner(self, jwt=None) -> json:
@@ -222,6 +233,10 @@ class GatewayRequests(object):
 
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_bids_by_owner failed with error: {e}")
             raise e
 
     def get_matches_by_owner(self, jwt=None) -> json:
@@ -249,6 +264,10 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_matches_by_owner failed with error: {e}")
+            raise e
+
     def sign_in_user(self, user_name, user_password) -> json:
         """
         Sends HTTP POST request to Gateway for sign in
@@ -270,12 +289,12 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} sign_in_user failed with error: {e}")
             raise e
 
 
-if __name__ == '__main__':
-    gr = GatewayRequests()
-    k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
-    print(gr.get_matches_by_owner(k))
+# if __name__ == '__main__':
+#     gr = GatewayRequests()
+#     k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
+#     print(gr.get_matches_by_owner(k))
 
