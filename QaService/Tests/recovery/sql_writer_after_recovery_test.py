@@ -19,25 +19,15 @@ logging.basicConfig(level=logging.INFO)
 postman = postman.Postman()
 reporter = reporter.Reporter()
 
-# The time given for Matcher component to recover after container restart
-matcher_expected_recovery_time = 10
+# The time given for SQL Writer component to recover after container restart
+sql_writer_expected_recovery_time = 10
 
 
-test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_sum = 20000
 test_duration = 24
 
-test_bid_owner_1 = 393
-test_bid_owner_2 = 582
-test_bid_owner_3 = 781
-test_bid_owner_4 = 343
-test_bid_owner_5 = 216
-test_bid_owner_6 = 278
-test_bid_owner_7 = 390
-test_bid_owner_8 = 920
-test_bid_owner_9 = 911
-test_bid_owner_10 = 883
+MATCH_EXPECTED = 4
 
 
 test_bid_interest_1 = 0.046
@@ -64,9 +54,8 @@ class TestSqlWriterRecovery:
 
     offer_id = 0
     matching_bid_id = 0
-
-    bid_owners = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5,
-                  test_bid_owner_6, test_bid_owner_7, test_bid_owner_8, test_bid_owner_9, test_bid_owner_10]
+    borrower = None
+    lenders = None
 
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5, test_bid_interest_6, test_bid_interest_7,
@@ -74,12 +63,16 @@ class TestSqlWriterRecovery:
 
     @pytest.mark.parametrize('set_matching_logic', [[2]], indirect=True)
     @pytest.mark.parametrize('restart_container', [[DockerContainerNames.SQL_WRITER.value]], indirect=True)
-    def test_placing_offer(self, set_matching_logic, restart_container):
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic, restart_container, get_authorized_borrowers):
 
-        time.sleep(matcher_expected_recovery_time)
+        TestSqlWriterRecovery.borrower = get_authorized_borrowers[0]
 
-        response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
-                                                        test_duration, test_offer_interest_low, 0)
+        time.sleep(sql_writer_expected_recovery_time)
+
+        response = postman.gateway_requests.place_offer(TestSqlWriterRecovery.borrower.user_id, test_sum,
+                                                        test_duration, test_offer_interest_low, 0,
+                                                        TestSqlWriterRecovery.borrower.jwt_token)
 
         TestSqlWriterRecovery.offer_id = response['offer_id']
         logging.info(f"Offer placement: response received {response}")
@@ -97,22 +90,27 @@ class TestSqlWriterRecovery:
         logging.info(offer_sql)
         assert offer_sql['id'] == self.offer_id, "Offer Placement error - placed offer wasn't saved to DB"
 
-        logging.info(f"----------------------- Offer ID validation in SQL - step passed ------------------------------\n")
+        logging.info(
+            f"----------------------- Offer ID validation in SQL - step passed ------------------------------\n")
 
-    def test_placing_first_bids(self):
+    @pytest.mark.parametrize('get_authorized_lenders', [[10]], indirect=True)
+    def test_placing_first_bids(self, get_authorized_lenders):
+
+        TestSqlWriterRecovery.lenders = get_authorized_lenders
 
         for i in range(0, 5):
-            response = postman.gateway_requests.\
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+            response = postman.gateway_requests. \
+                place_bid(TestSqlWriterRecovery.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestSqlWriterRecovery.lenders[i].jwt_token)
             logging.info(response)
 
             # The bid that is expected to create a match with the offer
-            if i == 4:
+            if i == MATCH_EXPECTED:
                 TestSqlWriterRecovery.matching_bid_id = response['bid_id']
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
             assert 'Added new bid' in response['result'], "BID Placement error - no confirmation in response"
-            assert isinstance(response['bid_id'], int),  "BID Placement error - invalid BID ID in response "
+            assert isinstance(response['bid_id'], int), "BID Placement error - invalid BID ID in response "
 
         logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
 
@@ -128,7 +126,8 @@ class TestSqlWriterRecovery:
     def test_placing_final_bids(self):
         for i in range(5, 10):
             response = postman.gateway_requests. \
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+                place_bid(TestSqlWriterRecovery.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestSqlWriterRecovery.lenders[i].jwt_token)
             logging.info(response)
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -142,7 +141,7 @@ class TestSqlWriterRecovery:
         offer_sql = reporter.get_offer_by_id(self.offer_id)[0]
         logging.info(offer_sql)
 
-        assert offer_sql['status'] == Offer.OfferStatuses.MATCHED.value,\
+        assert offer_sql['status'] == Offer.OfferStatuses.MATCHED.value, \
             "Offer status in SQL wasn't updated after match"
         assert offer_sql['final_interest'] == str(test_bid_interest_5), \
             "Final interest in SQL wasn't updated after match"
@@ -155,7 +154,7 @@ class TestSqlWriterRecovery:
         logging.info(match_sql)
 
         assert match_sql['bid_id'] == TestSqlWriterRecovery.matching_bid_id
-        assert match_sql['bid_owner_id'] == test_bid_owner_5
+        assert match_sql['bid_owner_id'] == TestSqlWriterRecovery.lenders[MATCH_EXPECTED].user_id
         assert match_sql['final_interest'] == str(test_bid_interest_5)
 
         logging.info(f"----------------------- Verifying Match Data in SQL - step passed --------------------"
@@ -171,7 +170,7 @@ class TestSqlWriterRecovery:
 
         for offer in response:
             if offer['id'] == TestSqlWriterRecovery.offer_id:
-                assert offer['owner_id'] == test_offer_owner_1
+                assert offer['owner_id'] == TestSqlWriterRecovery.borrower.user_id
                 assert Decimal(offer['sum']) == Decimal(test_sum)
                 assert offer['duration'] == test_duration
                 assert offer['offered_interest'] == str(test_offer_interest_low)

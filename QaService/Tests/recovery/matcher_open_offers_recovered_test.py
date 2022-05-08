@@ -33,11 +33,6 @@ test_duration = 24
 
 MATCH_EXPECTED = 3
 
-# test_bid_owner_1 = 393
-# test_bid_owner_2 = 582
-# test_bid_owner_3 = 781
-# test_bid_owner_4 = 343
-# test_bid_owner_5 = 216
 
 test_bid_interest_1 = 0.046
 test_bid_interest_2 = 0.045
