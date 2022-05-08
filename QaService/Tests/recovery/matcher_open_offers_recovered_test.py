@@ -26,16 +26,18 @@ reporter = reporter.Reporter()
 matcher_expected_recovery_time = 10
 
 
-test_offer_owner_1 = 1024
+# test_offer_owner_1 = 1024
 test_offer_interest_low = 0.05
 test_sum = 30000
 test_duration = 24
 
-test_bid_owner_1 = 393
-test_bid_owner_2 = 582
-test_bid_owner_3 = 781
-test_bid_owner_4 = 343
-test_bid_owner_5 = 216
+MATCH_EXPECTED = 3
+
+# test_bid_owner_1 = 393
+# test_bid_owner_2 = 582
+# test_bid_owner_3 = 781
+# test_bid_owner_4 = 343
+# test_bid_owner_5 = 216
 
 test_bid_interest_1 = 0.046
 test_bid_interest_2 = 0.045
@@ -55,16 +57,24 @@ class TestMatcherRecovery:
 
     offer_id = 0
     matching_bid_id = 0
+    borrower = None
+    lenders = None
 
-    bid_owners = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
+    # bid_owners = [test_bid_owner_1, test_bid_owner_2, test_bid_owner_3, test_bid_owner_4, test_bid_owner_5]
 
     bid_interest_list = [test_bid_interest_1, test_bid_interest_2, test_bid_interest_3,
                          test_bid_interest_4, test_bid_interest_5]
 
     @pytest.mark.parametrize('set_matching_logic', [[1]], indirect=True)
-    def test_placing_offer(self, set_matching_logic):
-        response = postman.gateway_requests.place_offer(test_offer_owner_1, test_sum,
-                                                        test_duration, test_offer_interest_low, 0)
+    @pytest.mark.parametrize('get_authorized_borrowers', [[1]], indirect=True)
+    def test_placing_offer(self, set_matching_logic, get_authorized_borrowers):
+        TestMatcherRecovery.borrower = get_authorized_borrowers[0]
+
+        time.sleep(matcher_expected_recovery_time)
+
+        response = postman.gateway_requests.place_offer(TestMatcherRecovery.borrower.user_id, test_sum,
+                                                        test_duration, test_offer_interest_low,
+                                                        0, TestMatcherRecovery.borrower.jwt_token)
 
         TestMatcherRecovery.offer_id = response['offer_id']
         logging.info(f"Offer placement: response received {response}")
@@ -84,11 +94,15 @@ class TestMatcherRecovery:
 
         logging.info(f"----------------------- Offer ID validation in SQL - step passed ------------------------------\n")
 
-    def test_placing_first_bids(self):
+    @pytest.mark.parametrize('get_authorized_lenders', [[10]], indirect=True)
+    def test_placing_first_bids(self, get_authorized_lenders):
+
+        TestMatcherRecovery.lenders = get_authorized_lenders
 
         for i in range(0, 3):
             response = postman.gateway_requests.\
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+                place_bid(TestMatcherRecovery.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestMatcherRecovery.lenders[i].jwt_token)
             logging.info(response)
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -117,14 +131,19 @@ class TestMatcherRecovery:
         logging.info(f"----------------------- Restarting the Matcher docker container - step passed ----------"
                      f"------------------------\n")
 
-    def test_placing_final_bids(self):
+    @pytest.mark.parametrize('get_authorized_lenders', [[5]], indirect=True)
+    def test_placing_final_bids(self, get_authorized_lenders):
+
+        TestMatcherRecovery.lenders = get_authorized_lenders
+
         for i in range(3, 5):
             response = postman.gateway_requests. \
-                place_bid(self.bid_owners[i], self.bid_interest_list[i], self.offer_id, 0)
+                place_bid(TestMatcherRecovery.lenders[i].user_id, self.bid_interest_list[i],
+                          self.offer_id, 0, TestMatcherRecovery.lenders[i].jwt_token)
             logging.info(response)
 
             # The bid that is expected to create a match with the offer
-            if i == 3:
+            if i == MATCH_EXPECTED:
                 TestMatcherRecovery.matching_bid_id = response['bid_id']
 
             assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -151,7 +170,7 @@ class TestMatcherRecovery:
         logging.info(match_sql)
 
         assert match_sql['bid_id'] == TestMatcherRecovery.matching_bid_id
-        assert match_sql['bid_owner_id'] == test_bid_owner_4
+        assert match_sql['bid_owner_id'] == TestMatcherRecovery.lenders[MATCH_EXPECTED].user_id
         assert match_sql['final_interest'] == str(test_bid_interest_4)
 
         logging.info(f"----------------------- Verifying Match Data in SQL - step passed --------------------"
@@ -167,7 +186,7 @@ class TestMatcherRecovery:
 
         for offer in response:
             if offer['id'] == TestMatcherRecovery.offer_id:
-                assert offer['owner_id'] == test_offer_owner_1
+                assert offer['owner_id'] == TestMatcherRecovery.borrower.user_id
                 assert Decimal(offer['sum']) == Decimal(test_sum)
                 assert offer['duration'] == test_duration
                 assert offer['offered_interest'] == str(test_offer_interest_low)
