@@ -22,7 +22,6 @@ class SqlBasic(object):
         # Initiating a session
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
-        self.create_validate_tables()
 
     # Connect to DB
     def connect_me(self, hst, usr, pwd, db_name):
@@ -64,48 +63,6 @@ class SqlBasic(object):
             logging.critical("SQL DB - Failed to connect, reason is unclear")
             logging.critical(e)
 
-
-    # def create_validate_tables(self):
-    #     """
-    #     This method can be used to validate, that all needed table are exist.
-    #     If they aren't the method will create them
-    #     :param engine: Sql Alchemy engine
-    #     """
-    #     tables = self.engine.table_names()
-    #
-    #     # Creating the 'offers' table if not exists - column for each "Offer" object property.
-    #     if 'offers' not in tables:
-    #         logging.warning("Logs: 'offers' table is missing! Creating the 'offers' table")
-    #         self.offers_table = objects_mapped.OfferMapped()
-    #         objects_mapped.Base.metadata.create_all(self.engine)
-    #
-    #     # Creating the 'bids' table if not exists - column for each "Bid" object property.
-    #     if 'bids' not in tables:
-    #         logging.warning("Logs: 'bids' table is missing! Creating the 'bids' table")
-    #         self.bids_table = objects_mapped.BidMapped()
-    #         objects_mapped.Base.metadata.create_all(self.engine)
-    #
-    #     # Creating the 'offers' table if not exists - column for each "Match" object property.
-    #     if 'matches' not in tables:
-    #         logging.warning("Logs: 'matches' table is missing! Creating the 'matches' table")
-    #         self.matches_table = objects_mapped.MatchesMapped()
-    #
-    #     # Creating the 'local_config' table if not exists
-    #     if 'local_config' not in tables:
-    #         logging.warning("Logs: 'local_config' table is missing! Creating the 'local_config' table")
-    #         self.local_config_table = objects_mapped.LocalConfigMapped()
-    #         objects_mapped.Base.metadata.create_all(self.engine)
-    #
-    #         # Inserting a record
-    #         configuration = [objects_mapped.LocalConfigMapped(id=1, property="matching_logic",
-    #                                            value=1, description="selected matching algorithm"),
-    #                          objects_mapped.LocalConfigMapped(id=2, property="tail_digits",
-    #                                            value=4, description="max tail digits allowed, rounding config")]
-    #
-    #         self.session.add_all(configuration)
-    #         self.session.commit()
-
-
     def get_columns(self, table):
         """
         Returns a list of column names
@@ -121,7 +78,6 @@ class SqlBasic(object):
         except Exception as e:
             logging.error(f" Failed to fetch column names of table {table} - {e}")
             return False
-
 
     def get_table_content(self, table):
         """
