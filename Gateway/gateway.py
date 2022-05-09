@@ -197,7 +197,7 @@ def place_bid():
     permissions_verification_result = reporter.verify_token(auth_token, PLACE_BID)
 
     if 'error' in permissions_verification_result.keys():
-        return {"Error": permissions_verification_result['error']}
+        return {"error": permissions_verification_result['error']}
 
     try:
         bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
@@ -260,7 +260,7 @@ def get_my_bids():
     permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_BIDS)
 
     if 'error' in permissions_verification_result.keys():
-        return {"Error": permissions_verification_result['error']}
+        return {"error": permissions_verification_result['error']}
 
     lender_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
@@ -279,7 +279,7 @@ def get_my_offers():
     permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_OFFERS)
 
     if 'error' in permissions_verification_result.keys():
-        return {"Error": permissions_verification_result['error']}
+        return {"error": permissions_verification_result['error']}
 
     borrower_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_offers_by_borrower(borrower_id))
@@ -297,7 +297,7 @@ def get_my_matches():
     permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_MATCHES)
 
     if 'error' in permissions_verification_result.keys():
-        return {"Error": permissions_verification_result['error']}
+        return {"error": permissions_verification_result['error']}
 
     owner_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_matches_by_owner(owner_id))
