@@ -9,6 +9,7 @@ from credittomodels import Bid
 from credittomodels import Offer
 from producer_from_api import ProducerFromApi
 import uuid
+from constants import *
 
 from credittomodels import protobuf_handler
 
@@ -39,6 +40,7 @@ from credittomodels import protobuf_handler
 # 22. Add Gateway instance on port 80 (?)
 # 23. Consider to add a new API method to Gateway - 'get_match_by_offer(offer_id)'
 # 24. Test container - consider adding retries when SQL is unavailable (catch exception, retry x times before failing) - D
+# 25. Authorization module - D
 
 logging.basicConfig(level=logging.INFO)
 
@@ -56,6 +58,68 @@ reporter = Reporter()
 proto_handler = protobuf_handler.ProtoHandler
 
 
+@app.route('/sign_in', methods=['GET'])
+def sign_in():
+    try:
+        # Headers parsing
+        username = request.headers.get('username')
+        password = request.headers.get('password')
+
+        if not (username and password):
+            logging.warning("Credentials missing in request headers")
+            return {"Authorization": "Credentials missing in request headers"}
+
+        logging.info(f"Authorization: Sign In request received, username {username} password {password}")
+
+        produced_token = reporter.generate_token(username, password)
+
+        if 'JWT' in produced_token.keys():
+            return {"Token": produced_token['JWT']}
+
+        elif 'error' in produced_token.keys():
+            return {"Error": produced_token['error']}
+
+    except (KeyError, TypeError) as e:
+        logging.error(f"Sign In method called - credentials weren't provided: {e}")
+        return {"Error": "Authorization: please provide valid credentials in request"}
+
+
+@app.route('/sign_out', methods=['GET'])
+def sign_out():
+    try:
+        # Headers parsing
+        token = request.headers.get('jwt')
+
+        if not token:
+            logging.warning("Credentials missing in request headers")
+            return {"Authorization": "Credentials missing in request headers"}
+
+        logging.info(f"Authorization: Sign Out request received, JWT in request: {token}")
+
+        sign_out_performed = reporter.sign_out(token)
+
+        if 'error' not in sign_out_performed.keys():
+            return {"Authorization": "Sign out confirmed", "Token": token}
+
+        return sign_out_performed
+
+    except (KeyError, TypeError) as e:
+        logging.error(f"Sign Out method called - invalid request: {e}")
+        return {"Error": "Authorization: please provide valid credentials in request"}
+
+
+@app.route("/get_jwt_ttl/<jwt>", methods=['GET'])
+def get_token_ttl(jwt):
+    logging.info(f"Authorization: request for {jwt} token TTL received")
+
+    token_ttl_checked = reporter.jwt_token_ttl_remains(jwt)
+
+    if isinstance(token_ttl_checked, dict) and 'error' in token_ttl_checked.keys():
+        return {"Error": token_ttl_checked['error']}
+
+    return {f"JWT": f"{jwt}", "TTL": token_ttl_checked}
+
+
 @app.route("/place_offer", methods=['POST'])
 def place_offer():
     """
@@ -64,7 +128,6 @@ def place_offer():
     Expecting for a POST request with JSON body, example:
     {
     "type":"offer",
-    "owner_id":1200,
     "sum":110000,
     "duration":12,
     "offered_interest":0.09,
@@ -73,6 +136,19 @@ def place_offer():
     """
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
+    auth_token = request.headers.get('jwt')
+
+    permissions_verification_result = reporter.verify_token(auth_token, PLACE_OFFER)
+
+    if 'error' in permissions_verification_result.keys():
+        return {"error": permissions_verification_result['error']}
+
+    try:
+        offer['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+
+    except TypeError as e:
+        logging.error(f"Failed to get user by user ID - {e}")
+        return {"error": "Invalid object type for this API method"}
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
@@ -83,7 +159,6 @@ def place_offer():
         logging.warning(f"Offer {next_id} has failed validation and was rejected")
         return response
 
-    # In future versions it is possible that the offer will be converted to Google Proto message
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
@@ -110,7 +185,6 @@ def place_bid():
     Expecting for a POST request with JSON body, example:
     {
     "type":"bid",
-    "owner_id":"2032",
     "bid_interest":0.061,
     "target_offer_id":2,
     "partial_only":0
@@ -118,6 +192,19 @@ def place_bid():
     """
     bid = request.get_json()
     logging.info(f"Gateway: Bid received {bid}")
+    auth_token = request.headers.get('jwt')
+
+    permissions_verification_result = reporter.verify_token(auth_token, PLACE_BID)
+
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
+
+    try:
+        bid['owner_id'] = reporter.get_user_data_by_jwt(auth_token)[0]
+
+    except TypeError as e:
+        logging.error(f"Failed to get user by user ID - {e}")
+        return {"error": "Invalid object type for this API method"}
 
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
@@ -160,80 +247,59 @@ def get_all_offers():
     return simplejson.dumps(reporter.get_offers_by_status(-1))
 
 
-@app.route("/get_all_my_bids", methods=['POST'])
+@app.route("/get_all_my_bids", methods=['GET'])
 def get_my_bids():
     """
-    This API method can be used to get all bids placed by customer with provided customer ID.
+    This API method can be used to get all bids placed by customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
+
     """
-    bids_request = request.get_json()
-    processed_match_request = reporter. \
-        validate_personal_data_request(bids_request, ConfigParams.verified_personal_data_request_params.value)
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my bids, lender token validated: {auth_token}")
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_BIDS)
 
-    lender_id = bids_request['owner_id']
-    token = bids_request['token']
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    logging.info(f"Gateway: get all my bids, lender token validated: {token}")
+    lender_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_bids_by_lender(lender_id))
 
 
-@app.route("/get_all_my_offers", methods=['POST'])
+@app.route("/get_all_my_offers", methods=['GET'])
 def get_my_offers():
     """
-    This API method can be used to get all offers placed by customer with provided customer ID.
+    This API method can be used to get all offers placed by customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
     """
 
-    offers_request = request.get_json()
-    processed_match_request = reporter. \
-        validate_personal_data_request(offers_request, ConfigParams.verified_personal_data_request_params.value)
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my offers, borrower token validated: {auth_token}")
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_OFFERS)
 
-    borrower_id = offers_request['owner_id']
-    token = offers_request['token']
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    logging.info(f"Gateway: get all my offers, borrower token validated: {token}")
+    borrower_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_offers_by_borrower(borrower_id))
 
 
-@app.route("/get_all_my_matches", methods=['POST'])
+@app.route("/get_all_my_matches", methods=['GET'])
 def get_my_matches():
     """
-    This API method can be used to get all matches related to given customer ID.
+    This API method can be used to get all matches related to given customer by JWT (expected in headers).
     :return: JSON
-    Body sample:
-    {
-    "owner_id":"1032",
-    "token": "a#rf$1vc"
-    }
     """
+    auth_token = request.headers.get('jwt')
+    logging.info(f"Gateway: get all my matches, customer's token validated: {auth_token}")
 
-    matches_request = request.get_json()
-    processed_match_request = reporter.\
-        validate_personal_data_request(matches_request, ConfigParams.verified_personal_data_request_params.value)
+    permissions_verification_result = reporter.verify_token(auth_token, VIEW_PRIVATE_MATCHES)
 
-    if 'error' in processed_match_request.keys():
-        return processed_match_request
+    if 'error' in permissions_verification_result.keys():
+        return {"Error": permissions_verification_result['error']}
 
-    owner_id = matches_request['owner_id']
-    token = matches_request['token']
-
-    logging.info(f"Gateway: get all my matches, customer's token validated: {token}")
+    owner_id = reporter.get_user_data_by_jwt(auth_token)[0]
     return simplejson.dumps(reporter.get_matches_by_owner(owner_id))
 
 

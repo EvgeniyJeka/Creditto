@@ -11,14 +11,12 @@ except ModuleNotFoundError:
     from ..Config.base_config import BaseConfig
 
 
-
 base_url = BaseConfig.BASE_URL
-
 
 
 class GatewayRequests(object):
 
-    def place_offer(self, owner_id, _sum, duration_months, offered_interest, allow_partial_fill) -> json:
+    def place_offer(self, owner_id, _sum, duration_months, offered_interest, allow_partial_fill, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Offer
         :return: Response body as a json.
@@ -28,10 +26,14 @@ class GatewayRequests(object):
 
         payload = GatewayRequestsBodies.place_offer_request_body(owner_id, _sum, duration_months, offered_interest,
                                                                  allow_partial_fill)
+        if jwt:
+            headers = {"jwt":jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -44,7 +46,7 @@ class GatewayRequests(object):
             logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
             raise e
 
-    def place_bid(self, owner_id, bid_interest, target_offer_id, partial_only) -> json:
+    def place_bid(self, owner_id, bid_interest, target_offer_id, partial_only, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Bid
         :return: Response body as a json.
@@ -54,9 +56,14 @@ class GatewayRequests(object):
 
         payload = GatewayRequestsBodies.place_bid_request_body(owner_id, bid_interest, target_offer_id, partial_only)
 
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
+
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -66,11 +73,11 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} place_bid failed with error: {e}")
             raise e
         
         
-    def place_bid_custom_body(self, bid_body : json) -> json:
+    def place_bid_custom_body(self, bid_body : json, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Bid - receives Bid body as an arg
         :return: Response body as a json.
@@ -79,10 +86,15 @@ class GatewayRequests(object):
         url = base_url + '/place_bid'
 
         payload = bid_body
+        
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -92,10 +104,10 @@ class GatewayRequests(object):
             raise e
 
         except Exception as e:
-            logging.error(F"{e.__class__.__name__} place_offer failed with error: {e}")
+            logging.error(F"{e.__class__.__name__} place_bid failed with error: {e}")
             raise e
 
-    def place_offer_custom_body(self, offer_body: json) -> json:
+    def place_offer_custom_body(self, offer_body: json, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to place a new Offer - receives Offer body as an arg
         :return: Response body as a json.
@@ -104,10 +116,15 @@ class GatewayRequests(object):
         url = base_url + '/place_offer'
 
         payload = offer_body
+        
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.post(url, json=payload, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -139,7 +156,11 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_offers_by_owner(self, owner_id, token) -> json:
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_offers_by_status failed with error: {e}")
+            raise e
+
+    def get_offers_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive offers placed by given borrower as JSON
         :return: Response body as a json.
@@ -147,17 +168,24 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_offers'
 
-        payload = GatewayRequestsBodies.get_offers_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
 
         except json.decoder.JSONDecodeError as e:
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_offers_by_owner failed with error: {e}")
             raise e
 
     def get_all_offers(self) -> json:
@@ -179,7 +207,11 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_bids_by_owner(self, owner_id, token) -> json:
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_all_offers failed with error: {e}")
+            raise e
+
+    def get_bids_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive bids placed by given lender as JSON
         :return: Response body as a json.
@@ -187,11 +219,14 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_bids'
 
-        payload = GatewayRequestsBodies.get_bids_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -200,7 +235,11 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
-    def get_matches_by_owner(self, owner_id, token) -> json:
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_bids_by_owner failed with error: {e}")
+            raise e
+
+    def get_matches_by_owner(self, jwt=None) -> json:
         """
         Sends HTTP POST request to Gateway in order to receive matches related to provided owner ID as JSON
         The method can be used both by Borrowers and Lenders - owner ID is used to filter the relevant matches
@@ -209,11 +248,14 @@ class GatewayRequests(object):
 
         url = base_url + f'/get_all_my_matches'
 
-        payload = GatewayRequestsBodies.get_matches_by_owner(owner_id, token)
+        if jwt:
+            headers = {"jwt": jwt}
+        else:
+            headers = {}
 
         try:
             logging.info(url)
-            response = requests.post(url, json=payload, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
             body = json.loads(response.text)
             logging.info("Service Response: {0}".format(body))
             return body
@@ -222,10 +264,37 @@ class GatewayRequests(object):
             logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
             raise e
 
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} get_matches_by_owner failed with error: {e}")
+            raise e
+
+    def sign_in_user(self, user_name, user_password) -> json:
+        """
+        Sends HTTP POST request to Gateway for sign in
+        :return:  JWT token is expected
+        """
+
+        url = base_url + '/sign_in'
+        headers = {'username': user_name, 'password': user_password}
+
+        try:
+            logging.info(url)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} sign_in_user failed with error: {e}")
+            raise e
+
 
 # if __name__ == '__main__':
 #     gr = GatewayRequests()
-#     # print(gr.place_offer("1021", 100000, 12, 0.08, 0 ))
-#     # print(gr.place_bid("223", 0.07, 6, 0))
-#     # print(gr.get_offers_by_status(1))
-#     print(gr.get_bids_by_owner(223, "ghyf"))
+#     k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
+#     print(gr.get_matches_by_owner(k))
+

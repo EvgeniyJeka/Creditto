@@ -3,6 +3,7 @@ import time
 import pytest
 import logging
 
+from credittomodels import User
 
 try:
     from Requests import postman
@@ -44,19 +45,81 @@ def set_matching_logic(request):
 
 
 @pytest.fixture(scope='class')
+def get_authorized_borrowers(request):
+
+    result = []
+    borrowers_amount = request.param[0]
+
+    borrowers_raw = reporter.get_users_by_role(1)
+
+    for borrower in borrowers_raw[0:borrowers_amount]:
+        user_borrower = User.User(*borrower)
+        user_borrower.password = test_users_passwords()[user_borrower.user_name]
+
+        result.append(sign_in_user(user_borrower))
+
+    return result
+
+
+@pytest.fixture(scope='class')
+def get_authorized_lenders(request):
+
+    result = []
+    lenders_amount = request.param[0]
+
+    lenders_raw = reporter.get_users_by_role(2)
+
+    for lender in lenders_raw[0:lenders_amount]:
+        user_lender = User.User(*lender)
+        user_lender.password = test_users_passwords()[user_lender.user_name]
+
+        result.append(sign_in_user(user_lender))
+
+    return result
+
+
+def get_authorized_borrowers_internal(borrowers_amount):
+
+    result = []
+    borrowers_raw = reporter.get_users_by_role(1)
+
+    for borrower in borrowers_raw[0:borrowers_amount]:
+        user_borrower = User.User(*borrower)
+        user_borrower.password = test_users_passwords()[user_borrower.user_name]
+
+        result.append(sign_in_user(user_borrower))
+
+    return result
+
+
+def get_authorized_lenders_internal(lenders_amount):
+
+    result = []
+    lenders_raw = reporter.get_users_by_role(2)
+
+    for lender in lenders_raw[0:lenders_amount]:
+        user_lender = User.User(*lender)
+        user_lender.password = test_users_passwords()[user_lender.user_name]
+
+        result.append(sign_in_user(user_lender))
+
+    return result
+
+
+@pytest.fixture(scope='class')
 def offer_placed(request):
     """
     This fixture can be used to place an offer with provided params
     :param request: offer params
     :return: placed offer ID, int
     """
-    test_offer_owner = request.param[0]
-    test_sum = request.param[1]
-    test_duration = request.param[2]
-    test_offer_interest = request.param[3]
+    test_offer_owner = get_authorized_borrowers_internal(1)[0]
+    test_sum = request.param[0]
+    test_duration = request.param[1]
+    test_offer_interest = request.param[2]
 
-    response = postman.gateway_requests.place_offer(test_offer_owner, test_sum,
-                                                    test_duration, test_offer_interest, 0)
+    response = postman.gateway_requests.place_offer(test_offer_owner.user_id, test_sum,
+                                                    test_duration, test_offer_interest, 0, test_offer_owner.jwt_token)
 
     offer_id = response['offer_id']
     logging.info(f"Offer placement: response received {response}")
@@ -139,21 +202,22 @@ def match_ready(request, set_matching_logic):
     :param request: dict with offer and bid params
     :return: None (match ID is attached to Test Class body)
     """
+    # Using 1 authorized borrower to place an Offer and 5 authorized lenders to place Bids
+    borrower = get_authorized_borrowers_internal(1)[0]
+    lenders = get_authorized_lenders_internal(5)
+
+    # Parsing params that were passed to the fixture, using them to define the requested match params
     match_input = request.param[0]
 
-    test_offer_owner = match_input['offer_owner']
     test_sum = match_input['offer_sum']
     test_duration = match_input['offer_duration']
 
     test_offer_interest = match_input['offer_interest']
-    test_offer_owner_token = match_input['offer_owner_token']
-
-    test_bid_owners_list = match_input['bid_owners_list']
     test_bid_interest = match_input['bid_interest']
 
     # Placing Offer
-    response = postman.gateway_requests.place_offer(test_offer_owner, test_sum,
-                                                    test_duration, test_offer_interest, 0)
+    response = postman.gateway_requests.place_offer(borrower.user_id, test_sum,
+                                                    test_duration, test_offer_interest, 0, borrower.jwt_token)
 
     offer_id = response['offer_id']
     logging.info(f"Offer placement: response received {response}")
@@ -163,12 +227,12 @@ def match_ready(request, set_matching_logic):
 
     time.sleep(5)
 
-    # Placing Bid that is expected to match with the Offer
+    # Placing Bid that is expected to match with the Offer (and other bids)
     bid_id = 0
 
     for i in range(0, 5):
         response = postman.gateway_requests. \
-            place_bid(test_bid_owners_list[i], test_bid_interest, offer_id, 0)
+            place_bid(lenders[i].user_id, test_bid_interest, offer_id, 0, lenders[i].jwt_token)
         logging.info(response)
 
         assert 'bid_id' in response.keys(), "BID Placement error - no BID ID in response"
@@ -179,7 +243,7 @@ def match_ready(request, set_matching_logic):
 
     # Finding the created match by Offer ID
     time.sleep(5)
-    my_matches = postman.gateway_requests.get_matches_by_owner(test_offer_owner, test_offer_owner_token)
+    my_matches = postman.gateway_requests.get_matches_by_owner(borrower.jwt_token)
     logging.warning(f"Matches received: {my_matches}")
 
     logging.warning(f"Looking for offer ID {offer_id}")
@@ -187,14 +251,31 @@ def match_ready(request, set_matching_logic):
 
     logging.info(f"Found the created match: {result}")
 
+    # Passing match params to the test instance body
     if len(result) > 0:
         request.cls.created_match = [x for x in my_matches if x['offer_id'] == offer_id][0]
         request.cls.offer_id = offer_id
         request.cls.bid_id = bid_id
-        request.cls.bid_owner_id = test_bid_owners_list[0]
+        request.cls.bid_owner_id = lenders[0].user_id
+        request.cls.offer_owner_id = borrower.user_id
 
     else:
         logging.error(f"Match creation failed - offer ID {offer_id}")
+
+
+def test_users_passwords():
+    return {'Greg Bradly': "Pigs", 'Joe Anderson': "Truth",
+            'Andrew Levi': "Pass", 'Mary Poppins': "Journey",
+            'David Ben Gurion': "Rabbit", 'Joseph Biggs': "Bank",
+            'Mara Karadja': "Fist", 'Lena Goldan': "Nice", 'Katya Rast': "Elite",
+            'Paul Atreides': "Spice", 'Leto Atreides': "Kiev", 'Baba Yaga': "Hero", 'Mike Smith': "Mars"}
+
+
+def sign_in_user(user: User):
+    password = test_users_passwords()[user.user_name]
+    response = postman.gateway_requests.sign_in_user(user.user_name, password)
+    user.jwt_token = response['Token']
+    return user
 
 
 # Support for @pytest.mark.incremental
@@ -212,3 +293,7 @@ def pytest_runtest_setup(item):
 
 
 
+# if __name__ == '__main__':
+#     ussr = User.User(202, 'Joe Anderson', 'cc3a062a97bf2935e0e12e1aee3bed944a81e1f4e4ca21eaa03b07be38628686', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiSm9lIEFuZGVyc29uIiwicGFzc3dvcmQiOiJUcnV0aCJ9.I4wjJ4COVHjXaJuqCWUOA87kvRtm6vWIYRngxpoVAbo', 'key4790', '1651420544.7691257', 2)
+#     rt = sign_in_user(ussr)
+#     print(rt.user_name)
