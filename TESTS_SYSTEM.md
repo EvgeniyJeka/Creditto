@@ -29,6 +29,8 @@ There are several groups of tests defined in <b>pytest.ini</b>:
 
   - sanity: sanity tests, verifying Bid and Offer placement, verifying other REST API methods
   
+  - authorization: authorization and permissions tests
+  
   - end2end: end to end tests, performing a full flow, verifying matching logic is applied correctly
   
   - functional: tests that verify a specific system functionality in each test 
