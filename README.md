@@ -54,9 +54,11 @@ All requests that contain an invalid JWT, an expired JWT or no token at all are 
 Customer's role defines the action he/she is authorized to perform.
 
 Customer Roles:
- a. Lender - authorized to place Bids
- b. Borrower - authorized to place Offers
- c. Admin - authorized to place both Bids and Offers
+  a. Lender - authorized to place Bids
+  
+  b. Borrower - authorized to place Offers
+  
+  c. Admin - authorized to place both Bids and Offers
 
 Authorization module is integrated into the Gateway component.
 
