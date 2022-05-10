@@ -292,6 +292,30 @@ class GatewayRequests(object):
             logging.error(F"{e.__class__.__name__} sign_in_user failed with error: {e}")
             raise e
 
+    def sign_out_user(self, jwt_token) -> json:
+        """
+        Sends HTTP POST request to Gateway for sign in
+        :return:  JWT token is expected
+        """
+
+        url = base_url + '/sign_out'
+        headers = {'jwt': jwt_token}
+
+        try:
+            logging.info(url)
+            response = requests.get(url, headers=headers, timeout=BaseConfig.WAIT_BEFORE_TIMEOUT)
+            body = json.loads(response.text)
+            logging.info("Service Response: {0}".format(body))
+            return body
+
+        except json.decoder.JSONDecodeError as e:
+            logging.error(f"Failed to convert the response to JSON, response: {response}, text: {response.text}")
+            raise e
+
+        except Exception as e:
+            logging.error(F"{e.__class__.__name__} sign_out_user failed with error: {e}")
+            raise e
+
 
 # if __name__ == '__main__':
 #     gr = GatewayRequests()
