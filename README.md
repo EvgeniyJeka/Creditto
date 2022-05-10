@@ -28,9 +28,9 @@ If there are several bids with identical interest rate the bid that was placed f
 # Use Case:
 
 Albert needs to borrow 10000 USD for 3 years. He is an authorized customer, his customer type is 'borrower',
-and can place offers. Albert places an offer - he is willing to pay up to 7% annual interest rate.
+and he can place offers. Albert places an offer - he is willing to pay up to 7% annual interest rate.
 
-Bill is also an authorized customer, customer type - 'lender'. He is looking for new attractive offers. 
+Bill is also an authorized customer, customer type - 'lender', he can place bids. He is looking for new attractive offers. 
 He is sending a request for all available offers and see Albert's offer. 
 He decides to lend the required sum to Albert and he is willing to do so for 6.8% annual interest rate. Bill places a bid. 
 
