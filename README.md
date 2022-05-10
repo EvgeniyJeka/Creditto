@@ -27,21 +27,40 @@ If there are several bids with identical interest rate the bid that was placed f
 
 # Use Case:
 
-Albert needs to borrow 10000 USD for 3 years. He is an authorized customer and can place both offers and bids.
-Albert places an offer - he is willing to pay up to 7% annual interest rate.
+Albert needs to borrow 10000 USD for 3 years. He is an authorized customer, his customer type is 'borrower',
+and can place offers. Albert places an offer - he is willing to pay up to 7% annual interest rate.
 
-Bill is also an authorized customer, he is looking for new attractive offers. He is sending a request 
-for all available offers and see Albert's offer. He decides to lend the required sum to Albert and he
-is willing to do so for 6.8% annual interest rate. Bill places a bid. 
+Bill is also an authorized customer, customer type - 'lender'. He is looking for new attractive offers. 
+He is sending a request for all available offers and see Albert's offer. 
+He decides to lend the required sum to Albert and he is willing to do so for 6.8% annual interest rate. Bill places a bid. 
 
 Bill's bid is the 5th bid on Albert's offer. His bid placement triggers the matcher, and it checks all
 bids placed on Albert's offer to find the best one for match. Since Sally's bid, that was placed earlier, 
 has 6.4% annual interest rate it is selected and it's status changes to MATCHED, all other bids, including Bill's, expire 
 and their status is changed to CANCELLED.  Offer status is changed to MATCHED as well.
 
+# 2 Authorization and Permissions
 
+Customer needs to sign in with his/here credentials to place offers or bids. 
+The credentials are sent in sign-in request headers. 
+JSON Web Token is generated on sign-in, saved to DB and returned to the customer.
+The JWT is sent in customer's request headers, it is used to identify the customer.
 
-# 2 System components
+JWT expires when the customer sends a "sign out" request or after a certain amount of time
+defined by system configuration (JWT Time To Live). 
+
+All requests that contain an invalid JWT, an expired JWT or no token at all are rejected.
+
+Customer's role defines the action he/she is authorized to perform.
+
+Customer Roles:
+ a. Lender - authorized to place Bids
+ b. Borrower - authorized to place Offers
+ c. Admin - authorized to place both Bids and Offers
+
+Authorization module is integrated into the Gateway component.
+
+# 3 System components
 Each component is a micro service. Components communicate with each other via Kafka topics. 
 
 Offer, Bid and Match models, tools needed for google protobuf serialization/deserialization and loan monthly
@@ -81,23 +100,31 @@ ________
      
      Message content is serialized to Google Protobuf.
      
-     Gateway acesses SQL DB to validate received data. 
+     Gateway accesses SQL DB to validate received data. 
+     
+     The Authorization module is integrated into Gateway.
      
      API methods:
      
-     a. place_offer: add new offer to the system. Offer data is validated
+     a. place_offer: add new offer to the system. Offer data is validated. 
      
-     b. place_bid: add new bid to the system. Bid data ais validated
+     b. place_bid: add new bid to the system. Bid data ais validated. 
      
-     c. get_offers_by_status: get all offers in given status 
+     c. get_offers_by_status: get all offers in given status. 
      
-     d. get_all_offers: get all existing offers disregarding of their status
+     d. get_all_offers: get all existing offers disregarding of their status. 
      
-     e. get_my_bids: get all bids placed by given customer (the former is identified by provided owner_id in request)
+     e. get_my_bids: get all bids placed by given customer (the former is identified by provided owner_id in request).
      
-     f. get_my_offers: get all offers placed by given customer 
+     f. get_my_offers: get all offers placed by given customer.
      
-     g. get_my_matches: get all matches related to given customer - the former can be either lender or borrower
+     g. get_my_matches: get all matches related to given customer - the former can be either lender or borrower.
+     
+     h. sign_in: customer sends his credentials in request headers, JSON Web Token is sent in response.
+     
+     i. sign_out: expires the JSON Web Token sent in request headers.
+     
+     j. get_token_ttl: returns JWT Time To Live, providing the token is valid.
      
      Gateway produces 'offer' messages to Kafka topic 'Offers' and 'bid' messages to Kafka topic 'bids'.
      
@@ -152,7 +179,7 @@ ________
 
 
  
-# 3 Models description:
+# 4 Models description:
 
 1. <b>Offer</b>:
    owner_id: the ID of the borrowing customer in the system. Only authorized customers can place offers (T.B.D)
@@ -203,7 +230,7 @@ ________
 
    
    
-# 4 Statuses
+# 5 Statuses
 
 1. Offer:
 
@@ -236,7 +263,7 @@ ________
     -HIDDEN: the bid was temporary hidden by the admin (T.B.D.)
     
   
-  # 5 Matching logic - available algorithms:
+  # 6 Matching logic - available algorithms:
   
     1. Bid with the lowest interest is selected when 5 bids are placed on one given offer. 
     If there are several bids with equally low interest the OLDEST bid is selected.
@@ -245,7 +272,7 @@ ________
     If there are several bids with equally low interest the NEWEST bid is selected.
     
     
-  # 6 Requirements:
+  # 7 Requirements:
   
   - Docker client
   - Python v3.9 or above
@@ -261,7 +288,7 @@ ________
     
     
   
-# 7 Future Development Options
+# 8 Future Development Options
 
 The project architecture allows to add additional functionalities.
 
@@ -271,9 +298,6 @@ After that 'offer cancellation' message will be produced to Kafka, consumed by M
 and by SQL Writer (it will modify the status of the offer and all related bids in SQL DB). Bid cancellation functionality also can be added. It is also safe to assume,
 that an 'admin' user should be able to cancel, hide or remove a bid or an offer - the same logic can be applied to add that functionality.
 
--Currently there is no users database, so Gateway has no option to verify if current user is authorized to place an offer or a bid. 
-It is possilbe to add a table in SQL DB that would contain a list of users credentials, types ('lender' or 'borrower') and emails.
-It would allow to add an Authorization module to the Gateway component, and it would validate each offer or bid placement request. 
 
 -Currently created matches aren't handled - they are only inserted to SQL DB. 
 It is an option to notify the lender and the borrower by sending an email - for that purpose another micro service can be added, it would consume matches from 'matches' Kafka topic, extract the lender and the borrower email address and send an email to both parties. 
