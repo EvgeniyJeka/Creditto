@@ -8,6 +8,7 @@ class SqlConfig(Enum):
     SQL_USER = 'root'
     SQL_PASSWORD = '123456'
     DB_NAME ='creditto'
+    TEST_USERS_FILE_PATH = './test_users.txt'
 
 class KafkaConfig(Enum):
     BOOTSTRAP_SERVERS = "kafka:9092"
