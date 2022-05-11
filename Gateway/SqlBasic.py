@@ -19,6 +19,7 @@ class SqlBasic(object):
     usr = SqlConfig.SQL_USER.value
     pwd = SqlConfig.SQL_PASSWORD.value
     db_name = SqlConfig.DB_NAME.value
+    test_users_file_path = SqlConfig.TEST_USERS_FILE_PATH.value
     cursor = None
 
     def __init__(self):
@@ -116,100 +117,8 @@ class SqlBasic(object):
             objects_mapped.Base.metadata.create_all(self.engine)
 
             # Inserting the default test users
-            default_users = [objects_mapped.UsersMapped(id='101',
-                                                        username='Greg Bradly',
-                                                        password=utils.Calculator.hash_string("Pigs"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=1),
-                             objects_mapped.UsersMapped(id='202',
-                                                        username='Joe Anderson',
-                                                        password=utils.Calculator.hash_string("Truth"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='304',
-                                                        username='Andrew Levi',
-                                                        password=utils.Calculator.hash_string("Pass"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=1),
-                             objects_mapped.UsersMapped(id='103',
-                                                        username='Mary Poppins',
-                                                        password=utils.Calculator.hash_string("Journey"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='505',
-                                                        username='David Ben Gurion',
-                                                        password=utils.Calculator.hash_string("Rabbit"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=3),
-                             objects_mapped.UsersMapped(id='104',
-                                                        username='Joseph Biggs',
-                                                        password=utils.Calculator.hash_string("Bank"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='105',
-                                                        username='Mara Karadja',
-                                                        password=utils.Calculator.hash_string("Fist"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='106',
-                                                        username='Lena Goldan',
-                                                        password=utils.Calculator.hash_string("Nice"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='107',
-                                                        username='Katya Rast',
-                                                        password=utils.Calculator.hash_string("Elite"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='108',
-                                                        username='Paul Atreides',
-                                                        password=utils.Calculator.hash_string("Spice"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='109',
-                                                        username='Leto Atreides',
-                                                        password=utils.Calculator.hash_string("Kiev"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='110',
-                                                        username='Baba Yaga',
-                                                        password=utils.Calculator.hash_string("Hero"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2),
-                             objects_mapped.UsersMapped(id='111',
-                                                        username='Mike Smith',
-                                                        password=utils.Calculator.hash_string("Mars"),
-                                                        jwt_token="",
-                                                        key="",
-                                                        token_creation_time="",
-                                                        role_id=2)
-                             ]
 
-            self.session.add_all(default_users)
+            self.session.add_all(self.get_test_users_from_file())
             self.session.commit()
 
         if ROLES_TABLE_NAME not in tables:
@@ -697,6 +606,20 @@ class SqlBasic(object):
             logging.error(f"Failed to pack data from SQL, {e}")
             raise e
 
+    def get_test_users_from_file(self):
+        with open(self.test_users_file_path, 'r') as f:
+            content = f.readlines()
+            processed_content = [x.split(",") for x in content]
+            users = []
+
+            for item in processed_content:
+                users.append(objects_mapped.UsersMapped(id=item[0],
+                                                        username=item[1].strip(),
+                                                        password=utils.Calculator.hash_string(item[2].strip()),
+                                                        jwt_token="",
+                                                        key="",
+                                                        token_creation_time="",
+                                                        role_id=int(item[3])))
 
 # if __name__ == '__main__':
 #     sq_mn = SqlBasic()

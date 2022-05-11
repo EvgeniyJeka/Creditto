@@ -1,0 +1,13 @@
+101, Greg Bradly, Pigs, 1
+202, Joe Anderson, Truth, 2
+304, Andrew Levi, Pass, 1
+103, Mary Poppins, Journey, 2
+505, David Ben Gurion, Rabbit, 3
+104, Joseph Biggs, Bank, 2
+105, Mara Karadja, Fist, 2
+106, Lena Goldan, Nice, 2
+107, Katya Rast, Elite, 2
+108, Paul Atreides, Spice,2
+109, Leto Atreides, Kiev, 2
+110, Baba Yaga, Hero, 2
+111, Mike Smith, Mars, 2
