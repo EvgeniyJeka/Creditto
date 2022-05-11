@@ -621,6 +621,9 @@ class SqlBasic(object):
                                                         token_creation_time="",
                                                         role_id=int(item[3])))
 
+        return users
+
 # if __name__ == '__main__':
 #     sq_mn = SqlBasic()
-#     print(sq_mn.get_users_by_role(2))
+#     sq_mn.session.add_all(sq_mn.get_test_users_from_file())
+#     sq_mn.session.commit()
