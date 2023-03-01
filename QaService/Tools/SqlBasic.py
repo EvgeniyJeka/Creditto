@@ -1,6 +1,6 @@
 import logging
 from sqlalchemy import exc, or_, and_
-from sqlalchemy import create_engine, exc, MetaData
+from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database
 import sqlalchemy as db
