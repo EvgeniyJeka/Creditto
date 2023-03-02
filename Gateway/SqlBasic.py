@@ -1,5 +1,5 @@
 import logging
-from sqlalchemy import exc, or_, and_
+from sqlalchemy import exc, or_, and_, MetaData
 from sqlalchemy import create_engine
 
 
@@ -77,7 +77,9 @@ class SqlBasic(object):
         If they aren't the method will create them
         :param engine: Sql Alchemy engine
         """
-        tables = self.engine.table_names()
+        metadata = MetaData()
+        metadata.reflect(bind=self.engine)
+        tables = metadata.tables.keys()
 
         # Creating the 'offers' table if not exists - column for each "Offer" object property.
         if 'offers' not in tables:
@@ -160,9 +162,9 @@ class SqlBasic(object):
         result = set()
 
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_])
+        query = db.select(table_)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
@@ -175,9 +177,9 @@ class SqlBasic(object):
         result = set()
 
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_])
+        query = db.select(table_)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
@@ -188,9 +190,9 @@ class SqlBasic(object):
 
     def get_token_creation_time(self, jwt):
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.jwt_token == jwt)
+        query = db.select(table_).where(table_.columns.jwt_token == jwt)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
         if fetched_data:
@@ -202,7 +204,7 @@ class SqlBasic(object):
 
         try:
             metadata = db.MetaData()
-            table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
             query = db.update(table_).\
                 values(jwt_token=encoded_jwt, key=key, token_creation_time=token_creation_time)\
@@ -218,7 +220,7 @@ class SqlBasic(object):
     def terminate_token(self, token):
         try:
             metadata = db.MetaData()
-            table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
             query = db.update(table_).\
                 values(token_creation_time=0)\
@@ -233,18 +235,18 @@ class SqlBasic(object):
 
     def get_password_by_username(self, username):
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.username == username)
+        query = db.select(table_).where(table_.columns.username == username)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
         return fetched_data[0][2]
 
     def get_data_by_token(self, token):
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.jwt_token == token)
+        query = db.select(table_).where(table_.columns.jwt_token == token)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
@@ -252,17 +254,17 @@ class SqlBasic(object):
 
     def get_allowed_actions_by_token(self, token):
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.jwt_token == token)
+        query = db.select(table_).where(table_.columns.jwt_token == token)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
         role_id = int(fetched_data[0][6])
 
-        table_ = db.Table(ACTIONS_BY_ROLES_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(ACTIONS_BY_ROLES_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.role_id == role_id)
+        query = db.select(table_).where(table_.columns.role_id == role_id)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
@@ -270,9 +272,9 @@ class SqlBasic(object):
 
     def get_user_by_token(self, token):
         metadata = db.MetaData()
-        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_]).where(table_.columns.jwt_token == token)
+        query = db.select(table_).where(table_.columns.jwt_token == token)
         ResultProxy = self.cursor.execute(query)
         fetched_data = ResultProxy.fetchall()
 
@@ -286,7 +288,7 @@ class SqlBasic(object):
         """
         try:
             metadata = db.MetaData()
-            table_ = db.Table(table, metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table(table, metadata, autoload_replace=True, autoload_with=self.engine)
 
             return table_.columns.keys()
 
@@ -302,9 +304,9 @@ class SqlBasic(object):
         """
 
         metadata = db.MetaData()
-        table_ = db.Table(table, metadata, autoload=True, autoload_with=self.engine)
+        table_ = db.Table(table, metadata, autoload_replace=True, autoload_with=self.engine)
 
-        query = db.select([table_])
+        query = db.select(table_)
         ResultProxy = self.cursor.execute(query)
         result = ResultProxy.fetchall()
 
@@ -319,9 +321,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("offers", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.id == offer_id)
+            query = db.select(table_).where(table_.columns.id == offer_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -339,9 +341,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("offers", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.status == offer_status)
+            query = db.select(table_).where(table_.columns.status == offer_status)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -359,9 +361,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("bids", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.target_offer_id == offer_id)
+            query = db.select(table_).where(table_.columns.target_offer_id == offer_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -379,9 +381,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("bids", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.id == bid_id)
+            query = db.select(table_).where(table_.columns.id == bid_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -415,9 +417,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("bids", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.owner_id == lender_id)
+            query = db.select(table_).where(table_.columns.owner_id == lender_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -435,9 +437,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("offers", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.owner_id == borrower_id)
+            query = db.select(table_).where(table_.columns.owner_id == borrower_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -455,9 +457,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("matches", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("matches", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
+            query = db.select(table_).where(or_(table_.columns.offer_owner_id == owner_id, table_.columns.bid_owner_id == owner_id))
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -474,9 +476,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("offers", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("offers", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(
+            query = db.select(table_).where(
                 or_(table_.columns.status == 1, table_.columns.status == 3))
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
@@ -495,9 +497,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("bids", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("bids", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(
+            query = db.select(table_).where(
                 and_(table_.columns.status == 1, table_.columns.target_offer_id == target_offer_id))
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
@@ -516,9 +518,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("local_config", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("local_config", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.property == config_param)
+            query = db.select(table_).where(table_.columns.property == config_param)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -537,9 +539,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table(table_name, metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table(table_name, metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_])
+            query = db.select(table_)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
@@ -559,9 +561,9 @@ class SqlBasic(object):
         try:
 
             metadata = db.MetaData()
-            table_ = db.Table("users", metadata, autoload=True, autoload_with=self.engine)
+            table_ = db.Table("users", metadata, autoload_replace=True, autoload_with=self.engine)
 
-            query = db.select([table_]).where(table_.columns.role_id == role_id)
+            query = db.select(table_).where(table_.columns.role_id == role_id)
             ResultProxy = self.cursor.execute(query)
             result = ResultProxy.fetchall()
 
