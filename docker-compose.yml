@@ -104,6 +104,8 @@ services:
       - SQL_PASSWORD=123456
       - WAIT_BEFORE_TIMEOUT=15
       - MYSQL_DB_WARMUP_DELAY=60
+      - SLACK_RESULTS_REPORTING_CHANNEL_NAME=# tests-reports
+      - SLACK_API_TOKEN=0
 
 
 
