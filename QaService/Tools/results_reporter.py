@@ -35,7 +35,7 @@ class ResultsReporter:
             return True
 
         except SlackApiError as e:
-            logging.error("Error sending message: ", e)
+            logging.error(f"Error sending message: {e}")
             raise e
 
     def report_success(self, test_id, test_file_name):
