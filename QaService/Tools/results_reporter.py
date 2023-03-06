@@ -14,12 +14,21 @@ class ResultsReporter:
         :return: True on success
         """
 
-        client = WebClient(token=os.environ['SLACK_API_TOKEN'])
-        channel_name = os.environ['SLACK_RESULTS_REPORTING_CHANNEL_NAME']
+        slack_token = os.environ['SLACK_API_TOKEN']
+        slack_channel_name = os.environ['SLACK_RESULTS_REPORTING_CHANNEL_NAME']
+
+        if not slack_token or not slack_channel_name:
+            logging.error("Can't send report to Slack - token or channel name missing in environment variables")
+            return False
+
+        if not len(slack_token) > 1:
+            logging.error(f"Can't send report to Slack - invalid slack token: {slack_token}")
+
+        client = WebClient(token=slack_token)
 
         try:
             response = client.chat_postMessage(
-                channel=channel_name,
+                channel=slack_channel_name,
                 text=data
             )
             logging.info(f"Test Result Published To Slack Channel Successfully: {response}")

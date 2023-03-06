@@ -64,10 +64,12 @@ class TestBidProduced(object):
         except AssertionError as e:
             logging.warning(f"Test {test_file_name} - step failed: {e}")
             report_test_results.report_failure(test_id, test_file_name)
+            raise e
 
         except Exception as e:
             logging.warning(f"Test {test_file_name} is broken: {e}")
             report_test_results.report_broken_test(test_id, test_file_name, e)
+            raise e
 
         logging.info(f"----------------------- Offer Placement - step passed ----------------------------------\n")
 
@@ -90,10 +92,12 @@ class TestBidProduced(object):
         except AssertionError as e:
             logging.warning(f"Test {test_file_name} - step failed: {e}")
             report_test_results.report_failure(test_id, test_file_name)
+            raise e
 
         except Exception as e:
             logging.warning(f"Test {test_file_name} is broken: {e}")
             report_test_results.report_broken_test(test_id, test_file_name, e)
+            raise e
 
         logging.info(f"----------------------- Bid Placement - step passed ----------------------------------\n")
 
@@ -131,10 +135,12 @@ class TestBidProduced(object):
         except AssertionError as e:
             logging.warning(f"Test {test_file_name} - step failed: {e}")
             report_test_results.report_failure(test_id, test_file_name)
+            raise e
 
         except Exception as e:
             logging.warning(f"Test {test_file_name} is broken: {e}")
             report_test_results.report_broken_test(test_id, test_file_name, e)
+            raise e
 
         logging.info(f"----------------------- Pulled Bid Message Validation - "
                      f"step passed ----------------------------------\n")
