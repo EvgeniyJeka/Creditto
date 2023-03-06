@@ -1,19 +1,21 @@
 import pytest
 import logging
 from credittomodels import Bid
+import os
 
 try:
     from Requests import postman
-    from Tools import reporter
+    from Tools import reporter, results_reporter
 
 except ModuleNotFoundError:
     from ...Requests import postman
-    from ...Tools import reporter
+    from ...Tools import reporter, results_reporter
 
 logging.basicConfig(level=logging.INFO)
 
 postman = postman.Postman()
 reporter = reporter.Reporter()
+report_test_results = results_reporter.ResultsReporter()
 
 test_offer_owner = 1312
 test_offer_interest = 0.06
@@ -32,6 +34,9 @@ test_bid_interest = 0.056
 
 test_token = '1Aa@<>12'
 
+test_id = 104
+test_file_name = os.path.basename(__file__)
+
 
 @pytest.mark.container
 @pytest.mark.functional
@@ -49,17 +54,31 @@ class TestBidsCancelled(object):
 
     @pytest.mark.parametrize('match_ready', [[match_input]], indirect=True)
     def test_missed_bids_cancelled(self, match_ready):
-        bids_on_offer = reporter.get_bids_by_offer(self.offer_id)
-        matched_bid_id = self.bid_id
+        try:
 
-        for bid in bids_on_offer:
-            if bid['id'] == matched_bid_id:
-                assert bid['status'] == Bid.BidStatuses.MATCHED.value, "Matched Bid status wasn't updated in SQL"
-            else:
-                assert bid['status'] == Bid.BidStatuses.CANCELLED.value, "Missed Bid status wasn't updated in SQL"
+            bids_on_offer = reporter.get_bids_by_offer(self.offer_id)
+            matched_bid_id = self.bid_id
 
-    logging.info(f"----------------------- Bids status is updated in SQL after a match - step passed "
-                 f"------------------------------\n")
+            for bid in bids_on_offer:
+                if bid['id'] == matched_bid_id:
+                    assert bid['status'] == Bid.BidStatuses.MATCHED.value, "Matched Bid status wasn't updated in SQL"
+                else:
+                    assert bid['status'] == Bid.BidStatuses.CANCELLED.value, "Missed Bid status wasn't updated in SQL"
+
+        except AssertionError as e:
+            logging.warning(f"Test {test_file_name} - step failed: {e}")
+            report_test_results.report_failure(test_id, test_file_name)
+            raise e
+
+        except Exception as e:
+            logging.warning(f"Test {test_file_name} is broken: {e}")
+            report_test_results.report_broken_test(test_id, test_file_name, e)
+            raise e
+
+        logging.info(f"----------------------- Bids status is updated in SQL after a match - step passed "
+                     f"------------------------------\n")
+
+        report_test_results.report_success(test_id, test_file_name)
 
 
 
