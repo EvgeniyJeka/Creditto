@@ -142,6 +142,7 @@ def restart_container(request):
     container = docker_tool.stop_container(container_to_restart)
     time.sleep(container_downtime)
     docker_tool.start_container(container)
+    time.sleep(10)
 
 
 def container_restart(container_to_restart):
