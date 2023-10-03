@@ -48,7 +48,7 @@ class SqlBasic(object):
             url = f'mysql+pymysql://{usr}:{pwd}@{hst}:3306/{db_name}'
 
             # Create an engine object.
-            engine = create_engine(url, echo=True, isolation_level="READ UNCOMMITTED")
+            engine = create_engine(url, echo=False, isolation_level="READ UNCOMMITTED")
 
             # Create database if it does not exist.
             if not database_exists(engine.url):
