@@ -38,16 +38,35 @@ class ResultsReporter:
             logging.error(f"Error sending message: {e}")
             raise e
 
+    def check_slack_key_available(self):
+        """
+        Verifying slack key is available - if it isn't, reports won't be sent to Slack API
+        to prevent unnecessary exceptions.
+        :return:
+        """
+        key_var = os.environ['SLACK_API_TOKEN']
+        if key_var is not None:
+            if len(key_var) > 1:
+                return True
+
+        return False
+
     def report_success(self, test_id, test_file_name):
         report = f"Test PASSED : #{test_id} , {test_file_name}"
-        return self.send_report_slack(report)
+        if self.check_slack_key_available():
+            return self.send_report_slack(report)
+        return True
 
     def report_failure(self, test_id, test_file_name):
         report = f"Test FAILED : #{test_id} , {test_file_name}"
-        return self.send_report_slack(report)
+        if self.check_slack_key_available():
+            return self.send_report_slack(report)
+        return True
 
     def report_broken_test(self, test_id, test_file_name, test_broken_exception):
         report = f"Test BROKEN : #{test_id} , {test_file_name} - note the exception: {test_broken_exception}"
-        return self.send_report_slack(report)
+        if self.check_slack_key_available():
+            return self.send_report_slack(report)
+        return True
 
 
