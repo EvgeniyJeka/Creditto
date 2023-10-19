@@ -92,6 +92,8 @@ services:
     build: ./QaService
     depends_on:
       - creditto_gateway
+      - creditto_matcher
+      - sql_writer
       - cabin_db
       - kafka
     networks:

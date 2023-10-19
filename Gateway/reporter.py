@@ -7,12 +7,12 @@ import jwt
 import time
 import logging
 from decimal import Decimal
+from local_config import ConfigParams
 
 logging.basicConfig(level=logging.INFO)
 
 from constants import *
 import hashlib
-import configparser
 import random
 
 from SqlBasic import SqlBasic
@@ -26,7 +26,7 @@ class Reporter(SqlBasic):
 
     def __init__(self):
         super().__init__()
-        self.token_ttl = 2000
+        self.token_ttl = ConfigParams.jwt_time_to_live.value
 
     def verify_offer_by_id(self, offer_id):
         """
@@ -165,19 +165,29 @@ class Reporter(SqlBasic):
         return {"confirmed": "given offer can be placed"}
 
     def hash_string(self, input_: str):
+        """
+        Hashing method
+        :param input_: str
+        :return: str
+        """
         plaintext = input_.encode()
 
         # call the sha256(...) function returns a hash object
-        d = hashlib.sha256(plaintext)
-
-        # generate human readable hash of "hello" string
-        hash = d.hexdigest()
+        hash_object = hashlib.sha256(plaintext)
+        hash = hash_object.hexdigest()
         return hash
 
     def sign_out(self, token):
+        """
+        Sign out flow - verifying the provided JWT.
+        If it is valid - the JWT is deleted, otherwise an error message is returned.
+        :param token: JWT token
+        :return:
+        """
         # Check for provided token in SQL DB
-        if not self.get_all_tokens().__contains__(token):
-            return {"error": f"Wrong credentials"}
+        all_tokens = self.get_all_tokens()
+        if token not in all_tokens:
+            return {"error": f"Invalid JWT provided"}
 
         return self.terminate_token(token)
 
@@ -195,11 +205,13 @@ class Reporter(SqlBasic):
         key = self.key_gen()  # The key will be generated on random basis and saved to DB
 
         # Check if given username exists in SQL DB, if it doesn't - return an error
-        if not self.get_users().__contains__(username):
+        user_names_set = self.get_users()
+        if username not in user_names_set:
             return {"error": f"Wrong credentials"}
 
         password_hash = self.get_password_by_username(username)
 
+        # Verifying password against hashed password in SQL DB
         if self.hash_string(password) == password_hash:
             encoded_jwt = jwt.encode({"user": username, "password": password}, key, algorithm="HS256")
             token_creation_time = time.time()
@@ -283,10 +295,17 @@ class Reporter(SqlBasic):
         return {"error": "Non existing JWT"}
 
     def get_user_data_by_jwt(self, jwt):
+        """
+        Prompting SQL DB for user name
+        :param jwt: str
+        :return: str on success
+        """
+
         result = self.get_user_by_token(jwt)
         if not result:
             return False
-        return self.get_user_by_token(jwt)
+
+        return result
 
 
 # if __name__ == '__main__':

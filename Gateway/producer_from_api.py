@@ -12,12 +12,24 @@ class ProducerFromApi(object):
         self.producer = KafkaProducer(bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value])
 
     def produce_message(self, message, topic, headers=None):
-        logging.info(f"ProducerFromApi: Producing message {message} to topic {topic}")
-        if headers:
-            self.producer.send(topic, value=message, headers=headers)
-        else:
-            self.producer.send(topic, value=message)
+        """
+        This methos is used to produce messages to Kafka
+        :param message: message content (should be serialized)
+        :param topic: target Kafka topic
+        :param headers: message headers (optional)
+        :return: True on success
+        """
+        try:
+            logging.info(f"ProducerFromApi: Producing message {message} to topic {topic}")
+            if headers:
+                self.producer.send(topic, value=message, headers=headers)
+            else:
+                self.producer.send(topic, value=message)
 
-        self.producer.flush()
-        time.sleep(0.01)
-        logging.info(f"ProducerFromApi: Succssfully produced message {message} to topic {topic}")
+            self.producer.flush()
+            time.sleep(0.01)
+            logging.info(f"ProducerFromApi: Succssfully produced message {message} to topic {topic}")
+            return True
+
+        except Exception as e:
+            logging.error(f"Failed to produce message to Kafka: {e} - message content:{message}")
