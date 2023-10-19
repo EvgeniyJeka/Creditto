@@ -33,3 +33,4 @@ class ProducerFromApi(object):
 
         except Exception as e:
             logging.error(f"Failed to produce message to Kafka: {e} - message content:{message}")
+            return False
