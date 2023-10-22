@@ -243,11 +243,20 @@ def place_bid():
 
 @app.route("/get_offers_by_status/<status>", methods=['GET'])
 def get_offers_by_status(status):
+    """
+    This method returns a list of all Offers with given status from SQL DB.
+    :param status: int
+    :return: JSON
+    """
     return simplejson.dumps(reporter.get_offers_by_status(status))
 
 
 @app.route("/get_all_offers", methods=['GET'])
 def get_all_offers():
+    """
+    This method returns all existing offers from DB disregarding to their status
+    :return: JSON
+    """
     return simplejson.dumps(reporter.get_offers_by_status(-1))
 
 
