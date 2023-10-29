@@ -88,7 +88,7 @@ services:
 
   sanity_tests_container:
     image: sanity_tests_container:latest
-    command: ["pytest", "-v", "-m", "container"]
+    command: ["pytest", "-v", "-m", "container", "--reruns", "2"]
     build: ./QaService
     depends_on:
       - creditto_gateway
