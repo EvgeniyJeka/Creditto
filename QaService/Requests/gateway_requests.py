@@ -317,8 +317,5 @@ class GatewayRequests(object):
             raise e
 
 
-# if __name__ == '__main__':
-#     gr = GatewayRequests()
-#     k = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiR3JlZyBCcmFkbHkiLCJwYXNzd29yZCI6IlBpZ3MifQ.hGvy243CI4y3mVjNkiXwmHwXnyt0-d-fxxOuCkcKf5U'
-#     print(gr.get_matches_by_owner(k))
+
 
