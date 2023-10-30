@@ -46,6 +46,12 @@ def set_matching_logic(request):
 
 @pytest.fixture(scope='class')
 def get_authorized_borrowers(request):
+    """
+    This fixture can be used to get one or several Borrowers after sign in
+    Test users passwords are hardcoded - borrower name is fetched from DB
+    and sign in is performed.
+    :return: list of Borrower objects
+    """
 
     result = []
     borrowers_amount = request.param[0]
@@ -63,6 +69,12 @@ def get_authorized_borrowers(request):
 
 @pytest.fixture(scope='class')
 def get_authorized_lenders(request):
+    """
+    This fixture can be used to get one or several Lenders after sign in
+    Test users passwords are hardcoded - lender name is fetched from DB
+    and sign in is performed.
+    :return: list of Lender objects
+    """
 
     result = []
     lenders_amount = request.param[0]
@@ -79,6 +91,10 @@ def get_authorized_lenders(request):
 
 
 def get_authorized_borrowers_internal(borrowers_amount):
+    """
+    Method for internal usage - can be used to get one or several Borrowers after sign in
+
+    """
 
     result = []
     borrowers_raw = reporter.get_users_by_role(1)
@@ -93,6 +109,11 @@ def get_authorized_borrowers_internal(borrowers_amount):
 
 
 def get_authorized_lenders_internal(lenders_amount):
+    """
+    Method for internal usage - can be used to get one or several Lenders after sign in
+    :param lenders_amount:
+    :return:
+    """
 
     result = []
     lenders_raw = reporter.get_users_by_role(2)
@@ -265,6 +286,10 @@ def match_ready(request, set_matching_logic):
 
 
 def test_users_passwords():
+    """
+    Test users passwords - hardcoded. Packed to a dict for internal test usage
+    :return:
+    """
     return {'Greg Bradly': "Pigs", 'Joe Anderson': "Truth",
             'Andrew Levi': "Pass", 'Mary Poppins': "Journey",
             'David Ben Gurion': "Rabbit", 'Joseph Biggs': "Bank",
@@ -273,6 +298,14 @@ def test_users_passwords():
 
 
 def sign_in_user(user: User):
+    """
+    This method can be used to sign in a user.
+    Sending a sign in request with user's name and password.
+    The method returns the same User instance that was passed to it,
+    but after the sign in procedure is completed
+    :param user:
+    :return:
+    """
     password = test_users_passwords()[user.user_name]
     response = postman.gateway_requests.sign_in_user(user.user_name, password)
     user.jwt_token = response['Token']
@@ -293,8 +326,3 @@ def pytest_runtest_setup(item):
 
 
 
-
-# if __name__ == '__main__':
-#     ussr = User.User(202, 'Joe Anderson', 'cc3a062a97bf2935e0e12e1aee3bed944a81e1f4e4ca21eaa03b07be38628686', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyIjoiSm9lIEFuZGVyc29uIiwicGFzc3dvcmQiOiJUcnV0aCJ9.I4wjJ4COVHjXaJuqCWUOA87kvRtm6vWIYRngxpoVAbo', 'key4790', '1651420544.7691257', 2)
-#     rt = sign_in_user(ussr)
-#     print(rt.user_name)
