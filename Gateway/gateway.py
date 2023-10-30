@@ -137,7 +137,7 @@ def place_offer():
     offer = request.get_json()
     logging.info(f"Gateway: Offer received: {offer}")
     auth_token = request.headers.get('jwt')
-
+    # Verifying the user is authorized to place an offer (JWT belongs toa  BORROWER, verifying user type)
     permissions_verification_result = reporter.verify_token(auth_token, PLACE_OFFER)
 
     if 'error' in permissions_verification_result.keys():
@@ -150,6 +150,7 @@ def place_offer():
         logging.error(f"Failed to get user by user ID - {e}")
         return {"error": "Invalid object type for this API method"}
 
+    # Generating new offer ID
     next_id = uuid.uuid4().int & (1 << ConfigParams.generated_uuid_length.value)-1
 
     logging.info("Validating offer placement request")
@@ -159,18 +160,21 @@ def place_offer():
         logging.warning(f"Offer {next_id} has failed validation and was rejected")
         return response
 
+    # Using the 'Offer' class from 'credittomodels' package - creating new Offer instance.
     placed_offer = Offer.Offer(next_id, offer['owner_id'], offer['sum'], offer['duration'], offer['offered_interest'],
                          offer['allow_partial_fill'])
 
-    # Offer - serializing to proto
+    # Offer instance - serializing to proto
     offer_to_producer = proto_handler.serialize_offer_to_proto(placed_offer)
 
     # Handling invalid user input -  provided data can't be used to create a valid Bid and serialize it to proto
     if not offer_to_producer:
         return {"error": f"Failed to place a new offer, invalid data in request"}
 
+    # Setting headers for Kafka message
     offer_record_headers = [("type", bytes('offer', encoding='utf8'))]
 
+    # Producing the 'Offer' message to Kafka
     logging.info(f"Using Producer instance to send the offer to Kafka topic 'offers': {offer_to_producer} ")
     producer.produce_message(offer_to_producer, 'offers', offer_record_headers)
 
@@ -239,11 +243,20 @@ def place_bid():
 
 @app.route("/get_offers_by_status/<status>", methods=['GET'])
 def get_offers_by_status(status):
+    """
+    This method returns a list of all Offers with given status from SQL DB.
+    :param status: int
+    :return: JSON
+    """
     return simplejson.dumps(reporter.get_offers_by_status(status))
 
 
 @app.route("/get_all_offers", methods=['GET'])
 def get_all_offers():
+    """
+    This method returns all existing offers from DB disregarding to their status
+    :return: JSON
+    """
     return simplejson.dumps(reporter.get_offers_by_status(-1))
 
 

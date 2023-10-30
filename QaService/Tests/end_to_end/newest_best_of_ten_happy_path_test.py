@@ -126,7 +126,8 @@ class TestBestOfTen:
                               self.offer_id, 0, TestBestOfTen.lenders[i].jwt_token)
                 logging.info(response)
 
-                # The bid that is expected to create a match with the offer
+                # The bid that is expected to create a match with the offer, since it is one of the bids
+                # that have the lowest interest, 3.7%, AND it is the newest among the two bids with that interest.
                 if i == 4:
                     TestBestOfTen.matching_bid_id = response['bid_id']
 

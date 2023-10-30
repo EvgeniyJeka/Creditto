@@ -25,9 +25,9 @@ class BestOfTenNewest:
             logging.info(f"MATCHER: Not enough bids for offer {offer.id}, expecting for at least 10, no match")
             return False
 
-        logging.info("Matcher: Selected matching logic - match the offer with the best bid when the 5th bid is received,"
+        logging.info("Matcher: Selected matching logic - match the offer with the best bid when the 10th bid is received,"
                      "best has the lowest interest rate, "
-                     "the oldest bit is selected if there are 2 or more bids with the same rate")
+                     "the newest bid is selected if there are 2 or more bids with the same rate")
 
         logging.info([x.bid_interest for x in bids_for_offer])
 
@@ -40,7 +40,7 @@ class BestOfTenNewest:
         # Filtering bids by interest rate - the list below contains the bids with the lowest rate found
         list_bids_best_interest = [x for x in bids_for_offer if x.bid_interest == best_interest_rate]
 
-        # Sorting the bids by date in ascending order, selecting the oldest bid
+        # Sorting the bids by date in ascending order, selecting the newest bid
         list_bids_best_interest.sort(key=lambda x: x.date_added, reverse=True)
         selected_bid = list_bids_best_interest[0]
 

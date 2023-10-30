@@ -22,3 +22,4 @@ class ConfigParams(Enum):
     verified_bid_params = ['bid_interest', 'target_offer_id', 'partial_only']
     verified_offer_params = ['sum', 'duration', 'offered_interest', 'allow_partial_fill']
     generated_uuid_length = 60
+    jwt_time_to_live = 2000

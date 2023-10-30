@@ -47,25 +47,25 @@ class Reporter(SqlBasic):
     def get_matches_by_owner(self, owner_id: int):
         return self.get_matches_by_owner_alchemy(owner_id)
 
-    def validate_personal_data_request(self, request_data, verified_fields):
-        try:
-            if not isinstance(request_data, dict):
-                return {"error": "Invalid object type for this API method"}
-
-            # Rejecting invalid and malformed personal data requests
-            if None in request_data.values():
-                logging.warning(f"Gateway: Invalid personal data request received: {request_data}")
-                return {"error": "Invalid object type for this API method"}
-
-            # Rejecting invalid personal data requests with missing mandatory params
-            for param in verified_fields:
-                if param not in request_data.keys():
-                    return {"error": "Required parameter is missing in provided personal data request"}
-
-            return {"confirmed": "given personal data request can be placed"}
-
-        except TypeError:
-            return {"error": f"Personal data request is invalid, 'NULL' is detected in one of the key fields"}
+    # def validate_personal_data_request(self, request_data, verified_fields):
+    #     try:
+    #         if not isinstance(request_data, dict):
+    #             return {"error": "Invalid object type for this API method"}
+    #
+    #         # Rejecting invalid and malformed personal data requests
+    #         if None in request_data.values():
+    #             logging.warning(f"Gateway: Invalid personal data request received: {request_data}")
+    #             return {"error": "Invalid object type for this API method"}
+    #
+    #         # Rejecting invalid personal data requests with missing mandatory params
+    #         for param in verified_fields:
+    #             if param not in request_data.keys():
+    #                 return {"error": "Required parameter is missing in provided personal data request"}
+    #
+    #         return {"confirmed": "given personal data request can be placed"}
+    #
+    #     except TypeError:
+    #         return {"error": f"Personal data request is invalid, 'NULL' is detected in one of the key fields"}
 
     def validate_bid(self, bid: dict, verified_bid_params: list):
         """
@@ -147,11 +147,6 @@ class Reporter(SqlBasic):
         return {"confirmed": "given offer can be placed"}
 
 
-# if __name__ == '__main__':
-#     rep = Reporter()
-#     a = rep.get_offer_data_alchemy(492829810550172999)
-#     b = rep.get_matches_by_owner(1312)
-#     print(a)
 
 
 

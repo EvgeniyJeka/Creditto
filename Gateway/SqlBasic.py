@@ -159,6 +159,10 @@ class SqlBasic(object):
             self.session.commit()
 
     def get_users(self)-> set:
+        """
+        Getting users from SQL DB using SqlAlchemy ORM
+        :return: set
+        """
         result = set()
 
         metadata = db.MetaData()
@@ -201,6 +205,14 @@ class SqlBasic(object):
         return -1
 
     def save_jwt_key_time(self, username, encoded_jwt, key, token_creation_time):
+        """
+        Updating the 'users' table saving the newly generated JWT and the time of it's creation.
+        :param username: user (for which the JWT was created)
+        :param encoded_jwt: JWT
+        :param key: encoding key
+        :param token_creation_time: time of JWT creation (unix timestamp)
+        :return: True on success
+        """
 
         try:
             metadata = db.MetaData()
@@ -218,6 +230,11 @@ class SqlBasic(object):
             return False
 
     def terminate_token(self, token):
+        """
+        Updating the 'users' table, setting the creation time of the provided JWT to 0 making it expired.
+        :param token: JWT
+        :return: dict
+        """
         try:
             metadata = db.MetaData()
             table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
@@ -271,6 +288,11 @@ class SqlBasic(object):
         return [int(x) for x in fetched_data[0][1].split(" ")]
 
     def get_user_by_token(self, token):
+        """
+        Getting user name by JWT from 'users' table
+        :param token: str
+        :return: str
+        """
         metadata = db.MetaData()
         table_ = db.Table(USERS_TABLE_NAME, metadata, autoload_replace=True, autoload_with=self.engine)
 
