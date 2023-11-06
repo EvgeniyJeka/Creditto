@@ -1,5 +1,8 @@
 # Creditto
 
+<b>Note: DB structure was recently changed, new column was added to the 'users' table. If you are not cloning this repo from scratch, but updating an 
+existing project it is strongly recommended to delete the MySQL DB volumes.</b>
+
 # 1 General product description
 
 The purpose of the system is to mediate between customers that would like to borrow money, borrowers,
