@@ -643,7 +643,8 @@ class SqlBasic(object):
                                                         jwt_token="",
                                                         key="",
                                                         token_creation_time="",
-                                                        role_id=int(item[3])))
+                                                        role_id=int(item[3]),
+                                                        user_email=str(item[4])))
 
         return users
 
