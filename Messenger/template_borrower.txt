@@ -1,0 +1,5 @@
+Greetings! \n Dear %borrower_name%, we are pleased to inform you, that your offer %offer_id%
+was matched with bid %bid_id%, and $%loan_sum% will be transferred to your account in the next 24 hours.\n
+The loan interest will be %loan_interest% and the monthly payment will be %monthly_payment% - you
+will pass it to the lender, %lender_name% each month until the loan is closed.\n"
+Have a nice day!
