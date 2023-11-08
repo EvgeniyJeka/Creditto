@@ -95,8 +95,28 @@ class ConsumerToMessenger(object):
                 # self.matcher.add_offer(received_offer)
 
     def notify_borrower(self, received_match):
+
+        # Fetching the relevant data from SQL - it will be inserted into the template
         borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
         logging.info(f"ConsumerToMessenger: Notifying borrower {borrower_data['username']} on match. ")
+
+        lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
+        offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
+
+        with open("template_borrower.txt", "r") as f:
+            borrower_template = f.read()
+
+        # Filling the template
+        borrower_template = borrower_template.replace("%borrower_name%", borrower_data['username'])
+        borrower_template = borrower_template.replace("%offer_id%", str(received_match.offer_id))
+        borrower_template = borrower_template.replace("%bid_id%", str(received_match.bid_id))
+        borrower_template = borrower_template.replace("%loan_sum%", str(received_match.sum))
+        borrower_template = borrower_template.replace('%loan_interest%', str(round(received_match.final_interest * 100, 4)))
+        borrower_template = borrower_template.replace("%monthly_payment%", str(received_match.monthly_payment))
+        borrower_template = borrower_template.replace('%lender_name%', lender_data['username'])
+        borrower_template = borrower_template.replace("%loan_duration%", str(offer_data['duration']))
+
+        print(borrower_template)
 
 
 if __name__ == "__main__":
@@ -105,7 +125,7 @@ if __name__ == "__main__":
 
     # borrower_template = "Greetings! \n Dear %borrower_name%, we are pleased to inform you, that your offer %offer_id% " \
     #                     "was matched with bid %bid_id%, and $%loan_sum% will be transferred to your account in the next 24 hours.\n" \
-    #                     "The loan interest will be %loan_interest% and the monthly payment will be %monthly_payment% - you" \
+    #                     "The loan interest will be %loan_interest% % and the monthly payment will be %monthly_payment% - you" \
     #                     "will pass it to the lender, %lender_name% each month until the loan is closed.\n" \
     #                     "Have a nice day!"
     #
