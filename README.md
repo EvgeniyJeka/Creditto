@@ -98,7 +98,11 @@ ________
 
     d. local_config
 
-3. <b>Gateway</b> : API exposed to end customers. Responsible for verifying received data (against DB).
+    e. users
+
+    f. roles
+
+4. <b>Gateway</b> : API exposed to end customers. Responsible for verifying received data (against DB).
 
      Receives: JSON from parsed POST and GET requests. 
      
@@ -139,7 +143,7 @@ ________
      
  
 
-4. <b>SQL Writer</b>: the component responsible for updating the data in MySQL DB.
+5. <b>SQL Writer</b>: the component responsible for updating the data in MySQL DB.
 
     Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
     Inserts and updated data in MySQL DB.
@@ -156,7 +160,7 @@ ________
     The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
     are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
     
-5. <b>Matcher</b>: the component responsible for matching between offers and bids. All offers and bids, that are currently 
+6. <b>Matcher</b>: the component responsible for matching between offers and bids. All offers and bids, that are currently 
    available for matching are kept in service cache, in a pool of offers and bids, the Matcher Pool.
    When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
