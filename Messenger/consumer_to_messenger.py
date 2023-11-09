@@ -1,10 +1,10 @@
 from kafka import KafkaConsumer
 from kafka.admin import KafkaAdminClient, NewTopic
-import logging
+import logging, os
 
 from SqlBasic import SqlBasic
 from credittomodels import statuses
-from local_config import KafkaConfig
+from local_config import KafkaConfig, EmailConfig
 
 from credittomodels import protobuf_handler
 
@@ -21,9 +21,20 @@ class ConsumerToMessenger(object):
         self.consumer = None
         self.db_manager = SqlBasic()
 
-        logging.info("ConsumerToMessenger: Verifying essential topics, starting main consumer")
-        self.start_consumer()
-        self.consume_process()
+        self.email_app_password = os.getenv("APP_PASSWORD")
+        self.sender_name = os.getenv("SENDER_NAME")
+
+        if self.email_app_password is None or self.sender_name is None:
+            self.email_app_password = EmailConfig.APP_PASSWORD.value
+            self.sender_name = EmailConfig.SENDER_NAME.value
+
+        if len(self.email_app_password) < 3:
+            logging.error("ConsumerToMessenger: - no valid email app password provided")
+
+        else:
+            logging.info("ConsumerToMessenger: Verifying essential topics, starting main consumer")
+            self.start_consumer()
+            self.consume_process()
 
 
     def start_consumer(self):

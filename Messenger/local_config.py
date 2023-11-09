@@ -15,3 +15,8 @@ class KafkaConfig(Enum):
 
 class WebConfig(Enum):
     RUN_ON_HOST = ""
+
+
+class EmailConfig(Enum):
+    APP_PASSWORD = "0"
+    SENDER_NAME = "Creditto Auto Notifier"
