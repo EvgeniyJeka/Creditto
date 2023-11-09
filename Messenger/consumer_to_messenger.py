@@ -107,18 +107,31 @@ class ConsumerToMessenger(object):
                 received_match = proto_handler.deserialize_proto_to_match(msg.value)
                 logging.info(f"ConsumerToMessenger: match received - {received_match}")
                 borrower_notified = self.notify_borrower(received_match)
-
-
+                # lender_notified = self.notify_lender(received_match)
+                # if borrower_notified and lender_notified:
+                #     logging.info("ConsumerToMessenger: both parties were notified via email")
 
     def notify_borrower(self, received_match):
+        """
+        This method is used to notify the borrower on the match.
+        Data from the received match are inserted into the template, data is fetched from SQL DB
+        and an email with a notification is sent to the borrower.
+        :param received_match: Match instance
+        :return: True on success
+        """
 
-        # Fetching the relevant data from SQL - it will be inserted into the template
-        borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
-        logging.info(f"ConsumerToMessenger: Notifying borrower {borrower_data['username']} on match. ")
+        try:
+            # Fetching the relevant data from SQL - it will be inserted into the template
+            borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
+            logging.info(f"ConsumerToMessenger: Notifying borrower {borrower_data['username']} on match. ")
 
-        lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
-        offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
-        borrower_email = borrower_data['user_email']
+            lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
+            offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
+            borrower_email = borrower_data['user_email']
+
+        except IndexError as e:
+            logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
+            return
 
         with open("template_borrower.txt", "r") as f:
             borrower_template = f.read()
@@ -135,47 +148,58 @@ class ConsumerToMessenger(object):
 
         result = self.send_email(self.sender_name, borrower_email, "Loan approved", borrower_template)
 
+        if not result:
+            logging.error(f"ConsumerToMessenger: failed to email {borrower_data['username']} - {borrower_email}")
+
+        logging.info(f"ConsumerToMessenger: notified the borrower {borrower_data['username']} "
+                     f"that his offer {received_match.offer_id} ")
+        return True
+
     def send_email(self, sender_email, receiver_email, subject, message):
-        # Create a MIMEText object for the email content
-        text = MIMEText(message)
+        """
+        This method is used to send emails. Email app password and login are taken from instance variables
+        (initiate in constructor).
+        :param sender_email: str
+        :param receiver_email: must be valid email address
+        :param subject: str
+        :param message: str
+        :return:
+        """
 
-        # Create a MIMEMultipart object to represent the email
-        msg = MIMEMultipart()
-        msg['From'] = sender_email
-        msg['To'] = receiver_email
-        msg['Subject'] = subject
+        try:
+            logging.info(f"Emailing {receiver_email} - {message}")
 
-        # Attach the text content to the email
-        msg.attach(text)
-        server = smtplib.SMTP('smtp.gmail.com', 587)
-        server.starttls()
+            # Create a MIMEText object for the email content
+            text = MIMEText(message)
 
-        # GMAIL APP PASSWORD IS REQUIRED HERE
-        server.login(self.email_app_login, self.email_app_password)
+            # Create a MIMEMultipart object to represent the email
+            msg = MIMEMultipart()
+            msg['From'] = sender_email
+            msg['To'] = receiver_email
+            msg['Subject'] = subject
 
-        # Send the email
-        server.sendmail(sender_email, receiver_email, msg.as_string())
+            # Attach the text content to the email
+            msg.attach(text)
+            server = smtplib.SMTP('smtp.gmail.com', 587)
+            server.starttls()
 
-        # Close the SMTP server session
-        server.quit()
+            # GMAIL APP PASSWORD IS REQUIRED HERE
+            server.login(self.email_app_login, self.email_app_password)
+
+            # Send the email
+            server.sendmail(sender_email, receiver_email, msg.as_string())
+
+            # Close the SMTP server session
+            server.quit()
+            return True
+
+        except Exception as e:
+            logging.error(f"ConsumerToMessenger: failed to send email - {e}")
+            return False
+
 
 
 if __name__ == "__main__":
     # Initiating component responsible for sending emails (and other messages if required)
     matcher_consumer = ConsumerToMessenger()
 
-    # borrower_template = "Greetings! \n Dear %borrower_name%, we are pleased to inform you, that your offer %offer_id% " \
-    #                     "was matched with bid %bid_id%, and $%loan_sum% will be transferred to your account in the next 24 hours.\n" \
-    #                     "The loan interest will be %loan_interest% % and the monthly payment will be %monthly_payment% - you" \
-    #                     "will pass it to the lender, %lender_name% each month until the loan is closed.\n" \
-    #                     "Have a nice day!"
-    #
-    # borrower_template = borrower_template.replace('%borrower_name%','Karl')
-    # borrower_template = borrower_template.replace('%loan_sum%', '1200')
-    #
-    # print(borrower_template)
-
-    # with open("template_borrower.txt", "r") as f:
-    #     borrower_template = f.read()
-    #
-    # print(borrower_template)
