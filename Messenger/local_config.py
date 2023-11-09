@@ -20,3 +20,4 @@ class WebConfig(Enum):
 class EmailConfig(Enum):
     APP_PASSWORD = "0"
     SENDER_NAME = "Creditto Auto Notifier"
+    APP_LOGIN = "evgeniy.gene@gmail.com"

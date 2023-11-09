@@ -21,12 +21,14 @@ class ConsumerToMessenger(object):
         self.consumer = None
         self.db_manager = SqlBasic()
 
-        self.email_app_password = os.getenv("APP_PASSWORD")
+        self.email_app_password = os.getenv("EMAIL_APP_PASSWORD")
         self.sender_name = os.getenv("SENDER_NAME")
+        self.email_app_login = os.getenv("EMAIL_APP_LOGIN")
 
         if self.email_app_password is None or self.sender_name is None:
             self.email_app_password = EmailConfig.APP_PASSWORD.value
             self.sender_name = EmailConfig.SENDER_NAME.value
+            self.email_app_login = EmailConfig.APP_LOGIN.value
 
         if len(self.email_app_password) < 3:
             logging.error("ConsumerToMessenger: - no valid email app password provided")
