@@ -2,6 +2,11 @@ from kafka import KafkaConsumer
 from kafka.admin import KafkaAdminClient, NewTopic
 import logging, os
 
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.application import MIMEApplication
+
 from SqlBasic import SqlBasic
 from credittomodels import statuses
 from local_config import KafkaConfig, EmailConfig
@@ -105,8 +110,6 @@ class ConsumerToMessenger(object):
 
 
 
-                # self.matcher.add_offer(received_offer)
-
     def notify_borrower(self, received_match):
 
         # Fetching the relevant data from SQL - it will be inserted into the template
@@ -115,6 +118,7 @@ class ConsumerToMessenger(object):
 
         lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
         offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
+        borrower_email = borrower_data['user_email']
 
         with open("template_borrower.txt", "r") as f:
             borrower_template = f.read()
@@ -129,7 +133,31 @@ class ConsumerToMessenger(object):
         borrower_template = borrower_template.replace('%lender_name%', lender_data['username'])
         borrower_template = borrower_template.replace("%loan_duration%", str(offer_data['duration']))
 
-        print(borrower_template)
+        result = self.send_email(self.sender_name, borrower_email, "Loan approved", borrower_template)
+
+    def send_email(self, sender_email, receiver_email, subject, message):
+        # Create a MIMEText object for the email content
+        text = MIMEText(message)
+
+        # Create a MIMEMultipart object to represent the email
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = receiver_email
+        msg['Subject'] = subject
+
+        # Attach the text content to the email
+        msg.attach(text)
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+
+        # GMAIL APP PASSWORD IS REQUIRED HERE
+        server.login(self.email_app_login, self.email_app_password)
+
+        # Send the email
+        server.sendmail(sender_email, receiver_email, msg.as_string())
+
+        # Close the SMTP server session
+        server.quit()
 
 
 if __name__ == "__main__":
