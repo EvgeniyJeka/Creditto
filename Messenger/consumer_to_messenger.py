@@ -107,9 +107,9 @@ class ConsumerToMessenger(object):
                 received_match = proto_handler.deserialize_proto_to_match(msg.value)
                 logging.info(f"ConsumerToMessenger: match received - {received_match}")
                 borrower_notified = self.notify_borrower(received_match)
-                # lender_notified = self.notify_lender(received_match)
-                # if borrower_notified and lender_notified:
-                #     logging.info("ConsumerToMessenger: both parties were notified via email")
+                lender_notified = self.notify_lender(received_match)
+                if borrower_notified and lender_notified:
+                    logging.info("ConsumerToMessenger: both parties were notified via email")
 
     def notify_borrower(self, received_match):
         """
@@ -154,6 +154,45 @@ class ConsumerToMessenger(object):
         logging.info(f"ConsumerToMessenger: notified the borrower {borrower_data['username']} "
                      f"that his offer {received_match.offer_id} ")
         return True
+
+    def notify_lender(self, received_match):
+        try:
+            # Fetching the relevant data from SQL - it will be inserted into the template
+            borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
+            lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
+            offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
+            lender_email = lender_data['user_email']
+
+            logging.info(f"ConsumerToMessenger: Notifying lender {lender_data['username']} on match. ")
+
+        except IndexError as e:
+            logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
+            return
+
+        with open("template_lender.txt", "r") as f:
+            lender_template = f.read()
+
+            # Filling the template
+            lender_template = lender_template.replace("%borrower_name%", borrower_data['username'])
+            lender_template = lender_template.replace("%offer_id%", str(received_match.offer_id))
+            lender_template = lender_template.replace("%bid_id%", str(received_match.bid_id))
+            lender_template = lender_template.replace("%loan_sum%", str(received_match.sum))
+            lender_template = lender_template.replace('%loan_interest%',
+                                                          str(round(received_match.final_interest * 100, 4)))
+            lender_template = lender_template.replace("%monthly_payment%", str(received_match.monthly_payment))
+            lender_template = lender_template.replace('%lender_name%', lender_data['username'])
+            lender_template = lender_template.replace("%loan_duration%", str(offer_data['duration']))
+
+            result = self.send_email(self.sender_name, lender_email, "Loan approved", lender_template)
+
+            if not result:
+                logging.error(f"ConsumerToMessenger: failed to email {lender_data['username']} - {lender_email}")
+
+            logging.info(f"ConsumerToMessenger: notified the lender {lender_data['username']} "
+                         f"that his bid {received_match.bid_id} ")
+            return True
+
+
 
     def send_email(self, sender_email, receiver_email, subject, message):
         """
