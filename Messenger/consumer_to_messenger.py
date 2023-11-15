@@ -21,6 +21,9 @@ proto_handler = protobuf_handler.ProtoHandler
 
 class ConsumerToMessenger(object):
 
+    BORROWER_TEMPLATE_FILE = "template_borrower.txt"
+    LENDER_TEMPLATE_FILE = "template_lender.txt"
+
     def __init__(self):
 
         self.consumer = None
@@ -108,45 +111,27 @@ class ConsumerToMessenger(object):
                 logging.info(f"ConsumerToMessenger: match received - {received_match}")
                 borrower_notified = self.notify_borrower(received_match)
                 lender_notified = self.notify_lender(received_match)
+
                 if borrower_notified and lender_notified:
                     logging.info("ConsumerToMessenger: both parties were notified via email")
+                else:
+                    logging.error("ConsumerToMessenger: failed to notify both parties on a match")
 
     def notify_borrower(self, received_match):
-        """
-        This method is used to notify the borrower on the match.
-        Data from the received match are inserted into the template, data is fetched from SQL DB
-        and an email with a notification is sent to the borrower.
-        :param received_match: Match instance
-        :return: True on success
-        """
-
         try:
-            # Fetching the relevant data from SQL - it will be inserted into the template
             borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
-            logging.info(f"ConsumerToMessenger: Notifying borrower {borrower_data['username']} on match. ")
-
             lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
             offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
-            borrower_email = borrower_data['user_email']
-
+            borrower_email = borrower_data.get('user_email')
         except IndexError as e:
             logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
-            return
+            return False
 
-        with open("template_borrower.txt", "r") as f:
-            borrower_template = f.read()
+        borrower_template = self._read_template_file(self.BORROWER_TEMPLATE_FILE)
+        filled_template = self._fill_template(borrower_template, borrower_data, lender_data, received_match,
+                                              offer_data)
 
-        # Filling the template
-        borrower_template = borrower_template.replace("%borrower_name%", borrower_data['username'])
-        borrower_template = borrower_template.replace("%offer_id%", str(received_match.offer_id))
-        borrower_template = borrower_template.replace("%bid_id%", str(received_match.bid_id))
-        borrower_template = borrower_template.replace("%loan_sum%", str(received_match.sum))
-        borrower_template = borrower_template.replace('%loan_interest%', str(round(received_match.final_interest * 100, 4)))
-        borrower_template = borrower_template.replace("%monthly_payment%", str(received_match.monthly_payment))
-        borrower_template = borrower_template.replace('%lender_name%', lender_data['username'])
-        borrower_template = borrower_template.replace("%loan_duration%", str(offer_data['duration']))
-
-        result = self.send_email(self.sender_name, borrower_email, "Loan approved", borrower_template)
+        result = self.send_email(self.sender_name, borrower_email, "Loan approved", filled_template)
 
         if not result:
             logging.error(f"ConsumerToMessenger: failed to email {borrower_data['username']} - {borrower_email}")
@@ -156,6 +141,13 @@ class ConsumerToMessenger(object):
         return True
 
     def notify_lender(self, received_match):
+        """
+        This method is used to notify the lender on the match.
+        Data from the received match are inserted into the template, data is fetched from SQL DB
+        and an email with a notification is sent to the lender.
+        :param received_match: Match instance
+        :return: True on success
+        """
         try:
             # Fetching the relevant data from SQL - it will be inserted into the template
             borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
@@ -169,30 +161,49 @@ class ConsumerToMessenger(object):
             logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
             return
 
-        with open("template_lender.txt", "r") as f:
-            lender_template = f.read()
+        lender_template = self._read_template_file(self.LENDER_TEMPLATE_FILE)
+        filled_template = self._fill_template(lender_template, borrower_data, lender_data, received_match,
+                                              offer_data)
 
-            # Filling the template
-            lender_template = lender_template.replace("%borrower_name%", borrower_data['username'])
-            lender_template = lender_template.replace("%offer_id%", str(received_match.offer_id))
-            lender_template = lender_template.replace("%bid_id%", str(received_match.bid_id))
-            lender_template = lender_template.replace("%loan_sum%", str(received_match.sum))
-            lender_template = lender_template.replace('%loan_interest%',
-                                                          str(round(received_match.final_interest * 100, 4)))
-            lender_template = lender_template.replace("%monthly_payment%", str(received_match.monthly_payment))
-            lender_template = lender_template.replace('%lender_name%', lender_data['username'])
-            lender_template = lender_template.replace("%loan_duration%", str(offer_data['duration']))
+        result = self.send_email(self.sender_name, lender_email, "Loan approved", filled_template)
 
-            result = self.send_email(self.sender_name, lender_email, "Loan approved", lender_template)
+        if not result:
+            logging.error(f"ConsumerToMessenger: failed to email {lender_data['username']} - {lender_email}")
 
-            if not result:
-                logging.error(f"ConsumerToMessenger: failed to email {lender_data['username']} - {lender_email}")
+        logging.info(f"ConsumerToMessenger: notified the lender {lender_data['username']} "
+                     f"that his bid {received_match.bid_id} ")
+        return True
 
-            logging.info(f"ConsumerToMessenger: notified the lender {lender_data['username']} "
-                         f"that his bid {received_match.bid_id} ")
-            return True
+    def _read_template_file(self, template_file):
+        """
+        This method is used to read a template from a file
+        :param template_file:
+        :return:
+        """
+        with open(template_file, "r") as f:
+            return f.read()
 
+    def _fill_template(self, template, borrower_data, lender_data, received_match, offer_data):
+        """
+        This method is used to fill the template taken from a file with actual data (from Match and from DB)
+        :param template: str
+        :param borrower_data: dict
+        :param lender_data: dict
+        :param received_match: Match
+        :param offer_data: dict
+        :return: str
+        """
 
+        template = template.replace("%borrower_name%", borrower_data['username'])
+        template = template.replace("%offer_id%", str(received_match.offer_id))
+        template = template.replace("%bid_id%", str(received_match.bid_id))
+        template = template.replace("%loan_sum%", str(received_match.sum))
+        template = template.replace('%loan_interest%', str(round(received_match.final_interest * 100, 4)))
+        template = template.replace("%monthly_payment%", str(received_match.monthly_payment))
+        template = template.replace('%lender_name%', lender_data['username'])
+        template = template.replace("%loan_duration%", str(offer_data['duration']))
+
+        return template
 
     def send_email(self, sender_email, receiver_email, subject, message):
         """
@@ -235,7 +246,6 @@ class ConsumerToMessenger(object):
         except Exception as e:
             logging.error(f"ConsumerToMessenger: failed to send email - {e}")
             return False
-
 
 
 if __name__ == "__main__":

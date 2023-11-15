@@ -1,6 +1,6 @@
 Greetings!
 Dear %lender_name%, we are pleased to inform you, that your bid with ID %bid_id% that
-you placed on offer %offer_id% has won, and you have a match.
+you placed on offer %offer_id%  with suggested interest %loan_interest% % has won, and you have a match.
 The loan sum, $%loan_sum%, will be transferred from your account in the next 24 hours.
 %borrower_name%, the person that placed the offer, will repay you $%loan_sum% each month
 for the next %loan_duration% months until the loan is closed.
