@@ -5,7 +5,6 @@ import logging, os
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 
 from SqlBasic import SqlBasic
 from credittomodels import statuses
@@ -20,6 +19,12 @@ proto_handler = protobuf_handler.ProtoHandler
 
 
 class ConsumerToMessenger(object):
+    """
+    This class is used to consume Matches messages from Kafka and notify both the
+    lender and the borrower on a match.
+    Email text is taken from the template files.
+    Personal data and match data is taken from the Match message and from SQL DB.
+    """
 
     BORROWER_TEMPLATE_FILE = "template_borrower.txt"
     LENDER_TEMPLATE_FILE = "template_lender.txt"
@@ -45,7 +50,6 @@ class ConsumerToMessenger(object):
             logging.info("ConsumerToMessenger: Verifying essential topics, starting main consumer")
             self.start_consumer()
             self.consume_process()
-
 
     def start_consumer(self):
         """
@@ -118,11 +122,19 @@ class ConsumerToMessenger(object):
                     logging.error("ConsumerToMessenger: failed to notify both parties on a match")
 
     def notify_borrower(self, received_match):
+        """
+        This method is used to notify the borrower on a match.
+        Data from the received match is inserted into the template, part of the data is fetched from SQL DB
+        and an email with a notification is sent to the lender.
+        :param received_match: Match instance
+        :return: True on success
+        """
         try:
             borrower_data = self.db_manager.get_user_name_by_id(received_match.offer_owner_id)[0]
             lender_data = self.db_manager.get_user_name_by_id(received_match.bid_owner_id)[0]
             offer_data = self.db_manager.get_offer_data_alchemy(received_match.offer_id)[0]
             borrower_email = borrower_data.get('user_email')
+
         except IndexError as e:
             logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
             return False
@@ -135,6 +147,7 @@ class ConsumerToMessenger(object):
 
         if not result:
             logging.error(f"ConsumerToMessenger: failed to email {borrower_data['username']} - {borrower_email}")
+            return False
 
         logging.info(f"ConsumerToMessenger: notified the borrower {borrower_data['username']} "
                      f"that his offer {received_match.offer_id} ")
@@ -142,8 +155,8 @@ class ConsumerToMessenger(object):
 
     def notify_lender(self, received_match):
         """
-        This method is used to notify the lender on the match.
-        Data from the received match are inserted into the template, data is fetched from SQL DB
+        This method is used to notify the lender on a match.
+        Data from the received match is inserted into the template, part of the data is fetched from SQL DB
         and an email with a notification is sent to the lender.
         :param received_match: Match instance
         :return: True on success
@@ -165,10 +178,11 @@ class ConsumerToMessenger(object):
         filled_template = self._fill_template(lender_template, borrower_data, lender_data, received_match,
                                               offer_data)
 
-        result = self.send_email(self.sender_name, lender_email, "Loan approved", filled_template)
+        result = self.send_email(self.sender_name, lender_email, "Your match has won", filled_template)
 
         if not result:
             logging.error(f"ConsumerToMessenger: failed to email {lender_data['username']} - {lender_email}")
+            return False
 
         logging.info(f"ConsumerToMessenger: notified the lender {lender_data['username']} "
                      f"that his bid {received_match.bid_id} ")
@@ -180,8 +194,13 @@ class ConsumerToMessenger(object):
         :param template_file:
         :return:
         """
-        with open(template_file, "r") as f:
-            return f.read()
+        try:
+            with open(template_file, "r") as f:
+                return f.read()
+
+        except FileNotFoundError as e:
+            logging.critical(f"ConsumerToMessenger: template file is missing, {template_file} - {e}")
+            raise e
 
     def _fill_template(self, template, borrower_data, lender_data, received_match, offer_data):
         """
@@ -233,7 +252,7 @@ class ConsumerToMessenger(object):
             server = smtplib.SMTP('smtp.gmail.com', 587)
             server.starttls()
 
-            # GMAIL APP PASSWORD IS REQUIRED HERE
+            # GMAIL APP Log in
             server.login(self.email_app_login, self.email_app_password)
 
             # Send the email
