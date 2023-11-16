@@ -1,10 +1,12 @@
 from kafka import KafkaConsumer
 from kafka.admin import KafkaAdminClient, NewTopic
-import logging, os
+import logging
+import os
 
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from kafka.errors import KafkaError
 
 from SqlBasic import SqlBasic
 from credittomodels import statuses
@@ -54,24 +56,30 @@ class ConsumerToMessenger(object):
     def start_consumer(self):
         """
         Creating Kafka client. Verifying all required topics exist, creating missing topics if required.
-        Starting consumer, subscribing to 'matches' topic
-        :return:
+        Starting consumer, subscribing to 'matches' topic.
+        Note: this method occupies the thread while running.
+        :return: False on failure.
         """
 
-        # Creating Kafka topics or adding if the topic is missing
-        admin_client = KafkaAdminClient(bootstrap_servers=KafkaConfig.BOOTSTRAP_SERVERS.value, client_id='messenger')
-        existing_topics = admin_client.list_topics()
+        try:
+            # Creating Kafka topics or adding if the topic is missing
+            admin_client = KafkaAdminClient(bootstrap_servers=KafkaConfig.BOOTSTRAP_SERVERS.value, client_id='messenger')
+            existing_topics = admin_client.list_topics()
 
-        required_topics = ("offers", "bids", "matches")
-        topic_list = [NewTopic(name=x, num_partitions=1, replication_factor=1) for x in required_topics
-                      if x not in existing_topics]
+            required_topics = ("offers", "bids", "matches")
+            topic_list = [NewTopic(name=x, num_partitions=1, replication_factor=1) for x in required_topics
+                          if x not in existing_topics]
 
-        admin_client.create_topics(new_topics=topic_list, validate_only=False)
-        logging.info(f"Existing topics: {admin_client.list_topics()}")
+            admin_client.create_topics(new_topics=topic_list, validate_only=False)
+            logging.info(f"Existing topics: {admin_client.list_topics()}")
 
-        # Initiating consumer
-        self.consumer = KafkaConsumer('matches', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
-                                    auto_offset_reset='earliest', enable_auto_commit=True, group_id="messenger_consumer")
+            # Initiating consumer
+            self.consumer = KafkaConsumer('matches', bootstrap_servers=[KafkaConfig.BOOTSTRAP_SERVERS.value],
+                                        auto_offset_reset='earliest', enable_auto_commit=True, group_id="messenger_consumer")
+
+        except KafkaError as e:
+            logging.error(f"ConsumerToMessenger: couldn't connect to Kafka and/or create the 'matches' topic - {e}")
+            return False
 
     def extract_message_type(self, kafka_message):
         """
@@ -172,7 +180,7 @@ class ConsumerToMessenger(object):
 
         except IndexError as e:
             logging.error(f"ConsumerToMessenger: failed to fetch data from DB: {e}")
-            return
+            return False
 
         lender_template = self._read_template_file(self.LENDER_TEMPLATE_FILE)
         filled_template = self._fill_template(lender_template, borrower_data, lender_data, received_match,
