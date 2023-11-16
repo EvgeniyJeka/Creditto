@@ -86,6 +86,21 @@ services:
     networks:
       - creditto_main
 
+  creditto_messenger:
+    image: creditto_messenger:latest
+    build: ./Messenger
+    restart: always
+    depends_on:
+      - cabin_db
+      - kafka
+    networks:
+      - creditto_main
+    environment:
+      - SENDER_NAME=Creditto Auto Notifier
+      - EMAIL_APP_LOGIN=evgeniy.gene@gmail.com
+      - EMAIL_APP_PASSWORD=000
+
+
   sanity_tests_container:
     image: sanity_tests_container:latest
     command: ["pytest", "-v", "-m", "container", "--reruns", "2"]

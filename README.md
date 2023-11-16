@@ -6,16 +6,16 @@ existing project it is strongly recommended to delete the MySQL DB volumes.</b>
 # 1 General product description
 
 The purpose of the system is to mediate between customers that would like to borrow money, borrowers,
-and customers that would like to provide a loan, money lenders.
+and customers that would like to provide a loan, moneylenders.
 
 A borrower that would like to get a loan posts a request for a loan via system API - such request is
-called 'an offer'.  
+called an 'offer'.  
 
 Offer must contain all relevant data, including the max interest rate the borrower is willing to pay (see models description below). 
-Each offer has a unique ID assigned by the system. Placed offer will be available to all potential money lenders via API.
+Each offer has a unique ID assigned by the system. Placed offer will be available to all potential moneylenders via API.
 
-Money lenders are expected to chose an offer and propose loans that would match the offer conditions like sum, duration e.t.c.
-Loan proposal is called 'a bid'. Bid interest rate must be lower then offer interest rate, since the former is
+Moneylenders are expected to choose an offer and propose loans that would match the offer conditions like sum, duration e.t.c.
+Loan proposal is called a 'bid'. Bid interest rate must be lower than offer interest rate, since the former is
 the max interest rate the borrower is willing to pay. Bids can be placed only on existing and active offers - 
 lender is to select an offer and to place a bid on it, offering the lowest interest he can so his bid will be selected
 to match with the targeted offer. Bids can't be placed on 'matched' and 'cancelled' offers.
@@ -23,6 +23,7 @@ to match with the targeted offer. Bids can't be placed on 'matched' and 'cancell
 Several bids can be placed on each offer - the best one will be selected and a match will be created.
 The offer and the bid statuses will be changed to 'matched' (see statuses below),
 all other bids on that offer will expire and their status will be changed to 'cancelled'.
+A lender can place only one bid on each offer (to prevent abuse).
 
 Matching criteria used by the system is defined by the operator (see matching logic list below) - by default
 the bid with the lowest interest rate is selected when the fifth bid is received on the given offer. 
@@ -35,12 +36,15 @@ and he can place offers. Albert places an offer - he is willing to pay up to 7% 
 
 Bill is also an authorized customer, customer type - 'lender', he can place bids. He is looking for new attractive offers. 
 He is sending a request for all available offers and see Albert's offer. 
-He decides to lend the required sum to Albert and he is willing to do so for 6.8% annual interest rate. Bill places a bid. 
+He decides to lend the required sum to Albert, and he is willing to do so for 6.8% annual interest rate. 
+Bill places a bid. 
 
 Bill's bid is the 5th bid on Albert's offer. His bid placement triggers the matcher, and it checks all
 bids placed on Albert's offer to find the best one for match. Since Sally's bid, that was placed earlier, 
-has 6.4% annual interest rate it is selected and it's status changes to MATCHED, all other bids, including Bill's, expire 
+has 6.4% annual interest rate it is selected, and it's status changes to MATCHED, all other bids, including Bill's, expire 
 and their status is changed to CANCELLED.  Offer status is changed to MATCHED as well.
+
+Sally (the lender) and Albert (the borrower) are both notified via email by the system on a match.
 
 # 2 Authorization and Permissions
 
@@ -67,9 +71,9 @@ Customer Roles:
 Authorization module is integrated into the Gateway component.
 
 # 3 System components
-Each component is a micro service. Components communicate with each other via Kafka topics. 
+Each component is a microservice. Components communicate with each other via Kafka topics. 
 
-Offer, Bid and Match models, tools needed for google protobuf serialization/deserialization and loan monthly
+Offer, Bid and Match models, tools needed for Google protobuf serialization/deserialization and loan monthly
 payment calculation are taken from "credittomodels" python package:
 
 https://pypi.org/project/credittomodels/
@@ -165,11 +169,11 @@ ________
    When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
    Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic.
-   Adds all received offers and bids to the the Matcher Pool.
+   Adds all received offers and bids to the Matcher Pool.
    
    Consumed Offer is added to the pool.
    Consumed Bid is added to the pool as well, 
-   and if the amount of bids placed on given offer is suffiecient it triggers a matching check, 
+   and if the amount of bids placed on given offer is sufficient it triggers a matching check, 
    the service checks if one of the Bids placed on that offer meets the match criteria. 
    
    Matching algorithm ID is taken from 'local_config' SQL table, the selected algorithm is applied
@@ -184,6 +188,17 @@ ________
    
    Once the offer is matched with one of the bids it's status changes to MATCHED and it is no longer presented
    in 'available offers' list and no bids can be placed one it. Matching bid status is changed to MATCHED as well.
+
+6. <b> Messenger </b>: the component is responsible for notifying the lender and the borrower on a match.
+   Currently they both are notified only via email, additional channels may be added in the future (for ex. Telegram).
+   
+   Consumes: matches from 'Matches' Kafka topic.
+   Message content is deserialized.
+   Both parties, the lender and the borrower, are notified via email on the match. The template files contain 
+   the email text, match details and users personal details are fetched from the Match message and from SQL DB. 
+   
+   NOTE: this component uses Gmail an external email server. Valid username (EMAIL_APP_LOGIN) 
+   and gmail app password (EMAIL_APP_PASSWORD) must be provided in environment variables. 
 
 
 
@@ -308,9 +323,7 @@ After that 'offer cancellation' message will be produced to Kafka, consumed by M
 and by SQL Writer (it will modify the status of the offer and all related bids in SQL DB). Bid cancellation functionality also can be added. It is also safe to assume,
 that an 'admin' user should be able to cancel, hide or remove a bid or an offer - the same logic can be applied to add that functionality.
 
-
--Currently created matches aren't handled - they are only inserted to SQL DB. 
-It is an option to notify the lender and the borrower by sending an email - for that purpose another micro service can be added, it would consume matches from 'matches' Kafka topic, extract the lender and the borrower email address and send an email to both parties. 
+-It is possible to add more channels, in addition to email, to notify the lender and the borrower on a match. 
 
 
                                                      
