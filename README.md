@@ -80,7 +80,7 @@ https://pypi.org/project/credittomodels/
 
 System chart:
 
-<img src="https://github.com/EvgeniyJeka/Creditto/blob/%23Messenger_Consumer_Added/creditto_flow_.jpg" alt="Screenshot" width="1000" />
+<img src="https://github.com/EvgeniyJeka/Creditto/blob/main/creditto_flow_.jpg" alt="Screenshot" width="1000" />
 ________
 
 
@@ -104,7 +104,9 @@ ________
 
     e. users
 
-3. <b>Gateway</b> : API exposed to end customers. Responsible for verifying received data (against DB).
+    f. roles
+
+4. <b>Gateway</b> : API exposed to end customers. Responsible for verifying received data (against DB).
 
      Receives: JSON from parsed POST and GET requests. 
      
@@ -145,7 +147,7 @@ ________
      
  
 
-4. <b>SQL Writer</b>: the component responsible for updating the data in MySQL DB.
+5. <b>SQL Writer</b>: the component responsible for updating the data in MySQL DB.
 
     Consumes: offers from 'Offers' Kafka topic, bids from 'Bids' Kafka topic, matches from 'Matches' Kafka topic.
     Inserts and updated data in MySQL DB.
@@ -162,7 +164,7 @@ ________
     The match is added to the 'matches' SQL table, the status of the matched Offer and the matched Bid
     are changed to MATCHED, the statuses of all other bids on that given offer changed to CANCELLED.
     
-5. <b>Matcher</b>: the component responsible for matching between offers and bids. All offers and bids, that are currently 
+6. <b>Matcher</b>: the component responsible for matching between offers and bids. All offers and bids, that are currently 
    available for matching are kept in service cache, in a pool of offers and bids, the Matcher Pool.
    When the service starts it fetches all offers in status OPEN and all bids in status PLACED from MySQL DB.
    
@@ -322,7 +324,6 @@ and by SQL Writer (it will modify the status of the offer and all related bids i
 that an 'admin' user should be able to cancel, hide or remove a bid or an offer - the same logic can be applied to add that functionality.
 
 -It is possible to add more channels, in addition to email, to notify the lender and the borrower on a match. 
-
 
 
                                                      
