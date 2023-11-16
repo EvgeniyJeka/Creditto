@@ -186,7 +186,7 @@ class ConsumerToMessenger(object):
         filled_template = self._fill_template(lender_template, borrower_data, lender_data, received_match,
                                               offer_data)
 
-        result = self.send_email(self.sender_name, lender_email, "Your match has won", filled_template)
+        result = self.send_email(self.sender_name, lender_email, "Your bid has won", filled_template)
 
         if not result:
             logging.error(f"ConsumerToMessenger: failed to email {lender_data['username']} - {lender_email}")

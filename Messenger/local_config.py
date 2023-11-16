@@ -18,6 +18,6 @@ class WebConfig(Enum):
 
 
 class EmailConfig(Enum):
-    APP_PASSWORD = 'sztt bvra ifjt iodj'
+    APP_PASSWORD = '000'
     SENDER_NAME = "Creditto Auto Notifier"
     APP_LOGIN = "evgeniy.gene@gmail.com"
