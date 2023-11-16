@@ -45,7 +45,7 @@ class ConsumerToMessenger(object):
             self.sender_name = EmailConfig.SENDER_NAME.value
             self.email_app_login = EmailConfig.APP_LOGIN.value
 
-        if len(self.email_app_password) < 3:
+        if len(self.email_app_password) < 5:
             logging.error("ConsumerToMessenger: - no valid email app password provided")
 
         else:
